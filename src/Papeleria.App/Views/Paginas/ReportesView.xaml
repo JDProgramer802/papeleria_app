@@ -1,0 +1,250 @@
+<UserControl x:Class="Papeleria.App.Views.Paginas.ReportesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Paginas"
+             d:DataContext="{d:DesignInstance vm:ReportesVistaModelo}"
+             mc:Ignorable="d"
+             d:DesignHeight="780" d:DesignWidth="1340">
+
+    <Grid Margin="{StaticResource MargenPagina}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300" />
+            <ColumnDefinition Width="14" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ══ Catálogo de reportes ════════════════════════════════════════ -->
+        <materialDesign:Card Grid.Column="0" Style="{StaticResource TarjetaBase}" Padding="0" Margin="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Margin="16,16,16,10">
+                    <TextBlock Text="Reportes" Style="{StaticResource TituloPagina}" FontSize="20" />
+                    <TextBlock Text="Elija el informe que desea consultar"
+                               Style="{StaticResource TextoTenue}" FontSize="12" />
+                </StackPanel>
+
+                <!-- La lista es la selección: al elegir un reporte se generan sus datos. -->
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding Catalogo}"
+                         SelectedItem="{Binding ReporteSeleccionado}"
+                         BorderThickness="0"
+                         Padding="6,0,6,12"
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="2,6">
+                                <materialDesign:PackIcon Kind="{Binding Icono}"
+                                                         Width="20" Height="20"
+                                                         VerticalAlignment="Top" Margin="0,2,0,0" />
+                                <StackPanel Margin="14,0,0,0" MaxWidth="196">
+                                    <TextBlock Text="{Binding Nombre}" FontWeight="SemiBold"
+                                               FontSize="12.5" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding Descripcion}"
+                                               Style="{StaticResource TextoTenue}"
+                                               FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- ══ Parámetros y vista previa ═══════════════════════════════════ -->
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Selección actual y parámetros -->
+            <materialDesign:Card Grid.Row="0" Style="{StaticResource TarjetaBase}" Padding="16" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid>
+                        <StackPanel>
+                            <ComboBox ItemsSource="{Binding Catalogo}"
+                                      SelectedItem="{Binding ReporteSeleccionado}"
+                                      DisplayMemberPath="Nombre"
+                                      Style="{StaticResource CampoSeleccion}"
+                                      Width="360" HorizontalAlignment="Left"
+                                      Margin="0"
+                                      materialDesign:HintAssist.Hint="Reporte"
+                                      materialDesign:HintAssist.IsFloating="True" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
+                                    Command="{Binding ExportarExcelCommand}"
+                                    IsEnabled="{Binding HayResultado}" ToolTip="Exportar a Excel">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="MicrosoftExcel" VerticalAlignment="Center" />
+                                    <TextBlock Text="Excel" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
+                                    Command="{Binding ExportarPdfCommand}"
+                                    IsEnabled="{Binding HayResultado}" ToolTip="Exportar a PDF">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="FilePdfBox" VerticalAlignment="Center" />
+                                    <TextBlock Text="PDF" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
+                                    Command="{Binding ExportarCsvCommand}"
+                                    IsEnabled="{Binding HayResultado}" ToolTip="Exportar a CSV">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="FileDelimitedOutline" VerticalAlignment="Center" />
+                                    <TextBlock Text="CSV" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource BotonSecundario}"
+                                    Command="{Binding ImprimirCommand}"
+                                    IsEnabled="{Binding HayResultado}" ToolTip="Abrir el PDF para imprimir">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="PrinterOutline" VerticalAlignment="Center" />
+                                    <TextBlock Text="Imprimir" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <Separator Style="{StaticResource SeparadorHorizontal}" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <DatePicker Grid.Column="0" Width="140" Height="40"
+                                    SelectedDate="{Binding Desde}"
+                                    IsEnabled="{Binding RequierePeriodo}"
+                                    materialDesign:HintAssist.Hint="Desde"
+                                    VerticalContentAlignment="Center" />
+
+                        <DatePicker Grid.Column="2" Width="140" Height="40"
+                                    SelectedDate="{Binding Hasta}"
+                                    IsEnabled="{Binding RequierePeriodo}"
+                                    materialDesign:HintAssist.Hint="Hasta"
+                                    VerticalContentAlignment="Center" />
+
+                        <ComboBox Grid.Column="4" Width="190" Height="40"
+                                  ItemsSource="{Binding Categorias}"
+                                  SelectedValue="{Binding CategoriaId}"
+                                  SelectedValuePath="Id" DisplayMemberPath="Nombre"
+                                  VerticalContentAlignment="Center"
+                                  ToolTip="Restringir el reporte a una categoría" />
+
+                        <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Style="{StaticResource BotonTexto}" FontSize="11"
+                                    Command="{Binding PeriodoMesActualCommand}" Content="MES ACTUAL" />
+                            <Button Style="{StaticResource BotonTexto}" FontSize="11"
+                                    Command="{Binding PeriodoMesAnteriorCommand}" Content="MES ANTERIOR" />
+                            <Button Style="{StaticResource BotonTexto}" FontSize="11"
+                                    Command="{Binding PeriodoAnioActualCommand}" Content="AÑO ACTUAL" />
+                        </StackPanel>
+
+                        <Button Grid.Column="8" Style="{StaticResource BotonPrincipal}"
+                                Command="{Binding GenerarCommand}" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="PlayOutline" VerticalAlignment="Center" />
+                                <TextBlock Text="GENERAR" Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </materialDesign:Card>
+
+            <Border Grid.Row="1" Background="{StaticResource BrochaErrorSuave}"
+                    CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
+                    Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
+                <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrochaError}"
+                           TextWrapping="Wrap" FontSize="12.5" />
+            </Border>
+
+            <!-- Indicadores del reporte -->
+            <ItemsControl Grid.Row="2" ItemsSource="{Binding Reporte.Indicadores}" Margin="0,0,0,12"
+                          Visibility="{Binding HayResultado, Converter={StaticResource BoolAVisible}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <materialDesign:Card Style="{StaticResource TarjetaBase}"
+                                             Padding="14,10" Margin="0,0,12,0" MinWidth="170">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Etiqueta}" Style="{StaticResource EtiquetaCampo}" />
+                                <TextBlock Text="{Binding Valor}" FontSize="17" FontWeight="Bold" />
+                            </StackPanel>
+                        </materialDesign:Card>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Vista previa -->
+            <materialDesign:Card Grid.Row="3" Style="{StaticResource TarjetaBase}" Padding="0" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="16,14,16,8"
+                                Visibility="{Binding HayResultado, Converter={StaticResource BoolAVisible}}">
+                        <TextBlock Text="{Binding Reporte.Titulo}" Style="{StaticResource TituloSeccion}"
+                                   Margin="0,0,0,2" />
+                        <TextBlock Style="{StaticResource TextoTenue}" FontSize="12">
+                            <Run Text="{Binding Reporte.Subtitulo, Mode=OneWay}" />
+                            <Run Text="  " />
+                            <Run Text="{Binding Reporte.Periodo, Mode=OneWay}" />
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Las columnas se generan solas porque cada reporte tiene su propia forma. -->
+                    <DataGrid Grid.Row="1" Style="{StaticResource GrillaDatos}"
+                              ItemsSource="{Binding VistaPrevia}"
+                              AutoGenerateColumns="True"
+                              RowHeight="34" ColumnHeaderHeight="38"
+                              CanUserSortColumns="True"
+                              Visibility="{Binding HayResultado, Converter={StaticResource BoolAVisible}}" />
+
+                    <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{Binding SinResultado, Converter={StaticResource BoolAVisible}}">
+                        <materialDesign:PackIcon Kind="DatabaseSearchOutline" Width="52" Height="52"
+                                                 Opacity="0.25" HorizontalAlignment="Center" />
+                        <TextBlock Text="{Binding Reporte.MensajeVacio}"
+                                   Style="{StaticResource TextoTenue}" Margin="0,12,0,0"
+                                   TextAlignment="Center" TextWrapping="Wrap" MaxWidth="380" />
+                    </StackPanel>
+
+                    <ProgressBar Grid.Row="1" Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                 IsIndeterminate="True" Width="42" Height="42"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 Visibility="{Binding EstaCargando, Converter={StaticResource BoolAVisible}}" />
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+    </Grid>
+</UserControl>

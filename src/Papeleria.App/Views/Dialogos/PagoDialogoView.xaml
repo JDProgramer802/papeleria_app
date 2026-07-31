@@ -1,0 +1,134 @@
+<UserControl x:Class="Papeleria.App.Views.Dialogos.PagoDialogoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
+             d:DataContext="{d:DesignInstance vm:PagoDialogoVistaModelo}"
+             mc:Ignorable="d"
+             Width="470">
+
+    <Grid Margin="24,22,24,18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Total a cobrar -->
+        <Border Grid.Row="0" CornerRadius="10" Padding="18,14"
+                Background="{DynamicResource MaterialDesign.Brush.Primary}">
+            <StackPanel>
+                <TextBlock Text="TOTAL A COBRAR"
+                           Foreground="White" Opacity="0.85"
+                           FontSize="11" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Total, Converter={StaticResource Moneda}}"
+                           Foreground="White" FontSize="34" FontWeight="Bold" />
+            </StackPanel>
+        </Border>
+
+        <!-- Medio de pago -->
+        <StackPanel Grid.Row="1" Margin="0,18,0,0">
+            <TextBlock Text="Medio de pago" Style="{StaticResource EtiquetaCampo}" />
+            <ComboBox ItemsSource="{Binding MetodosPago}"
+                      SelectedValue="{Binding MetodoPago}"
+                      SelectedValuePath="Valor"
+                      DisplayMemberPath="Descripcion"
+                      Style="{StaticResource CampoSeleccion}"
+                      materialDesign:HintAssist.Hint="Seleccione cómo paga el cliente" />
+        </StackPanel>
+
+        <!-- Efectivo recibido -->
+        <StackPanel Grid.Row="2"
+                    Visibility="{Binding RequiereEfectivo, Converter={StaticResource BoolAVisible}}">
+            <TextBlock Text="Efectivo recibido" Style="{StaticResource EtiquetaCampo}" />
+
+            <TextBox Text="{Binding MontoRecibido, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                     Style="{StaticResource CampoNumerico}"
+                     FontSize="20" FontWeight="SemiBold"
+                     materialDesign:HintAssist.Hint="Importe entregado" />
+
+            <ItemsControl ItemsSource="{Binding Sugerencias}" Margin="0,0,0,12">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Height="32" Padding="12,0" Margin="0,0,8,8"
+                                Content="{Binding Converter={StaticResource Moneda}}"
+                                Command="{Binding DataContext.UsarSugerenciaCommand,
+                                          RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                ToolTip="Usar este importe" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Cambio a devolver -->
+            <Border CornerRadius="8" Padding="14,10" Margin="0,0,0,4"
+                    Background="{StaticResource BrochaExitoSuave}"
+                    Visibility="{Binding Cambio, Converter={StaticResource MayorQueCeroAVisible}}">
+                <Grid>
+                    <TextBlock Text="Cambio a devolver" VerticalAlignment="Center"
+                               Foreground="{StaticResource BrochaExito}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Cambio, Converter={StaticResource Moneda}}"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Foreground="{StaticResource BrochaExito}"
+                               FontSize="20" FontWeight="Bold" />
+                </Grid>
+            </Border>
+
+            <Border CornerRadius="8" Padding="14,10" Margin="0,0,0,4"
+                    Background="{StaticResource BrochaErrorSuave}"
+                    Visibility="{Binding FaltaPorPagar, Converter={StaticResource MayorQueCeroAVisible}}">
+                <Grid>
+                    <TextBlock Text="Falta por pagar" VerticalAlignment="Center"
+                               Foreground="{StaticResource BrochaError}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding FaltaPorPagar, Converter={StaticResource Moneda}}"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Foreground="{StaticResource BrochaError}"
+                               FontSize="20" FontWeight="Bold" />
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <CheckBox Grid.Row="3" Margin="0,10,0,0"
+                  Content="Imprimir factura al finalizar"
+                  IsChecked="{Binding ImprimirFactura}" />
+
+        <!-- Error -->
+        <Border Grid.Row="4" Margin="0,14,0,0"
+                Background="{StaticResource BrochaErrorSuave}"
+                CornerRadius="6" Padding="12,9"
+                Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
+            <TextBlock Text="{Binding MensajeError}"
+                       Foreground="{StaticResource BrochaError}"
+                       TextWrapping="Wrap" FontSize="12.5" />
+        </Border>
+
+        <StackPanel Grid.Row="5" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Margin="0,18,0,0">
+            <Button Content="Cancelar" Style="{StaticResource BotonTexto}"
+                    Margin="0,0,8,0" IsCancel="True"
+                    Command="{Binding CancelarCommand}" />
+
+            <Button Style="{StaticResource BotonPrincipal}"
+                    Height="42" MinWidth="160"
+                    IsDefault="True"
+                    IsEnabled="{Binding PuedeConfirmar}"
+                    Command="{Binding ConfirmarCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="CheckCircleOutline" VerticalAlignment="Center" />
+                    <TextBlock Text="CONFIRMAR VENTA" Margin="8,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

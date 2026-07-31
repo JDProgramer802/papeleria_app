@@ -1,0 +1,339 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+    <!-- ══ Medidas y duraciones compartidas ══════════════════════════════════ -->
+    <CornerRadius x:Key="RadioTarjeta">10</CornerRadius>
+    <Thickness x:Key="MargenPagina">24,20,24,20</Thickness>
+    <Thickness x:Key="RellenoTarjeta">18</Thickness>
+    <system:Double x:Key="AlturaBarraSuperior">60</system:Double>
+    <Duration x:Key="DuracionTransicion">0:0:0.25</Duration>
+
+    <!-- ══ Colores semánticos (independientes del tema) ══════════════════════ -->
+    <SolidColorBrush x:Key="BrochaExito" Color="#2E7D32" />
+    <SolidColorBrush x:Key="BrochaAdvertencia" Color="#EF6C00" />
+    <SolidColorBrush x:Key="BrochaError" Color="#C62828" />
+    <SolidColorBrush x:Key="BrochaInformacion" Color="#1565C0" />
+    <SolidColorBrush x:Key="BrochaExitoSuave" Color="#E8F5E9" />
+    <SolidColorBrush x:Key="BrochaAdvertenciaSuave" Color="#FFF3E0" />
+    <SolidColorBrush x:Key="BrochaErrorSuave" Color="#FFEBEE" />
+    <SolidColorBrush x:Key="BrochaInformacionSuave" Color="#E3F2FD" />
+
+    <!-- ══ Tipografía ════════════════════════════════════════════════════════ -->
+    <Style x:Key="TituloPagina" TargetType="TextBlock"
+           BasedOn="{StaticResource MaterialDesignHeadline5TextBlock}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0,0,0,2" />
+    </Style>
+
+    <Style x:Key="SubtituloPagina" TargetType="TextBlock"
+           BasedOn="{StaticResource MaterialDesignBody2TextBlock}">
+        <Setter Property="Opacity" Value="0.68" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+
+    <Style x:Key="TituloSeccion" TargetType="TextBlock"
+           BasedOn="{StaticResource MaterialDesignSubtitle1TextBlock}">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0,0,0,10" />
+    </Style>
+
+    <Style x:Key="EtiquetaCampo" TargetType="TextBlock"
+           BasedOn="{StaticResource MaterialDesignCaptionTextBlock}">
+        <Setter Property="Opacity" Value="0.7" />
+        <Setter Property="Margin" Value="0,0,0,2" />
+    </Style>
+
+    <Style x:Key="ValorDestacado" TargetType="TextBlock"
+           BasedOn="{StaticResource MaterialDesignHeadline5TextBlock}">
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style x:Key="TextoTenue" TargetType="TextBlock"
+           BasedOn="{StaticResource MaterialDesignBody2TextBlock}">
+        <Setter Property="Opacity" Value="0.6" />
+    </Style>
+
+    <!-- ══ Tarjetas ══════════════════════════════════════════════════════════ -->
+    <Style x:Key="TarjetaBase" TargetType="materialDesign:Card">
+        <Setter Property="UniformCornerRadius" Value="10" />
+        <Setter Property="Padding" Value="{StaticResource RellenoTarjeta}" />
+        <Setter Property="Margin" Value="0,0,0,16" />
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
+    </Style>
+
+    <!-- La tarjeta interactiva se eleva y desplaza levemente al pasar el ratón. -->
+    <Style x:Key="TarjetaInteractiva" TargetType="materialDesign:Card"
+           BasedOn="{StaticResource TarjetaBase}">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform />
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="MouseEnter">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                                         To="-3" Duration="0:0:0.15">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut" />
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            <EventTrigger RoutedEvent="MouseLeave">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                                         To="0" Duration="0:0:0.15">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut" />
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp8" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ══ Botones ═══════════════════════════════════════════════════════════ -->
+    <Style x:Key="BotonPrincipal" TargetType="Button"
+           BasedOn="{StaticResource MaterialDesignRaisedButton}">
+        <Setter Property="Height" Value="38" />
+        <Setter Property="MinWidth" Value="110" />
+        <Setter Property="Padding" Value="14,0" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="6" />
+    </Style>
+
+    <Style x:Key="BotonSecundario" TargetType="Button"
+           BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+        <Setter Property="Height" Value="38" />
+        <Setter Property="MinWidth" Value="110" />
+        <Setter Property="Padding" Value="14,0" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="6" />
+    </Style>
+
+    <Style x:Key="BotonTexto" TargetType="Button"
+           BasedOn="{StaticResource MaterialDesignFlatButton}">
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Padding" Value="12,0" />
+    </Style>
+
+    <Style x:Key="BotonPeligro" TargetType="Button"
+           BasedOn="{StaticResource MaterialDesignRaisedButton}">
+        <Setter Property="Height" Value="38" />
+        <Setter Property="MinWidth" Value="110" />
+        <Setter Property="Padding" Value="14,0" />
+        <Setter Property="Background" Value="{StaticResource BrochaError}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrochaError}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="6" />
+    </Style>
+
+    <Style x:Key="BotonIconoAccion" TargetType="Button"
+           BasedOn="{StaticResource MaterialDesignIconButton}">
+        <Setter Property="Width" Value="34" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <!-- ══ Entradas ══════════════════════════════════════════════════════════ -->
+    <Style x:Key="CampoTexto" TargetType="TextBox"
+           BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+        <Setter Property="Margin" Value="0,0,0,14" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <!-- El contador «12 / 50» que Material muestra al fijar MaxLength distrae
+             en un formulario de gestión; el límite sigue vigente, solo se oculta. -->
+        <Setter Property="materialDesign:TextFieldAssist.CharacterCounterVisibility" Value="Collapsed" />
+    </Style>
+
+    <Style x:Key="CampoNumerico" TargetType="TextBox"
+           BasedOn="{StaticResource CampoTexto}">
+        <Setter Property="HorizontalContentAlignment" Value="Right" />
+    </Style>
+
+    <Style x:Key="CampoSeleccion" TargetType="ComboBox"
+           BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
+        <Setter Property="Margin" Value="0,0,0,14" />
+    </Style>
+
+    <Style x:Key="CampoFecha" TargetType="DatePicker"
+           BasedOn="{StaticResource MaterialDesignOutlinedDatePicker}">
+        <Setter Property="Margin" Value="0,0,0,14" />
+    </Style>
+
+    <Style x:Key="CampoBusqueda" TargetType="TextBox"
+           BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True" />
+        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="6" />
+        <Setter Property="materialDesign:TextFieldAssist.CharacterCounterVisibility" Value="Collapsed" />
+    </Style>
+
+    <!-- Campos del formulario de acceso: mismo aspecto para el campo enmascarado
+         y el visible, de modo que el «ojito» no produzca ningún salto. -->
+    <Style x:Key="CampoAcceso" TargetType="TextBox"
+           BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+        <Setter Property="Height" Value="48" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="materialDesign:TextFieldAssist.HasLeadingIcon" Value="True" />
+        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="8" />
+        <Setter Property="materialDesign:TextFieldAssist.CharacterCounterVisibility" Value="Collapsed" />
+    </Style>
+
+    <Style x:Key="CampoAccesoContrasena" TargetType="PasswordBox"
+           BasedOn="{StaticResource MaterialDesignOutlinedPasswordBox}">
+        <Setter Property="Height" Value="48" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="materialDesign:TextFieldAssist.HasLeadingIcon" Value="True" />
+        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="8" />
+        <Setter Property="materialDesign:TextFieldAssist.CharacterCounterVisibility" Value="Collapsed" />
+    </Style>
+
+    <!-- ══ Grillas ═══════════════════════════════════════════════════════════ -->
+    <Style x:Key="GrillaDatos" TargetType="DataGrid"
+           BasedOn="{StaticResource MaterialDesignDataGrid}">
+        <Setter Property="AutoGenerateColumns" Value="False" />
+        <Setter Property="CanUserAddRows" Value="False" />
+        <Setter Property="CanUserDeleteRows" Value="False" />
+        <Setter Property="IsReadOnly" Value="True" />
+        <Setter Property="SelectionMode" Value="Single" />
+        <Setter Property="SelectionUnit" Value="FullRow" />
+        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+        <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="RowHeight" Value="42" />
+        <Setter Property="ColumnHeaderHeight" Value="44" />
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+        <Setter Property="EnableRowVirtualization" Value="True" />
+        <Setter Property="EnableColumnVirtualization" Value="True" />
+        <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True" />
+        <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling" />
+        <Setter Property="materialDesign:DataGridAssist.CellPadding" Value="10,4" />
+        <Setter Property="materialDesign:DataGridAssist.ColumnHeaderPadding" Value="10,4" />
+    </Style>
+
+    <!-- Grilla editable usada en compras y en el carrito del punto de venta. -->
+    <Style x:Key="GrillaEditable" TargetType="DataGrid"
+           BasedOn="{StaticResource GrillaDatos}">
+        <Setter Property="IsReadOnly" Value="False" />
+        <Setter Property="CanUserSortColumns" Value="False" />
+    </Style>
+
+    <!-- ══ Estados y distintivos ═════════════════════════════════════════════ -->
+    <Style x:Key="Distintivo" TargetType="Border">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="8,3" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="TextoDistintivo" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <!-- ══ Fila de dato de contacto (fichas de cliente y proveedor) ══════════
+         Llevan clave explícita a propósito: un estilo implícito de StackPanel
+         declarado dentro de StackPanel.Resources se aplicaría también al propio
+         contenedor y volcaría la lista entera en horizontal. -->
+    <Style x:Key="FilaContacto" TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Margin" Value="0,0,0,7" />
+    </Style>
+
+    <Style x:Key="IconoContacto" TargetType="materialDesign:PackIcon">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Opacity" Value="0.6" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0,0,10,0" />
+    </Style>
+
+    <Style x:Key="TextoContacto" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <!-- ══ Separadores y contenedores ════════════════════════════════════════ -->
+    <Style x:Key="SeparadorHorizontal" TargetType="Separator"
+           BasedOn="{StaticResource MaterialDesignSeparator}">
+        <Setter Property="Margin" Value="0,10" />
+    </Style>
+
+    <Style x:Key="BarraHerramientas" TargetType="Border">
+        <Setter Property="Padding" Value="0,0,0,14" />
+    </Style>
+
+    <!-- Animación de entrada aplicada al contenido de cada página. -->
+    <Style x:Key="ContenidoAnimado" TargetType="ContentControl">
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1" Duration="0:0:0.3" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Elemento del menú lateral: icono + texto, con resaltado al seleccionar. -->
+    <Style x:Key="BotonMenuLateral" TargetType="RadioButton">
+        <Setter Property="GroupName" Value="MenuLateral" />
+        <Setter Property="Height" Value="46" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Fondo"
+                            Background="Transparent"
+                            CornerRadius="8"
+                            Margin="8,2">
+                        <Grid>
+                            <Border x:Name="Indicador"
+                                    Width="3" HorizontalAlignment="Left"
+                                    CornerRadius="2" Margin="0,8"
+                                    Background="{DynamicResource MaterialDesign.Brush.Primary}"
+                                    Opacity="0" />
+                            <ContentPresenter Margin="14,0,10,0"
+                                              VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Fondo" Property="Background"
+                                    Value="{DynamicResource MaterialDesignChipBackground}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Fondo" Property="Background"
+                                    Value="{DynamicResource MaterialDesign.Brush.Primary.Light}" />
+                            <Setter TargetName="Indicador" Property="Opacity" Value="1" />
+                            <Setter Property="Foreground"
+                                    Value="{DynamicResource MaterialDesign.Brush.Primary.Light.Foreground}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

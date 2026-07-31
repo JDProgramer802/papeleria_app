@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Papeleria.App</RootNamespace>
+    <AssemblyName>Papeleria</AssemblyName>
+    <ApplicationIcon>Resources\Images\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>Sistema de Gestión de Papelería</Product>
+    <Company>Papelería</Company>
+    <Copyright>© 2026</Copyright>
+    <SatelliteResourceLanguages>es;en</SatelliteResourceLanguages>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Se incrusta además como recurso para poder asignarlo a las ventanas. -->
+    <Resource Include="Resources\Images\app.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Papeleria.Domain\Papeleria.Domain.csproj" />
+    <ProjectReference Include="..\Papeleria.Data\Papeleria.Data.csproj" />
+    <ProjectReference Include="..\Papeleria.Business\Papeleria.Business.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+  </ItemGroup>
+
+  <!--
+    Los gráficos del dashboard se dibujan con controles WPF propios (Controls/Charts).
+    Se descartó LiveCharts2 porque arrastra SkiaSharp + OpenTK compilados para
+    .NET Framework 4.6.1, lo que introduce binarios nativos y avisos NU1701 en un
+    ejecutable autónomo que debe funcionar sin conexión.
+  -->
+
+</Project>

@@ -1,0 +1,59 @@
+<UserControl x:Class="Papeleria.App.Views.Dialogos.MovimientoCajaDialogoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
+             d:DataContext="{d:DesignInstance vm:MovimientoCajaDialogoVistaModelo}"
+             mc:Ignorable="d"
+             Width="440">
+
+    <StackPanel Margin="24,22,24,18">
+        <TextBlock Text="{Binding Titulo}" Style="{StaticResource MaterialDesignHeadline6TextBlock}" />
+        <TextBlock Text="{Binding Subtitulo}" Style="{StaticResource SubtituloPagina}"
+                   TextWrapping="Wrap" Margin="0,4,0,16" />
+
+        <Border CornerRadius="8" Padding="12,9" Margin="0,0,0,16"
+                Background="{DynamicResource MaterialDesignChipBackground}"
+                Visibility="{Binding EsIngreso, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="CashCheck" VerticalAlignment="Center" Opacity="0.7" />
+                <TextBlock VerticalAlignment="Center" Margin="8,0,0,0" FontSize="12.5">
+                    <Run Text="Efectivo disponible en caja:" />
+                    <Run Text="{Binding EfectivoDisponible, Converter={StaticResource Moneda}, Mode=OneWay}"
+                         FontWeight="SemiBold" />
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <TextBox Text="{Binding Monto, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                 Style="{StaticResource CampoNumerico}"
+                 FontSize="18" FontWeight="SemiBold"
+                 materialDesign:HintAssist.Hint="Monto" />
+
+        <TextBox Text="{Binding Concepto, UpdateSourceTrigger=PropertyChanged}"
+                 Style="{StaticResource CampoTexto}"
+                 MaxLength="300"
+                 materialDesign:HintAssist.Hint="Concepto del movimiento" />
+
+        <Border Background="{StaticResource BrochaErrorSuave}"
+                CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
+                Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
+            <TextBlock Text="{Binding MensajeError}"
+                       Foreground="{StaticResource BrochaError}"
+                       TextWrapping="Wrap" FontSize="12.5" />
+        </Border>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancelar" Style="{StaticResource BotonTexto}"
+                    Margin="0,0,8,0" IsCancel="True"
+                    Command="{Binding CancelarCommand}" />
+
+            <Button Content="Registrar" Style="{StaticResource BotonPrincipal}"
+                    IsDefault="True"
+                    IsEnabled="{Binding PuedeGuardar}"
+                    Command="{Binding GuardarCommand}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

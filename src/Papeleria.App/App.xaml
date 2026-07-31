@@ -1,0 +1,26 @@
+<Application x:Class="Papeleria.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <materialDesign:BundledTheme BaseTheme="Light"
+                                             PrimaryColor="Blue"
+                                             SecondaryColor="Amber"
+                                             ColorAdjustment="{materialDesign:ColorAdjustment}" />
+                <!--
+                    MaterialDesignThemes 5.x publica dos juegos de estilos. Se usa el de
+                    Material Design 2 porque es el que define los nombres clásicos
+                    (MaterialDesignRaisedButton, MaterialDesignOutlinedTextBox, …) sobre
+                    los que se construyen los estilos de Resources/Estilos.xaml.
+                -->
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
+
+                <ResourceDictionary Source="Resources/Convertidores.xaml" />
+                <ResourceDictionary Source="Resources/Estilos.xaml" />
+                <ResourceDictionary Source="Resources/PlantillasDatos.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,86 @@
+<UserControl x:Class="Papeleria.App.Views.Dialogos.ClienteDialogoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
+             d:DataContext="{d:DesignInstance vm:ClienteDialogoVistaModelo}"
+             mc:Ignorable="d"
+             Width="720">
+
+    <StackPanel Margin="24,22,24,16">
+        <TextBlock Text="{Binding Titulo}"
+                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                   Margin="0,0,0,18" />
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBox Grid.Row="0" Grid.Column="0" Style="{StaticResource CampoTexto}"
+                     materialDesign:HintAssist.Hint="Nombre completo"
+                     Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" MaxLength="180" />
+
+            <ComboBox Grid.Row="0" Grid.Column="2" Style="{StaticResource CampoSeleccion}"
+                      materialDesign:HintAssist.Hint="Tipo de documento"
+                      ItemsSource="{Binding TiposDocumento}"
+                      DisplayMemberPath="Descripcion"
+                      SelectedValuePath="Valor"
+                      SelectedValue="{Binding TipoDocumento}" />
+
+            <TextBox Grid.Row="1" Grid.Column="0" Style="{StaticResource CampoTexto}"
+                     materialDesign:HintAssist.Hint="Número de documento"
+                     Text="{Binding NumeroDocumento}" MaxLength="40" />
+
+            <TextBox Grid.Row="1" Grid.Column="2" Style="{StaticResource CampoTexto}"
+                     materialDesign:HintAssist.Hint="Teléfono" Text="{Binding Telefono}" MaxLength="40" />
+
+            <TextBox Grid.Row="2" Grid.Column="0" Style="{StaticResource CampoTexto}"
+                     materialDesign:HintAssist.Hint="Correo electrónico"
+                     Text="{Binding Correo}" MaxLength="150" />
+
+            <TextBox Grid.Row="2" Grid.Column="2" Style="{StaticResource CampoTexto}"
+                     materialDesign:HintAssist.Hint="Ciudad" Text="{Binding Ciudad}" MaxLength="100" />
+
+            <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource CampoTexto}"
+                     materialDesign:HintAssist.Hint="Dirección" Text="{Binding Direccion}" MaxLength="250" />
+        </Grid>
+
+        <TextBox Style="{StaticResource CampoTexto}"
+                 materialDesign:HintAssist.Hint="Observaciones"
+                 Text="{Binding Observaciones}"
+                 AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60"
+                 VerticalContentAlignment="Top" MaxLength="600" />
+
+        <CheckBox Content="Cliente activo" IsChecked="{Binding Activo}" Margin="0,0,0,4"
+                  IsEnabled="{Binding EsProtegido, Converter={StaticResource InvertirBool}}" />
+
+        <TextBlock Text="Este es el cliente por defecto del punto de venta y no puede desactivarse."
+                   Style="{StaticResource TextoTenue}" FontSize="11.5" Margin="0,0,0,10"
+                   Visibility="{Binding EsProtegido, Converter={StaticResource BoolAVisible}}" />
+
+        <Border Background="{StaticResource BrochaErrorSuave}" CornerRadius="6" Padding="12,9"
+                Margin="0,0,0,12"
+                Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
+            <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrochaError}"
+                       TextWrapping="Wrap" FontSize="12.5" />
+        </Border>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancelar" Style="{StaticResource BotonTexto}" Margin="0,0,8,0"
+                    IsCancel="True" Command="{Binding CancelarCommand}" />
+            <Button Content="Guardar" Style="{StaticResource BotonPrincipal}" IsDefault="True"
+                    Command="{Binding GuardarCommand}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

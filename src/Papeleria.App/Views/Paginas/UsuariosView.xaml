@@ -1,0 +1,252 @@
+<UserControl x:Class="Papeleria.App.Views.Paginas.UsuariosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Paginas"
+             d:DataContext="{d:DesignInstance vm:UsuariosVistaModelo}"
+             mc:Ignorable="d"
+             d:DesignHeight="780" d:DesignWidth="1340">
+
+    <Grid Margin="{StaticResource MargenPagina}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,14">
+            <StackPanel>
+                <TextBlock Text="{Binding Titulo}" Style="{StaticResource TituloPagina}" />
+                <TextBlock Text="{Binding Subtitulo}" Style="{StaticResource SubtituloPagina}" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
+                        Command="{Binding CambiarMiContrasenaCommand}"
+                        ToolTip="Cambiar la contraseña de su propio usuario">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="LockReset" VerticalAlignment="Center" />
+                        <TextBlock Text="Mi contraseña" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource BotonPrincipal}"
+                        Command="{Binding NuevoCommand}"
+                        Visibility="{Binding PuedeCrear, Converter={StaticResource BoolAVisible}}"
+                        ToolTip="Crear un usuario nuevo">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="AccountPlusOutline" VerticalAlignment="Center" />
+                        <TextBlock Text="NUEVO USUARIO" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Background="{StaticResource BrochaErrorSuave}"
+                CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
+                Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
+            <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrochaError}"
+                       TextWrapping="Wrap" FontSize="12.5" />
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.5*" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- ══ Usuarios ════════════════════════════════════════════════ -->
+            <materialDesign:Card Grid.Column="0" Style="{StaticResource TarjetaBase}" Padding="0" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="16,14,16,10">
+                        <TextBlock Text="Operadores del sistema" Style="{StaticResource TituloSeccion}"
+                                   Margin="0" VerticalAlignment="Center" />
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Style="{StaticResource BotonTexto}" FontSize="11"
+                                    Command="{Binding RestablecerContrasenaCommand}"
+                                    IsEnabled="{Binding HaySeleccion}"
+                                    Content="RESTABLECER CONTRASEÑA"
+                                    ToolTip="Asignar una contraseña nueva al usuario seleccionado" />
+                        </StackPanel>
+                    </Grid>
+
+                    <DataGrid Grid.Row="1" Style="{StaticResource GrillaDatos}"
+                              ItemsSource="{Binding Usuarios}"
+                              SelectedItem="{Binding UsuarioSeleccionado}"
+                              RowHeight="52">
+                        <DataGrid.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding EditarCommand}" />
+                        </DataGrid.InputBindings>
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Usuario" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Width="32" Height="32" CornerRadius="16"
+                                                    Background="{DynamicResource MaterialDesign.Brush.Primary.Light}">
+                                                <materialDesign:PackIcon Kind="AccountCircleOutline"
+                                                                         Width="18" Height="18"
+                                                                         HorizontalAlignment="Center"
+                                                                         VerticalAlignment="Center"
+                                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary.Light.Foreground}" />
+                                            </Border>
+
+                                            <StackPanel Margin="10,0,0,0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding NombreCompleto}"
+                                                               TextTrimming="CharacterEllipsis" />
+                                                    <materialDesign:PackIcon Kind="ShieldCrownOutline"
+                                                                             Width="14" Height="14"
+                                                                             Margin="6,0,0,0"
+                                                                             VerticalAlignment="Center"
+                                                                             Foreground="{StaticResource BrochaAdvertencia}"
+                                                                             ToolTip="Administrador principal: no puede eliminarse"
+                                                                             Visibility="{Binding EsProtegido, Converter={StaticResource BoolAVisible}}" />
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding NombreUsuario}"
+                                                           Style="{StaticResource TextoTenue}" FontSize="11" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Rol" Width="130"
+                                                Binding="{Binding Rol, Converter={StaticResource EnumADescripcion}}" />
+
+                            <DataGridTextColumn Header="Correo" Binding="{Binding Correo}" Width="180" />
+
+                            <DataGridTextColumn Header="Último acceso" Width="145"
+                                                Binding="{Binding UltimoAcceso, Converter={StaticResource Fecha}, ConverterParameter=Hora}" />
+
+                            <DataGridTemplateColumn Header="Estado" Width="95">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border>
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource Distintivo}">
+                                                    <Setter Property="Background" Value="#9E9E9E" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Activo}" Value="True">
+                                                            <Setter Property="Background" Value="#43A047" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock"
+                                                           BasedOn="{StaticResource TextoDistintivo}">
+                                                        <Setter Property="Text" Value="Inactivo" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Activo}" Value="True">
+                                                                <Setter Property="Text" Value="Activo" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="" Width="126" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Style="{StaticResource BotonIconoAccion}"
+                                                    Command="{Binding DataContext.EditarCommand,
+                                                              RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    ToolTip="Editar el usuario">
+                                                <materialDesign:PackIcon Kind="PencilOutline"
+                                                                         Width="17" Height="17" />
+                                            </Button>
+                                            <Button Style="{StaticResource BotonIconoAccion}"
+                                                    Command="{Binding DataContext.AlternarEstadoCommand,
+                                                              RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    IsEnabled="{Binding EsProtegido, Converter={StaticResource InvertirBool}}"
+                                                    ToolTip="Activar o desactivar">
+                                                <materialDesign:PackIcon Kind="PowerStandby"
+                                                                         Width="17" Height="17" />
+                                            </Button>
+                                            <Button Style="{StaticResource BotonIconoAccion}"
+                                                    Command="{Binding DataContext.EliminarCommand,
+                                                              RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    IsEnabled="{Binding EsProtegido, Converter={StaticResource InvertirBool}}"
+                                                    Foreground="{StaticResource BrochaError}"
+                                                    ToolTip="Eliminar el usuario">
+                                                <materialDesign:PackIcon Kind="DeleteOutline"
+                                                                         Width="17" Height="17" />
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </materialDesign:Card>
+
+            <!-- ══ Matriz de permisos ══════════════════════════════════════ -->
+            <materialDesign:Card Grid.Column="2" Style="{StaticResource TarjetaBase}" Padding="0" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="16,14,16,8">
+                        <TextBlock Text="Permisos por rol" Style="{StaticResource TituloSeccion}"
+                                   Margin="0,0,0,2" />
+                        <TextBlock Text="El rol Administrador siempre conserva acceso total y no se puede restringir."
+                                   Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                   TextWrapping="Wrap" Margin="0,0,0,10" />
+
+                        <ComboBox ItemsSource="{Binding Roles}"
+                                  SelectedValue="{Binding RolPermisos}"
+                                  SelectedValuePath="Valor" DisplayMemberPath="Descripcion"
+                                  Style="{StaticResource CampoSeleccion}"
+                                  Margin="0"
+                                  materialDesign:HintAssist.Hint="Rol a configurar"
+                                  materialDesign:HintAssist.IsFloating="True" />
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1" Style="{StaticResource GrillaEditable}"
+                              ItemsSource="{Binding Permisos}"
+                              RowHeight="40" CanUserSortColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Módulo" Binding="{Binding NombreModulo}"
+                                                Width="*" IsReadOnly="True" />
+                            <DataGridCheckBoxColumn Header="Ver" Binding="{Binding PuedeVer}" Width="52" />
+                            <DataGridCheckBoxColumn Header="Crear" Binding="{Binding PuedeCrear}" Width="58" />
+                            <DataGridCheckBoxColumn Header="Editar" Binding="{Binding PuedeEditar}" Width="62" />
+                            <DataGridCheckBoxColumn Header="Borrar" Binding="{Binding PuedeEliminar}" Width="62" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Button Grid.Row="2" Style="{StaticResource BotonPrincipal}"
+                            Margin="16,12,16,16" Height="40"
+                            Command="{Binding GuardarPermisosCommand}"
+                            Visibility="{Binding PuedeEditar, Converter={StaticResource BoolAVisible}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ContentSaveCheckOutline" VerticalAlignment="Center" />
+                            <TextBlock Text="GUARDAR PERMISOS" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </materialDesign:Card>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,66 @@
+<UserControl x:Class="Papeleria.App.Controls.PaginadorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:infra="clr-namespace:Papeleria.App.Infrastructure"
+             d:DataContext="{d:DesignInstance infra:Paginador}"
+             mc:Ignorable="d">
+
+    <!-- Barra de paginación compartida por todas las grillas del sistema. -->
+    <Grid Margin="0,10,0,0">
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="{Binding TextoRango}"
+                       Style="{StaticResource TextoTenue}"
+                       VerticalAlignment="Center" />
+
+            <TextBlock Text="·" Opacity="0.4" Margin="10,0" VerticalAlignment="Center" />
+
+            <TextBlock Text="Filas por página"
+                       Style="{StaticResource TextoTenue}"
+                       VerticalAlignment="Center" Margin="0,0,8,0" />
+
+            <ComboBox ItemsSource="{Binding Tamanos}"
+                      SelectedItem="{Binding TamanoPagina}"
+                      Width="76" Height="30"
+                      VerticalContentAlignment="Center"
+                      ToolTip="Cantidad de registros por página" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+            <Button Style="{StaticResource BotonIconoAccion}"
+                    Command="{Binding PrimeraPaginaCommand}"
+                    ToolTip="Primera página">
+                <materialDesign:PackIcon Kind="PageFirst" Width="19" Height="19" />
+            </Button>
+
+            <Button Style="{StaticResource BotonIconoAccion}"
+                    Command="{Binding PaginaAnteriorCommand}"
+                    ToolTip="Página anterior">
+                <materialDesign:PackIcon Kind="ChevronLeft" Width="19" Height="19" />
+            </Button>
+
+            <Border Background="{DynamicResource MaterialDesignChipBackground}"
+                    CornerRadius="6" Padding="12,4" Margin="6,0" VerticalAlignment="Center">
+                <TextBlock VerticalAlignment="Center" FontSize="12">
+                    <Run Text="{Binding Pagina, Mode=OneWay}" FontWeight="SemiBold" />
+                    <Run Text="/" Foreground="Gray" />
+                    <Run Text="{Binding TotalPaginas, Mode=OneWay}" />
+                </TextBlock>
+            </Border>
+
+            <Button Style="{StaticResource BotonIconoAccion}"
+                    Command="{Binding PaginaSiguienteCommand}"
+                    ToolTip="Página siguiente">
+                <materialDesign:PackIcon Kind="ChevronRight" Width="19" Height="19" />
+            </Button>
+
+            <Button Style="{StaticResource BotonIconoAccion}"
+                    Command="{Binding UltimaPaginaCommand}"
+                    ToolTip="Última página">
+                <materialDesign:PackIcon Kind="PageLast" Width="19" Height="19" />
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,59 @@
+<UserControl x:Class="Papeleria.App.Views.Dialogos.DialogoTextoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance vm:DialogoTextoVistaModelo}"
+             mc:Ignorable="d"
+             Width="460">
+
+    <Grid Margin="24,22,24,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Text="{Binding Titulo}"
+                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                   TextWrapping="Wrap" />
+
+        <TextBox Grid.Row="1"
+                 Margin="0,18,0,16"
+                 Text="{Binding Valor, UpdateSourceTrigger=PropertyChanged}"
+                 materialDesign:HintAssist.Hint="{Binding Etiqueta}"
+                 AcceptsReturn="{Binding Multilinea}"
+                 TextWrapping="Wrap"
+                 MaxLength="400"
+                 FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
+            <TextBox.Style>
+                <Style TargetType="TextBox" BasedOn="{StaticResource CampoTexto}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Multilinea}" Value="True">
+                            <Setter Property="MinHeight" Value="96" />
+                            <Setter Property="VerticalContentAlignment" Value="Top" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+        </TextBox>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancelar"
+                    Style="{StaticResource BotonTexto}"
+                    Margin="0,0,8,0"
+                    IsCancel="True"
+                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" />
+
+            <Button Content="Aceptar"
+                    IsDefault="True"
+                    Style="{StaticResource BotonPrincipal}"
+                    IsEnabled="{Binding PuedeAceptar}"
+                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                    CommandParameter="{Binding Valor}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

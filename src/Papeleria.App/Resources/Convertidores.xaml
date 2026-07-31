@@ -1,0 +1,27 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:conv="clr-namespace:Papeleria.App.Converters">
+
+    <!-- Instancias únicas de los convertidores, disponibles en toda la aplicación. -->
+    <conv:BooleanoAVisibilidad x:Key="BoolAVisible" />
+    <conv:InvertirBooleano x:Key="InvertirBool" />
+    <conv:NuloAVisibilidad x:Key="NuloAVisible" />
+    <conv:TextoAVisibilidad x:Key="TextoAVisible" />
+    <conv:ColeccionVaciaAVisibilidad x:Key="ColeccionVaciaAVisible" />
+    <conv:MonedaConverter x:Key="Moneda" />
+    <conv:CantidadConverter x:Key="Cantidad" />
+    <conv:PorcentajeConverter x:Key="Porcentaje" />
+    <conv:FechaConverter x:Key="Fecha" />
+    <conv:EstadoStockABrocha x:Key="EstadoStockABrocha" />
+    <conv:VariacionABrocha x:Key="VariacionABrocha" />
+    <conv:VariacionAIcono x:Key="VariacionAIcono" />
+    <conv:VariacionATexto x:Key="VariacionATexto" />
+    <conv:RutaAImagen x:Key="RutaAImagen" />
+    <conv:BytesAImagen x:Key="BytesAImagen" />
+    <conv:IgualAParametro x:Key="IgualAParametro" />
+    <conv:EnumADescripcion x:Key="EnumADescripcion" />
+    <conv:MayorQueCeroAVisibilidad x:Key="MayorQueCeroAVisible" />
+    <conv:NivelAlertaABrocha x:Key="NivelAlertaABrocha" />
+    <conv:MenuColapsadoAAncho x:Key="MenuColapsadoAAncho" />
+
+</ResourceDictionary>

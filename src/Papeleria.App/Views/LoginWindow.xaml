@@ -1,0 +1,355 @@
+<Window x:Class="Papeleria.App.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:Papeleria.App.ViewModels"
+        d:DataContext="{d:DesignInstance vm:LoginVistaModelo}"
+        mc:Ignorable="d"
+        Title="Iniciar sesión — Sistema de Gestión de Papelería"
+        Height="640" Width="1000"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Icon="pack://application:,,,/Papeleria;component/Resources/Images/app.ico"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+
+    <Window.Resources>
+        <!--
+            Estilos con clave explícita a propósito: un estilo implícito
+            (TargetType sin x:Key) declarado dentro de StackPanel.Resources se
+            aplicaría también al StackPanel contenedor y volcaría la lista entera
+            en horizontal.
+        -->
+        <Style x:Key="FilaCaracteristica" TargetType="StackPanel">
+            <Setter Property="Orientation" Value="Horizontal" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
+
+        <Style x:Key="IconoCaracteristica" TargetType="Border">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Background" Value="#1FFFFFFF" />
+            <Setter Property="Margin" Value="0,0,14,0" />
+        </Style>
+
+        <Style x:Key="GlifoCaracteristica" TargetType="materialDesign:PackIcon">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="TextoCaracteristica" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Opacity" Value="0.92" />
+            <Setter Property="FontSize" Value="13.5" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </Window.Resources>
+
+    <Border CornerRadius="16" Margin="16" Background="{DynamicResource MaterialDesignPaper}"
+            RenderTransformOrigin="0.5,0.5">
+        <Border.RenderTransform>
+            <TranslateTransform x:Name="DesplazamientoEntrada" Y="24" />
+        </Border.RenderTransform>
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="34" ShadowDepth="6" Opacity="0.42" Color="#000000" />
+        </Border.Effect>
+
+        <Border CornerRadius="16" ClipToBounds="True">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.15*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- ══════════════ PANEL DE MARCA ═══════════════════════════ -->
+                <Grid Grid.Column="0" MouseLeftButtonDown="ArrastrarVentana">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#0A3D91" Offset="0" />
+                            <GradientStop Color="#1565C0" Offset="0.55" />
+                            <GradientStop Color="#2196F3" Offset="1" />
+                        </LinearGradientBrush>
+                    </Grid.Background>
+
+                    <!-- Formas decorativas de fondo -->
+                    <Ellipse Width="380" Height="380" HorizontalAlignment="Left"
+                             VerticalAlignment="Bottom" Margin="-150,0,0,-160">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#26FFFFFF" Offset="0" />
+                                <GradientStop Color="#00FFFFFF" Offset="1" />
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                    </Ellipse>
+
+                    <Ellipse Width="240" Height="240" HorizontalAlignment="Right"
+                             VerticalAlignment="Top" Margin="0,-90,-70,0" Fill="#14FFFFFF" />
+
+                    <Ellipse Width="130" Height="130" HorizontalAlignment="Right"
+                             VerticalAlignment="Bottom" Margin="0,0,60,54" Fill="#0DFFFFFF" />
+
+                    <StackPanel VerticalAlignment="Center" Margin="54,0,48,0">
+                        <!-- Logotipo -->
+                        <Border Width="78" Height="78" CornerRadius="20"
+                                HorizontalAlignment="Left" Background="#2BFFFFFF">
+                            <materialDesign:PackIcon Kind="BookOpenPageVariant"
+                                                     Width="46" Height="46"
+                                                     Foreground="White"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center" />
+                        </Border>
+
+                        <TextBlock Text="{Binding NombreEmpresa}"
+                                   FontSize="34" FontWeight="Bold"
+                                   Foreground="White"
+                                   TextWrapping="Wrap"
+                                   LineHeight="40"
+                                   Margin="0,26,0,0" />
+
+                        <Rectangle Height="4" Width="56" RadiusX="2" RadiusY="2"
+                                   Fill="#66FFFFFF" HorizontalAlignment="Left"
+                                   Margin="0,16,0,0" />
+
+                        <TextBlock Text="Sistema de gestión comercial: inventario, punto de venta, compras y caja en un solo lugar."
+                                   FontSize="14.5"
+                                   Foreground="White" Opacity="0.9"
+                                   TextWrapping="Wrap"
+                                   LineHeight="23"
+                                   MaxWidth="380"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,18,0,0" />
+
+                        <StackPanel Margin="0,36,0,0">
+                            <StackPanel Style="{StaticResource FilaCaracteristica}">
+                                <Border Style="{StaticResource IconoCaracteristica}">
+                                    <materialDesign:PackIcon Kind="WifiOff"
+                                                             Style="{StaticResource GlifoCaracteristica}" />
+                                </Border>
+                                <TextBlock Text="Funciona sin conexión a Internet"
+                                           Style="{StaticResource TextoCaracteristica}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource FilaCaracteristica}">
+                                <Border Style="{StaticResource IconoCaracteristica}">
+                                    <materialDesign:PackIcon Kind="ShieldCheckOutline"
+                                                             Style="{StaticResource GlifoCaracteristica}" />
+                                </Border>
+                                <TextBlock Text="Contraseñas cifradas y permisos por rol"
+                                           Style="{StaticResource TextoCaracteristica}" />
+                            </StackPanel>
+
+                            <StackPanel Style="{StaticResource FilaCaracteristica}">
+                                <Border Style="{StaticResource IconoCaracteristica}">
+                                    <materialDesign:PackIcon Kind="DatabaseCheckOutline"
+                                                             Style="{StaticResource GlifoCaracteristica}" />
+                                </Border>
+                                <TextBlock Text="Copias de seguridad automáticas"
+                                           Style="{StaticResource TextoCaracteristica}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                               Margin="54,0,0,26"
+                               Foreground="White" Opacity="0.6" FontSize="11.5">
+                        <Run Text="Versión" />
+                        <Run Text="{Binding Version, Mode=OneWay}" />
+                        <Run Text="  ·  © 2026" />
+                    </TextBlock>
+                </Grid>
+
+                <!-- ══════════════ FORMULARIO ═══════════════════════════════ -->
+                <Grid Grid.Column="1" MouseLeftButtonDown="ArrastrarVentana">
+                    <!-- Controles de ventana -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                VerticalAlignment="Top" Margin="0,12,12,0">
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                Width="32" Height="32" Padding="0"
+                                Click="MinimizarVentana"
+                                ToolTip="Minimizar">
+                            <materialDesign:PackIcon Kind="WindowMinimize" Width="16" Height="16" />
+                        </Button>
+
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                Width="32" Height="32" Padding="0"
+                                Command="{Binding SalirCommand}"
+                                ToolTip="Salir del sistema">
+                            <materialDesign:PackIcon Kind="Close" Width="17" Height="17" />
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel VerticalAlignment="Center" Margin="48,0,48,0">
+                        <TextBlock Text="Bienvenido"
+                                   FontSize="30" FontWeight="Bold" />
+                        <TextBlock Text="Ingrese sus credenciales para continuar"
+                                   Style="{StaticResource SubtituloPagina}"
+                                   FontSize="13.5"
+                                   Margin="0,6,0,28" />
+
+                        <!-- Usuario -->
+                        <TextBox x:Name="CampoUsuario"
+                                 Style="{StaticResource CampoAcceso}"
+                                 Margin="0,0,0,18"
+                                 materialDesign:HintAssist.Hint="Usuario"
+                                 materialDesign:TextFieldAssist.LeadingIcon="AccountOutline"
+                                 Text="{Binding NombreUsuario, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="50" />
+
+                        <!-- Contraseña: campo enmascarado y campo visible superpuestos -->
+                        <Grid Margin="0,0,0,6">
+                            <PasswordBox x:Name="CampoContrasena"
+                                         Style="{StaticResource CampoAccesoContrasena}"
+                                         materialDesign:HintAssist.Hint="Contraseña"
+                                         materialDesign:TextFieldAssist.LeadingIcon="LockOutline"
+                                         MaxLength="80"
+                                         PasswordChanged="ContrasenaCambiada"
+                                         KeyUp="ComprobarBloqueoMayusculas"
+                                         Visibility="{Binding MostrarContrasena, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}" />
+
+                            <TextBox x:Name="CampoContrasenaVisible"
+                                     Style="{StaticResource CampoAcceso}"
+                                     materialDesign:HintAssist.Hint="Contraseña"
+                                     materialDesign:TextFieldAssist.LeadingIcon="LockOpenOutline"
+                                     MaxLength="80"
+                                     KeyUp="ComprobarBloqueoMayusculas"
+                                     Text="{Binding Contrasena, UpdateSourceTrigger=PropertyChanged}"
+                                     Visibility="{Binding MostrarContrasena, Converter={StaticResource BoolAVisible}}" />
+
+                            <!-- El «ojito» -->
+                            <ToggleButton x:Name="BotonVerContrasena"
+                                          Style="{StaticResource MaterialDesignFlatToggleButton}"
+                                          Width="38" Height="38"
+                                          Padding="0" Margin="0,0,6,0"
+                                          HorizontalAlignment="Right" VerticalAlignment="Center"
+                                          IsTabStop="False"
+                                          IsChecked="{Binding MostrarContrasena}"
+                                          Checked="VisibilidadContrasenaCambiada"
+                                          Unchecked="VisibilidadContrasenaCambiada"
+                                          ToolTip="{Binding TextoAyudaVisibilidad}">
+                                <materialDesign:PackIcon Width="20" Height="20">
+                                    <materialDesign:PackIcon.Style>
+                                        <Style TargetType="materialDesign:PackIcon">
+                                            <Setter Property="Kind" Value="EyeOutline" />
+                                            <Setter Property="Opacity" Value="0.65" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding MostrarContrasena}" Value="True">
+                                                    <Setter Property="Kind" Value="EyeOffOutline" />
+                                                    <Setter Property="Opacity" Value="1" />
+                                                    <Setter Property="Foreground"
+                                                            Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </materialDesign:PackIcon.Style>
+                                </materialDesign:PackIcon>
+                            </ToggleButton>
+                        </Grid>
+
+                        <!-- Aviso de Bloq Mayús -->
+                        <StackPanel Orientation="Horizontal" Margin="2,0,0,10"
+                                    Visibility="{Binding BloqueoMayusculasActivo, Converter={StaticResource BoolAVisible}}">
+                            <materialDesign:PackIcon Kind="AppleKeyboardCaps"
+                                                     Width="15" Height="15"
+                                                     VerticalAlignment="Center"
+                                                     Foreground="{StaticResource BrochaAdvertencia}" />
+                            <TextBlock Text="Bloq Mayús está activado"
+                                       FontSize="11.5" Margin="6,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Foreground="{StaticResource BrochaAdvertencia}" />
+                        </StackPanel>
+
+                        <CheckBox Content="Recordar mi usuario"
+                                  IsChecked="{Binding RecordarUsuario}"
+                                  Margin="0,4,0,18" />
+
+                        <!-- Error de autenticación -->
+                        <Border Background="{StaticResource BrochaErrorSuave}"
+                                CornerRadius="8" Padding="13,10" Margin="0,0,0,16"
+                                Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="AlertCircleOutline"
+                                                         Foreground="{StaticResource BrochaError}"
+                                                         VerticalAlignment="Top"
+                                                         Margin="0,1,10,0" />
+                                <TextBlock Text="{Binding MensajeError}"
+                                           Foreground="{StaticResource BrochaError}"
+                                           TextWrapping="Wrap"
+                                           MaxWidth="290"
+                                           FontSize="12.5" />
+                            </StackPanel>
+                        </Border>
+
+                        <Button Height="50" FontSize="14"
+                                Command="{Binding IniciarSesionCommand}"
+                                IsDefault="True"
+                                materialDesign:ButtonAssist.CornerRadius="8"
+                                Style="{StaticResource MaterialDesignRaisedButton}">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal"
+                                            Visibility="{Binding EstaCargando, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+                                    <materialDesign:PackIcon Kind="LoginVariant"
+                                                             Width="21" Height="21"
+                                                             VerticalAlignment="Center"
+                                                             Margin="0,0,10,0" />
+                                    <TextBlock Text="INICIAR SESIÓN" VerticalAlignment="Center"
+                                               FontWeight="SemiBold" />
+                                </StackPanel>
+
+                                <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                             IsIndeterminate="True"
+                                             Width="22" Height="22"
+                                             Foreground="White"
+                                             Visibility="{Binding EstaCargando, Converter={StaticResource BoolAVisible}}" />
+                            </Grid>
+                        </Button>
+
+                        <!-- Credenciales de fábrica -->
+                        <Border Background="{StaticResource BrochaInformacionSuave}"
+                                CornerRadius="8" Padding="13,10" Margin="0,20,0,0"
+                                Visibility="{Binding MostrarAvisoContrasenaPorDefecto, Converter={StaticResource BoolAVisible}}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="KeyOutline"
+                                                         Foreground="{StaticResource BrochaInformacion}"
+                                                         VerticalAlignment="Top"
+                                                         Margin="0,1,10,0" />
+                                <TextBlock Text="{Binding AvisoContrasenaPorDefecto}"
+                                           Foreground="{StaticResource BrochaInformacion}"
+                                           TextWrapping="Wrap"
+                                           MaxWidth="290"
+                                           LineHeight="17"
+                                           FontSize="11.5" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Border>
+
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <!-- Entrada: la ventana aparece deslizándose ligeramente hacia arriba. -->
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                     From="0" To="1" Duration="0:0:0.35" />
+                    <DoubleAnimation Storyboard.TargetName="DesplazamientoEntrada"
+                                     Storyboard.TargetProperty="Y"
+                                     From="24" To="0" Duration="0:0:0.4">
+                        <DoubleAnimation.EasingFunction>
+                            <CubicEase EasingMode="EaseOut" />
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+</Window>

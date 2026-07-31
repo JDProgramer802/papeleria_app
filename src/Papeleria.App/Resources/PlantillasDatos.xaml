@@ -1,0 +1,115 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vmPaginas="clr-namespace:Papeleria.App.ViewModels.Paginas"
+                    xmlns:vmDialogos="clr-namespace:Papeleria.App.ViewModels.Dialogos"
+                    xmlns:paginas="clr-namespace:Papeleria.App.Views.Paginas"
+                    xmlns:dialogos="clr-namespace:Papeleria.App.Views.Dialogos">
+
+    <!--
+        Navegación centrada en el modelo de vista: al asignar un modelo al panel de
+        contenido o al host de diálogos, WPF elige aquí la vista que le corresponde.
+    -->
+
+    <!-- ══ Páginas ══════════════════════════════════════════════════════════ -->
+    <DataTemplate DataType="{x:Type vmPaginas:DashboardVistaModelo}">
+        <paginas:DashboardView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:ProductosVistaModelo}">
+        <paginas:ProductosView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:CatalogosVistaModelo}">
+        <paginas:CatalogosView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:ProveedoresVistaModelo}">
+        <paginas:ProveedoresView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:ClientesVistaModelo}">
+        <paginas:ClientesView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:ComprasVistaModelo}">
+        <paginas:ComprasView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:PuntoVentaVistaModelo}">
+        <paginas:PuntoVentaView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:InventarioVistaModelo}">
+        <paginas:InventarioView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:KardexVistaModelo}">
+        <paginas:KardexView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:CajaVistaModelo}">
+        <paginas:CajaView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:ReportesVistaModelo}">
+        <paginas:ReportesView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:ConfiguracionVistaModelo}">
+        <paginas:ConfiguracionView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmPaginas:UsuariosVistaModelo}">
+        <paginas:UsuariosView />
+    </DataTemplate>
+
+    <!-- ══ Diálogos ═════════════════════════════════════════════════════════ -->
+    <DataTemplate DataType="{x:Type vmDialogos:DialogoMensajeVistaModelo}">
+        <dialogos:DialogoMensajeView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:DialogoTextoVistaModelo}">
+        <dialogos:DialogoTextoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:ProductoDialogoVistaModelo}">
+        <dialogos:ProductoDialogoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:CatalogoDialogoVistaModelo}">
+        <dialogos:CatalogoDialogoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:ProveedorDialogoVistaModelo}">
+        <dialogos:ProveedorDialogoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:ClienteDialogoVistaModelo}">
+        <dialogos:ClienteDialogoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:UsuarioDialogoVistaModelo}">
+        <dialogos:UsuarioDialogoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:PagoDialogoVistaModelo}">
+        <dialogos:PagoDialogoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:MovimientoInventarioDialogoVistaModelo}">
+        <dialogos:MovimientoInventarioDialogoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:MovimientoCajaDialogoVistaModelo}">
+        <dialogos:MovimientoCajaDialogoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:CierreCajaDialogoVistaModelo}">
+        <dialogos:CierreCajaDialogoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:ActualizacionDialogoVistaModelo}">
+        <dialogos:ActualizacionDialogoView />
+    </DataTemplate>
+
+</ResourceDictionary>

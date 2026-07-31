@@ -1,0 +1,140 @@
+using System.Windows;
+using System.Windows.Input;
+using Papeleria.App.ViewModels;
+
+namespace Papeleria.App.Views;
+
+/// <summary>Ventana de inicio de sesión.</summary>
+public partial class LoginWindow : Window
+{
+    /// <summary>
+    /// Evita el bucle de notificaciones al copiar la contraseña entre el campo
+    /// enmascarado y el modelo de vista.
+    /// </summary>
+    private bool _sincronizando;
+
+    public LoginWindow()
+    {
+        InitializeComponent();
+
+        DataContextChanged += (_, args) =>
+        {
+            if (args.OldValue is LoginVistaModelo anterior)
+            {
+                anterior.AutenticacionCorrecta -= CerrarConExito;
+                anterior.PropertyChanged -= AlCambiarPropiedadDelModelo;
+            }
+
+            if (args.NewValue is LoginVistaModelo nuevo)
+            {
+                nuevo.AutenticacionCorrecta += CerrarConExito;
+                nuevo.PropertyChanged += AlCambiarPropiedadDelModelo;
+            }
+        };
+
+        Loaded += (_, _) =>
+        {
+            ActualizarBloqueoMayusculas();
+
+            // Si ya se recordó el usuario, el foco va directo a la contraseña.
+            if (DataContext is LoginVistaModelo modelo && !string.IsNullOrWhiteSpace(modelo.NombreUsuario))
+            {
+                CampoContrasena.Focus();
+            }
+            else
+            {
+                CampoUsuario.Focus();
+            }
+        };
+    }
+
+    private void CerrarConExito(object? remitente, EventArgs argumentos)
+    {
+        DialogResult = true;
+        Close();
+    }
+
+    /// <summary>
+    /// El modelo de vista puede vaciar la contraseña (por ejemplo tras un intento
+    /// fallido); hay que reflejarlo en el campo enmascarado, que no es enlazable.
+    /// </summary>
+    private void AlCambiarPropiedadDelModelo(object? remitente, System.ComponentModel.PropertyChangedEventArgs argumentos)
+    {
+        if (argumentos.PropertyName != nameof(LoginVistaModelo.Contrasena) ||
+            _sincronizando ||
+            DataContext is not LoginVistaModelo modelo)
+        {
+            return;
+        }
+
+        if (CampoContrasena.Password != modelo.Contrasena)
+        {
+            _sincronizando = true;
+            CampoContrasena.Password = modelo.Contrasena;
+            _sincronizando = false;
+        }
+    }
+
+    /// <summary>
+    /// El <c>PasswordBox</c> no expone su contenido como propiedad enlazable por
+    /// seguridad, así que se traslada al modelo de vista desde su propio evento.
+    /// </summary>
+    private void ContrasenaCambiada(object remitente, RoutedEventArgs argumentos)
+    {
+        if (_sincronizando || DataContext is not LoginVistaModelo modelo)
+        {
+            return;
+        }
+
+        _sincronizando = true;
+        modelo.Contrasena = CampoContrasena.Password;
+        _sincronizando = false;
+    }
+
+    /// <summary>
+    /// Al pulsar el «ojito» se cambia de campo: hay que llevar el foco al que queda
+    /// visible y dejar el cursor al final para poder seguir escribiendo sin interrupción.
+    /// </summary>
+    private void VisibilidadContrasenaCambiada(object remitente, RoutedEventArgs argumentos)
+    {
+        if (DataContext is not LoginVistaModelo modelo)
+        {
+            return;
+        }
+
+        if (modelo.MostrarContrasena)
+        {
+            CampoContrasenaVisible.Focus();
+            CampoContrasenaVisible.CaretIndex = CampoContrasenaVisible.Text.Length;
+            return;
+        }
+
+        _sincronizando = true;
+        CampoContrasena.Password = modelo.Contrasena;
+        _sincronizando = false;
+
+        CampoContrasena.Focus();
+    }
+
+    private void ComprobarBloqueoMayusculas(object remitente, KeyEventArgs argumentos) =>
+        ActualizarBloqueoMayusculas();
+
+    private void ActualizarBloqueoMayusculas()
+    {
+        if (DataContext is LoginVistaModelo modelo)
+        {
+            modelo.BloqueoMayusculasActivo = Keyboard.IsKeyToggled(Key.CapsLock);
+        }
+    }
+
+    private void ArrastrarVentana(object remitente, MouseButtonEventArgs argumentos)
+    {
+        if (argumentos.ChangedButton == MouseButton.Left)
+        {
+            DragMove();
+        }
+    }
+
+    private void MinimizarVentana(object remitente, RoutedEventArgs argumentos) =>
+        WindowState = WindowState.Minimized;
+}

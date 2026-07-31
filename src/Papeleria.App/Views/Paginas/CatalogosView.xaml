@@ -1,0 +1,234 @@
+<UserControl x:Class="Papeleria.App.Views.Paginas.CatalogosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Paginas"
+             d:DataContext="{d:DesignInstance vm:CatalogosVistaModelo}"
+             mc:Ignorable="d"
+             d:DesignHeight="760" d:DesignWidth="1200">
+
+    <UserControl.Resources>
+        <!-- Columna de estado compartida por los tres catálogos. -->
+        <Style x:Key="EstiloEstado" TargetType="Border" BasedOn="{StaticResource Distintivo}">
+            <Setter Property="Background" Value="#9E9E9E" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Activo}" Value="True">
+                    <Setter Property="Background" Value="#43A047" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="EstiloTextoEstado" TargetType="TextBlock" BasedOn="{StaticResource TextoDistintivo}">
+            <Setter Property="Text" Value="Inactivo" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Activo}" Value="True">
+                    <Setter Property="Text" Value="Activo" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="{StaticResource MargenPagina}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,14">
+            <TextBlock Text="{Binding Titulo}" Style="{StaticResource TituloPagina}" />
+            <TextBlock Text="{Binding Subtitulo}" Style="{StaticResource SubtituloPagina}" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="{StaticResource BrochaErrorSuave}"
+                CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
+                Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
+            <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrochaError}"
+                       TextWrapping="Wrap" FontSize="12.5" />
+        </Border>
+
+        <materialDesign:Card Grid.Row="2" Style="{StaticResource TarjetaBase}" Padding="0" Margin="0">
+            <TabControl Style="{StaticResource MaterialDesignFilledTabControl}"
+                        materialDesign:ColorZoneAssist.Mode="PrimaryLight">
+
+                <!-- ══ Categorías ══════════════════════════════════════════ -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ShapeOutline" VerticalAlignment="Center" />
+                            <TextBlock Text="Categorías" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </TabItem.Header>
+
+                    <Grid Margin="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                            <Button Style="{StaticResource BotonPrincipal}" Margin="0,0,8,0"
+                                    Command="{Binding NuevaCategoriaCommand}"
+                                    Visibility="{Binding PuedeCrear, Converter={StaticResource BoolAVisible}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Plus" VerticalAlignment="Center" />
+                                    <TextBlock Text="NUEVA" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
+                                    Command="{Binding EditarCategoriaCommand}"
+                                    Content="Editar" />
+
+                            <Button Style="{StaticResource BotonTexto}"
+                                    Command="{Binding EliminarCategoriaCommand}"
+                                    Foreground="{StaticResource BrochaError}"
+                                    Content="Eliminar"
+                                    Visibility="{Binding PuedeEliminar, Converter={StaticResource BoolAVisible}}" />
+                        </StackPanel>
+
+                        <DataGrid Grid.Row="1" Style="{StaticResource GrillaDatos}"
+                                  ItemsSource="{Binding Categorias}"
+                                  SelectedItem="{Binding CategoriaSeleccionada}">
+                            <DataGrid.InputBindings>
+                                <MouseBinding MouseAction="LeftDoubleClick"
+                                              Command="{Binding EditarCategoriaCommand}" />
+                            </DataGrid.InputBindings>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="2*" />
+                                <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="3*" />
+                                <DataGridTemplateColumn Header="Estado" Width="110">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource EstiloEstado}">
+                                                <TextBlock Style="{StaticResource EstiloTextoEstado}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+
+                <!-- ══ Marcas ══════════════════════════════════════════════ -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="TagMultipleOutline" VerticalAlignment="Center" />
+                            <TextBlock Text="Marcas" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </TabItem.Header>
+
+                    <Grid Margin="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                            <Button Style="{StaticResource BotonPrincipal}" Margin="0,0,8,0"
+                                    Command="{Binding NuevaMarcaCommand}"
+                                    Visibility="{Binding PuedeCrear, Converter={StaticResource BoolAVisible}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Plus" VerticalAlignment="Center" />
+                                    <TextBlock Text="NUEVA" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
+                                    Command="{Binding EditarMarcaCommand}" Content="Editar" />
+
+                            <Button Style="{StaticResource BotonTexto}"
+                                    Command="{Binding EliminarMarcaCommand}"
+                                    Foreground="{StaticResource BrochaError}" Content="Eliminar"
+                                    Visibility="{Binding PuedeEliminar, Converter={StaticResource BoolAVisible}}" />
+                        </StackPanel>
+
+                        <DataGrid Grid.Row="1" Style="{StaticResource GrillaDatos}"
+                                  ItemsSource="{Binding Marcas}"
+                                  SelectedItem="{Binding MarcaSeleccionada}">
+                            <DataGrid.InputBindings>
+                                <MouseBinding MouseAction="LeftDoubleClick"
+                                              Command="{Binding EditarMarcaCommand}" />
+                            </DataGrid.InputBindings>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="2*" />
+                                <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="3*" />
+                                <DataGridTemplateColumn Header="Estado" Width="110">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource EstiloEstado}">
+                                                <TextBlock Style="{StaticResource EstiloTextoEstado}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+
+                <!-- ══ Unidades de medida ══════════════════════════════════ -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="RulerSquare" VerticalAlignment="Center" />
+                            <TextBlock Text="Unidades" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </TabItem.Header>
+
+                    <Grid Margin="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                            <Button Style="{StaticResource BotonPrincipal}" Margin="0,0,8,0"
+                                    Command="{Binding NuevaUnidadCommand}"
+                                    Visibility="{Binding PuedeCrear, Converter={StaticResource BoolAVisible}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Plus" VerticalAlignment="Center" />
+                                    <TextBlock Text="NUEVA" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
+                                    Command="{Binding EditarUnidadCommand}" Content="Editar" />
+
+                            <Button Style="{StaticResource BotonTexto}"
+                                    Command="{Binding EliminarUnidadCommand}"
+                                    Foreground="{StaticResource BrochaError}" Content="Eliminar"
+                                    Visibility="{Binding PuedeEliminar, Converter={StaticResource BoolAVisible}}" />
+                        </StackPanel>
+
+                        <DataGrid Grid.Row="1" Style="{StaticResource GrillaDatos}"
+                                  ItemsSource="{Binding Unidades}"
+                                  SelectedItem="{Binding UnidadSeleccionada}">
+                            <DataGrid.InputBindings>
+                                <MouseBinding MouseAction="LeftDoubleClick"
+                                              Command="{Binding EditarUnidadCommand}" />
+                            </DataGrid.InputBindings>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="2*" />
+                                <DataGridTextColumn Header="Abreviatura" Binding="{Binding Abreviatura}" Width="130" />
+                                <DataGridTextColumn Header="Descripción" Binding="{Binding Descripcion}" Width="3*" />
+                                <DataGridTemplateColumn Header="Estado" Width="110">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource EstiloEstado}">
+                                                <TextBlock Style="{StaticResource EstiloTextoEstado}" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

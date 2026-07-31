@@ -1,0 +1,152 @@
+<UserControl x:Class="Papeleria.App.Views.Dialogos.ActualizacionDialogoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
+             d:DataContext="{d:DesignInstance vm:ActualizacionDialogoVistaModelo}"
+             mc:Ignorable="d"
+             Width="520">
+
+    <StackPanel Margin="24,22,24,18">
+        <StackPanel Orientation="Horizontal">
+            <Border Width="46" Height="46" CornerRadius="12"
+                    Background="{DynamicResource MaterialDesign.Brush.Primary.Light}">
+                <materialDesign:PackIcon Kind="CloudDownloadOutline"
+                                         Width="26" Height="26"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary.Light.Foreground}" />
+            </Border>
+
+            <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Titulo}"
+                           Style="{StaticResource MaterialDesignHeadline6TextBlock}" />
+                <TextBlock Text="{Binding FechaPublicacion}"
+                           Style="{StaticResource TextoTenue}" FontSize="11.5" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Comparación de versiones -->
+        <Border CornerRadius="10" Padding="16,13" Margin="0,18,0,0"
+                Background="{DynamicResource MaterialDesignChipBackground}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Versión instalada" Style="{StaticResource EtiquetaCampo}" />
+                    <TextBlock Text="{Binding VersionActual}" FontSize="17" Opacity="0.65" />
+                </StackPanel>
+
+                <materialDesign:PackIcon Grid.Column="1" Kind="ArrowRightBold"
+                                         Width="22" Height="22" Margin="16,0"
+                                         VerticalAlignment="Center" Opacity="0.4" />
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Versión nueva" Style="{StaticResource EtiquetaCampo}" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding VersionNueva}" FontSize="17" FontWeight="Bold"
+                                   Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
+                        <TextBlock Text="{Binding Actualizacion.TamanoTexto}"
+                                   Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                   VerticalAlignment="Bottom" Margin="8,0,0,3" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Notas de la versión -->
+        <StackPanel Margin="0,16,0,0" Visibility="{Binding TieneNotas, Converter={StaticResource BoolAVisible}}">
+            <TextBlock Text="Novedades" Style="{StaticResource TituloSeccion}" Margin="0,0,0,6" />
+
+            <ScrollViewer MaxHeight="170" VerticalScrollBarVisibility="Auto">
+                <TextBlock Text="{Binding Actualizacion.Notas}"
+                           TextWrapping="Wrap" FontSize="12.5" LineHeight="19" Opacity="0.85" />
+            </ScrollViewer>
+        </StackPanel>
+
+        <!-- Progreso de la descarga -->
+        <StackPanel Margin="0,18,0,0"
+                    Visibility="{Binding TextoProgreso, Converter={StaticResource TextoAVisible}}">
+            <TextBlock Text="{Binding TextoProgreso}" FontSize="12.5" Margin="0,0,0,7" />
+
+            <ProgressBar Height="6" Minimum="0" Maximum="100"
+                         Value="{Binding Progreso, Mode=OneWay}"
+                         IsIndeterminate="{Binding ListaParaReiniciar}" />
+        </StackPanel>
+
+        <!-- Aviso de reinicio -->
+        <Border Background="{StaticResource BrochaExitoSuave}"
+                CornerRadius="8" Padding="13,10" Margin="0,16,0,0"
+                Visibility="{Binding ListaParaReiniciar, Converter={StaticResource BoolAVisible}}">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Kind="CheckCircleOutline"
+                                         Foreground="{StaticResource BrochaExito}"
+                                         VerticalAlignment="Top" Margin="0,1,10,0" />
+                <TextBlock Text="La actualización quedó instalada. Reinicie el programa para empezar a usarla; sus datos no se han tocado."
+                           Foreground="{StaticResource BrochaExito}"
+                           TextWrapping="Wrap" MaxWidth="390" FontSize="12.5" />
+            </StackPanel>
+        </Border>
+
+        <Border Background="{StaticResource BrochaErrorSuave}"
+                CornerRadius="8" Padding="13,10" Margin="0,16,0,0"
+                Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
+            <TextBlock Text="{Binding MensajeError}"
+                       Foreground="{StaticResource BrochaError}"
+                       TextWrapping="Wrap" MaxWidth="440" FontSize="12.5" />
+        </Border>
+
+        <!-- Acciones -->
+        <Grid Margin="0,20,0,0">
+            <Button Style="{StaticResource BotonTexto}"
+                    HorizontalAlignment="Left"
+                    Content="Omitir esta versión"
+                    Command="{Binding OmitirVersionCommand}"
+                    Visibility="{Binding PuedeCerrar, Converter={StaticResource BoolAVisible}}"
+                    ToolTip="No volver a avisar de esta versión concreta" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource BotonTexto}" Margin="0,0,8,0"
+                        Command="{Binding CancelarCommand}"
+                        Visibility="{Binding ListaParaReiniciar, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="Ahora no" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Descargando}" Value="True">
+                                        <Setter Property="Text" Value="Cancelar descarga" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Button>
+
+                <Button Style="{StaticResource BotonPrincipal}" MinWidth="170"
+                        Command="{Binding ActualizarAhoraCommand}"
+                        IsEnabled="{Binding Descargando, Converter={StaticResource InvertirBool}}"
+                        Visibility="{Binding ListaParaReiniciar, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Download" VerticalAlignment="Center" />
+                        <TextBlock Text="ACTUALIZAR AHORA" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource BotonPrincipal}" MinWidth="190"
+                        Command="{Binding ReiniciarCommand}"
+                        Visibility="{Binding ListaParaReiniciar, Converter={StaticResource BoolAVisible}}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Restart" VerticalAlignment="Center" />
+                        <TextBlock Text="REINICIAR AHORA" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</UserControl>

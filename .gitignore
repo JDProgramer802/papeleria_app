@@ -1,0 +1,24 @@
+# Compilación
+bin/
+obj/
+publish/
+*.user
+*.suo
+
+# Visual Studio
+.vs/
+*.userprefs
+
+# Resultados de publicación
+*.publishsettings
+
+# Bases de datos locales generadas durante pruebas
+*.db
+*.db-shm
+*.db-wal
+
+# Archivos temporales
+*.tmp
+
+# Ajustes locales del entorno de trabajo, no del proyecto
+.claude/

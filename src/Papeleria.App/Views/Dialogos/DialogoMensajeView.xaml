@@ -1,0 +1,82 @@
+<UserControl x:Class="Papeleria.App.Views.Dialogos.DialogoMensajeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
+             d:DataContext="{d:DesignInstance vm:DialogoMensajeVistaModelo}"
+             mc:Ignorable="d"
+             MaxWidth="480">
+
+    <Grid Margin="24,22,24,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <materialDesign:PackIcon Kind="{Binding Icono}"
+                                     Width="30" Height="30"
+                                     VerticalAlignment="Center"
+                                     Margin="0,0,14,0">
+                <materialDesign:PackIcon.Style>
+                    <Style TargetType="materialDesign:PackIcon">
+                        <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding EsDestructivo}" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource BrochaError}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </materialDesign:PackIcon.Style>
+            </materialDesign:PackIcon>
+
+            <TextBlock Text="{Binding Titulo}"
+                       Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="1"
+                   Text="{Binding Mensaje}"
+                   Margin="44,14,0,20"
+                   TextWrapping="Wrap"
+                   LineHeight="21"
+                   Style="{StaticResource MaterialDesignBody1TextBlock}" />
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="{Binding TextoCancelar}"
+                    Style="{StaticResource BotonTexto}"
+                    Margin="0,0,8,0"
+                    IsCancel="True"
+                    Visibility="{Binding MostrarCancelar, Converter={StaticResource BoolAVisible}}"
+                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                <Button.CommandParameter>
+                    <sys:Boolean>False</sys:Boolean>
+                </Button.CommandParameter>
+            </Button>
+
+            <Button IsDefault="True"
+                    Content="{Binding TextoAceptar}"
+                    Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}">
+                <Button.CommandParameter>
+                    <sys:Boolean>True</sys:Boolean>
+                </Button.CommandParameter>
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource BotonPrincipal}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding EsDestructivo}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BrochaError}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource BrochaError}" />
+                                <Setter Property="Foreground" Value="White" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

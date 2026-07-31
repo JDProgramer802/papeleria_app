@@ -1,0 +1,256 @@
+# Sistema de Gestión de Papelería
+
+Aplicación de escritorio para Windows que administra por completo una papelería:
+inventario, punto de venta, compras, caja, kardex, terceros, reportes y respaldos.
+Funciona **100 % sin conexión a Internet** sobre una base de datos SQLite local.
+
+- **Framework:** .NET 8 · WPF · MVVM
+- **Datos:** SQLite + Entity Framework Core 8 (migraciones automáticas)
+- **Interfaz:** Material Design (tema claro y oscuro)
+- **Moneda:** peso colombiano (COP), IVA configurable
+
+---
+
+## Puesta en marcha
+
+### Abrir en Visual Studio 2022
+
+1. Abrir `Papeleria.sln`.
+2. Proyecto de inicio: **Papeleria.App**.
+3. F5.
+
+No hace falta configurar nada más: la base de datos se crea sola en el primer arranque.
+
+### Compilar y ejecutar desde consola
+
+```bash
+dotnet build Papeleria.sln -c Release
+```
+
+```bash
+dotnet run --project src/Papeleria.App/Papeleria.App.csproj
+```
+
+### Generar el ejecutable distribuible
+
+Produce un **único `.exe` autónomo** (~85 MB) que no requiere .NET instalado en el
+equipo de destino:
+
+```bash
+dotnet publish src/Papeleria.App/Papeleria.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -o publish/win-x64
+```
+
+El resultado queda en `publish/win-x64/Papeleria.exe`. Se puede copiar a cualquier
+equipo con Windows 10/11 de 64 bits y ejecutarlo directamente.
+
+### Primer acceso
+
+| Usuario | Contraseña  |
+|---------|-------------|
+| `admin` | `Admin123*` |
+
+La pantalla de login muestra estas credenciales mientras no se hayan cambiado.
+**Cámbielas desde _Usuarios → Mi contraseña_ en cuanto entre por primera vez.**
+
+---
+
+## Dónde viven los datos
+
+Todo se guarda bajo `%LOCALAPPDATA%\PapeleriaApp`, fuera de la carpeta del programa,
+para que la aplicación funcione sin permisos de administrador y actualizar el `.exe`
+nunca borre información:
+
+```
+%LOCALAPPDATA%\PapeleriaApp\
+├── Data\papeleria.db      Base de datos SQLite
+├── Backups\               Copias de seguridad
+├── Images\                Imágenes de productos y logo
+├── Exportaciones\         Reportes exportados
+├── Logs\                  Registro de errores (30 días)
+└── Temp\                  Facturas y etiquetas generadas
+```
+
+---
+
+## Arquitectura
+
+Cuatro proyectos con dependencias en una sola dirección:
+
+```
+Papeleria.Domain  ←  Papeleria.Data  ←  Papeleria.Business  ←  Papeleria.App
+```
+
+| Proyecto | Responsabilidad |
+|---|---|
+| **Papeleria.Domain** | Entidades, enumerados, excepciones de negocio y constantes. No depende de nada. |
+| **Papeleria.Data** | `AppDbContext`, configuraciones EF, migraciones, unidad de trabajo, repositorios y siembra de datos maestros. |
+| **Papeleria.Business** | Servicios de negocio (ventas, compras, caja, kardex, reportes, respaldos…), DTOs y seguridad. |
+| **Papeleria.App** | WPF: vistas, modelos de vista, controles, convertidores y arranque con inyección de dependencias. |
+
+La navegación es **ViewModel-first**: se navega por clave de módulo, el contenedor
+resuelve el modelo de vista y un `DataTemplate` (`Resources/PlantillasDatos.xaml`)
+elige la vista. Los modelos de vista no conocen ningún tipo de WPF.
+
+---
+
+## Módulos
+
+| Módulo | Qué hace |
+|---|---|
+| **Dashboard** | Nueve indicadores, gráfico comparativo de 12 meses, productos más vendidos, movimientos recientes y alertas accionables. |
+| **Punto de venta** | Facturación con lector de código de barras, carrito editable, descuentos, diálogo de cobro con cambio e impresión del recibo. |
+| **Productos** | CRUD completo, búsqueda paginada, duplicado, generación de código de barras EAN-13 e impresión de etiquetas. |
+| **Inventario** | Existencias con semáforo, entradas, salidas, ajustes por conteo y transferencias de ubicación. |
+| **Compras** | Historial y registro de compras: actualiza existencias, recalcula el costo promedio y escribe en el kardex. |
+| **Caja** | Apertura con base, ingresos, egresos, arqueo comparando esperado contra contado, cierre e historial de turnos. |
+| **Kardex** | Consulta filtrable del histórico de movimientos, con exportación. |
+| **Clientes / Proveedores** | Directorios con ficha e historial de documentos. |
+| **Catálogos** | Categorías, marcas y unidades de medida. |
+| **Reportes** | Once informes con vista previa y exportación a Excel, PDF y CSV. |
+| **Configuración** | Datos de empresa, logo, impuestos, moneda, numeración de documentos, tema y copias de seguridad. |
+| **Usuarios** | Usuarios, roles y matriz de permisos editable por módulo. |
+
+---
+
+## Reglas de negocio garantizadas
+
+- **El kardex es inmutable.** Además de bloquearlo en el código, la migración instala
+  disparadores en SQLite que rechazan `UPDATE` y `DELETE` sobre `MovimientosKardex`,
+  de modo que ninguna herramienta externa pueda alterar el histórico.
+- **No se vende sin existencias.** El carrito completo se valida antes de tocar nada,
+  para que el inventario nunca quede parcialmente descontado.
+- **No se factura con la caja cerrada.** El dinero siempre tiene un turno donde registrarse.
+- **Nada se pierde.** Productos, clientes, proveedores y usuarios con movimientos se
+  desactivan en lugar de borrarse. Las ventas y compras se anulan, nunca se eliminan.
+- **Todo es transaccional.** Una venta toca factura, detalle, existencias, kardex, caja
+  y consecutivo dentro de una sola transacción: o se guarda todo, o no se guarda nada.
+- **Solo el administrador anula facturas**, porque mueve inventario y dinero.
+
+### Cómo se calculan los importes
+
+Sobre cada línea se aplica primero el descuento y sobre la base resultante se liquida
+el IVA, que es el orden de la facturación colombiana:
+
+```
+subtotal      = cantidad × valor unitario
+descuento     = subtotal × % descuento
+base gravable = subtotal − descuento
+IVA           = base gravable × % IVA
+total         = base gravable + IVA
+```
+
+El costo de compra se capitaliza **sin IVA** y se mezcla con el inventario existente
+mediante promedio ponderado. La utilidad de una venta es `base gravable − costo de la
+mercancía vendida`, con el costo congelado en el momento de facturar.
+
+---
+
+## Decisiones técnicas que conviene conocer
+
+**Los gráficos son controles WPF propios** (`Controls/GraficoBarras.cs`). Se descartó
+LiveCharts2 porque arrastra SkiaSharp y OpenTK compilados para .NET Framework 4.6.1:
+binarios nativos y avisos `NU1701` en un ejecutable que debe ser autónomo y funcionar
+sin conexión. El control propio dibuja ejes, rejilla, etiquetas, tooltips y animación
+de entrada sin ninguna dependencia nativa.
+
+**Los códigos de barras no usan System.Drawing.** ZXing genera la matriz y
+`Common/CodificadorPng.cs` la codifica a PNG con un codificador propio de ~120 líneas,
+para que el mismo byte array sirva igual en pantalla (WPF) y en los PDF (QuestPDF).
+
+**Los decimales se guardan como REAL.** SQLite no tiene tipo decimal nativo; EF los
+guardaría como TEXT y dejaría de traducir `SUM` y `ORDER BY` a SQL. `AppDbContext`
+mapea globalmente los `decimal` a `double` en el proveedor y la capa de negocio
+redondea con `Dinero.Redondear` antes de persistir. Donde SQLite sigue sin poder
+ordenar (agregaciones del ranking de ventas) la ordenación se resuelve en `double`
+y la conversión a `decimal` se hace ya en memoria.
+
+**Material Design 2.** `App.xaml` carga `MaterialDesign2.Defaults.xaml`, que es el
+juego de estilos que define los nombres clásicos (`MaterialDesignRaisedButton`,
+`MaterialDesignOutlinedTextBox`…) sobre los que se construye `Resources/Estilos.xaml`.
+
+---
+
+## Migraciones
+
+La aplicación aplica las migraciones pendientes en cada arranque. Para añadir una nueva
+tras cambiar el modelo:
+
+```bash
+dotnet dotnet-ef migrations add NombreDeLaMigracion --project src/Papeleria.Data --startup-project src/Papeleria.Data
+```
+
+La herramienta `dotnet-ef` ya está fijada en `.config/dotnet-tools.json`; si es la
+primera vez en el equipo, restáurela con:
+
+```bash
+dotnet tool restore
+```
+
+---
+
+## Publicar una actualización
+
+La aplicación se actualiza sola desde las publicaciones («releases») de un repositorio
+de GitHub. El cliente no tiene que descargar nada a mano.
+
+### Configuración inicial (una sola vez)
+
+En la aplicación: **Configuración → Actualizaciones**, escribir el repositorio con el
+formato `usuario/repositorio` (también se acepta pegar la URL completa de GitHub) y
+guardar. El repositorio debe ser **público**, porque la comprobación se hace sin
+credenciales.
+
+### Cada vez que quiera publicar una versión nueva
+
+1. **Subir el número de versión** en `src/Papeleria.App/Papeleria.App.csproj`:
+
+   ```xml
+   <Version>1.0.1</Version>
+   <AssemblyVersion>1.0.1.0</AssemblyVersion>
+   <FileVersion>1.0.1.0</FileVersion>
+   ```
+
+   Este paso no es opcional: la app compara la versión del ensamblado con la etiqueta
+   de la release, y si no sube el número no detectará nada.
+
+2. **Generar el ejecutable** con el comando de publicación de más arriba.
+
+3. **Crear la release en GitHub** con la etiqueta `v1.0.1` (vale `1.0.1`, `v1.0.1` o
+   `version-1.0.1`) y **adjuntar `Papeleria.exe`** como archivo de la release.
+
+Al abrir el programa, el cliente verá el aviso de versión nueva con sus notas, podrá
+instalarla con un clic y reiniciar. También puede buscarlas a mano desde
+**Configuración → Actualizaciones → Buscar ahora**.
+
+### Cómo se comporta
+
+- **Comprueba una vez al día como máximo**, en segundo plano y después de abrir la
+  pantalla principal: si no hay Internet o GitHub no responde, no se muestra nada y el
+  programa funciona con normalidad.
+- **Verifica la descarga** contra la huella SHA-256 que publica GitHub; un archivo
+  incompleto o alterado se descarta sin instalarse.
+- **Conserva el ejecutable anterior** con la extensión `.anterior` hasta el siguiente
+  arranque, por si hubiera que volver atrás.
+- **No toca los datos.** La base de datos, los respaldos y la configuración viven en
+  `%LOCALAPPDATA%`, así que una actualización nunca puede perderlos.
+- El usuario puede pulsar **«Omitir esta versión»** para que no se le vuelva a avisar
+  de esa versión concreta.
+
+### Limitaciones
+
+- Solo funciona sobre el **ejecutable publicado**. Si se ejecuta la compilación de
+  desarrollo, la pantalla lo indica y desactiva la instalación automática.
+- Si el programa está en `C:\Program Files`, Windows no deja sustituirlo sin permisos
+  de administrador. Se recomienda instalarlo en una carpeta propia como `C:\Papeleria`.
+
+---
+
+## Copias de seguridad
+
+- Se crean con la API de respaldo en línea de SQLite, así que **no hace falta cerrar
+  la aplicación** para generarlas.
+- Automáticas al cerrar el programa, con frecuencia y retención configurables.
+- Manuales desde el icono de la barra superior o desde _Configuración → Copias de seguridad_.
+- Al restaurar se guarda primero una copia del estado vigente, se valida que el archivo
+  sea realmente una base de datos del sistema y la aplicación se cierra para que el
+  siguiente arranque trabaje con los datos restaurados.

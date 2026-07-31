@@ -1,0 +1,151 @@
+<UserControl x:Class="Papeleria.App.Views.Dialogos.CierreCajaDialogoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
+             d:DataContext="{d:DesignInstance vm:CierreCajaDialogoVistaModelo}"
+             mc:Ignorable="d"
+             Width="520">
+
+    <StackPanel Margin="24,22,24,18">
+        <TextBlock Text="{Binding Titulo}" Style="{StaticResource MaterialDesignHeadline6TextBlock}" />
+        <TextBlock Text="{Binding Subtitulo}" Style="{StaticResource SubtituloPagina}"
+                   TextWrapping="Wrap" Margin="0,4,0,16" />
+
+        <!-- Detalle del arqueo calculado por el sistema -->
+        <Border CornerRadius="8" Padding="16,12"
+                Background="{DynamicResource MaterialDesignChipBackground}"
+                Margin="0,0,0,16">
+            <StackPanel>
+                <StackPanel.Resources>
+                    <Style TargetType="Grid">
+                        <Setter Property="Margin" Value="0,0,0,6" />
+                    </Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="FontSize" Value="12.5" />
+                    </Style>
+                </StackPanel.Resources>
+
+                <Grid>
+                    <TextBlock Text="Base inicial" />
+                    <TextBlock Text="{Binding Arqueo.MontoInicial, Converter={StaticResource Moneda}}"
+                               HorizontalAlignment="Right" />
+                </Grid>
+                <Grid>
+                    <TextBlock Text="Ventas en efectivo" />
+                    <TextBlock Text="{Binding Arqueo.VentasEfectivo, Converter={StaticResource Moneda}}"
+                               HorizontalAlignment="Right" />
+                </Grid>
+                <Grid>
+                    <TextBlock Text="Otros ingresos" />
+                    <TextBlock Text="{Binding Arqueo.Ingresos, Converter={StaticResource Moneda}}"
+                               HorizontalAlignment="Right" />
+                </Grid>
+                <Grid>
+                    <TextBlock Text="Egresos" />
+                    <TextBlock HorizontalAlignment="Right"
+                               Foreground="{StaticResource BrochaError}">
+                        <Run Text="-" />
+                        <Run Text="{Binding Arqueo.Egresos, Converter={StaticResource Moneda}, Mode=OneWay}" />
+                    </TextBlock>
+                </Grid>
+
+                <Separator Style="{StaticResource SeparadorHorizontal}" Margin="0,4" />
+
+                <Grid>
+                    <TextBlock Text="Efectivo esperado" FontWeight="Bold" FontSize="14" />
+                    <TextBlock Text="{Binding Arqueo.MontoEsperado, Converter={StaticResource Moneda}}"
+                               HorizontalAlignment="Right" FontWeight="Bold" FontSize="14" />
+                </Grid>
+
+                <Grid Margin="0,8,0,0">
+                    <TextBlock Text="Ventas por otros medios (no afectan el cajón)"
+                               Opacity="0.65" FontSize="11.5" />
+                    <TextBlock Text="{Binding Arqueo.VentasOtrosMedios, Converter={StaticResource Moneda}}"
+                               HorizontalAlignment="Right" Opacity="0.65" FontSize="11.5" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <TextBox Text="{Binding MontoContado, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                 Style="{StaticResource CampoNumerico}"
+                 FontSize="20" FontWeight="SemiBold"
+                 materialDesign:HintAssist.Hint="Efectivo contado en el cajón" />
+
+        <!-- Diferencia del arqueo -->
+        <Border CornerRadius="8" Padding="14,11" Margin="0,0,0,14">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Background" Value="{StaticResource BrochaExitoSuave}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HayDescuadre}" Value="True">
+                            <Setter Property="Background" Value="{StaticResource BrochaAdvertenciaSuave}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <Grid>
+                <TextBlock Text="{Binding TextoDiferencia}" VerticalAlignment="Center"
+                           FontWeight="SemiBold">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource BrochaExito}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HayDescuadre}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource BrochaAdvertencia}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <TextBlock Text="{Binding Diferencia, Converter={StaticResource Moneda}}"
+                           HorizontalAlignment="Right" VerticalAlignment="Center"
+                           FontSize="18" FontWeight="Bold">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{StaticResource BrochaExito}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HayDescuadre}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource BrochaAdvertencia}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </Border>
+
+        <TextBox Text="{Binding Observaciones, UpdateSourceTrigger=PropertyChanged}"
+                 Style="{StaticResource CampoTexto}"
+                 AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70"
+                 VerticalContentAlignment="Top" MaxLength="500"
+                 materialDesign:HintAssist.Hint="Observaciones del cierre (opcional)" />
+
+        <Border Background="{StaticResource BrochaErrorSuave}"
+                CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
+                Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
+            <TextBlock Text="{Binding MensajeError}"
+                       Foreground="{StaticResource BrochaError}"
+                       TextWrapping="Wrap" FontSize="12.5" />
+        </Border>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Cancelar" Style="{StaticResource BotonTexto}"
+                    Margin="0,0,8,0" IsCancel="True"
+                    Command="{Binding CancelarCommand}" />
+
+            <Button Style="{StaticResource BotonPrincipal}"
+                    MinWidth="150" IsDefault="True"
+                    Command="{Binding GuardarCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="LockCheckOutline" VerticalAlignment="Center" />
+                    <TextBlock Text="CERRAR CAJA" Margin="8,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </StackPanel>
+</UserControl>
