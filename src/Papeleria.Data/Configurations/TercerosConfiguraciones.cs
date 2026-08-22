@@ -44,6 +44,7 @@ public class ClienteConfiguration : IEntityTypeConfiguration<Cliente>
         builder.Property(c => c.Ciudad).HasMaxLength(100);
         builder.Property(c => c.Observaciones).HasMaxLength(600);
         builder.Property(c => c.Activo).HasDefaultValue(true);
+        builder.Property(c => c.LimiteCredito).HasDefaultValue(0d);
 
         builder.HasIndex(c => c.NumeroDocumento).IsUnique().HasDatabaseName("IX_Clientes_NumeroDocumento");
         builder.HasIndex(c => c.Nombre).HasDatabaseName("IX_Clientes_Nombre");

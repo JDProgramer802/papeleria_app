@@ -12,11 +12,14 @@ namespace Papeleria.Business.Services;
 public class ServicioReportes : IServicioReportes
 {
     private readonly IUnidadDeTrabajoFactory _fabrica;
+    private readonly IServicioCartera _cartera;
     private readonly IContextoSesion _sesion;
 
-    public ServicioReportes(IUnidadDeTrabajoFactory fabrica, IContextoSesion sesion)
+    public ServicioReportes(
+        IUnidadDeTrabajoFactory fabrica, IServicioCartera cartera, IContextoSesion sesion)
     {
         _fabrica = fabrica;
+        _cartera = cartera;
         _sesion = sesion;
     }
 
@@ -43,7 +46,9 @@ public class ServicioReportes : IServicioReportes
         new(TipoReporte.Caja, "Caja",
             "Sesiones de caja con su arqueo y diferencias.", "CashMultiple", true),
         new(TipoReporte.Kardex, "Kardex",
-            "Movimientos de inventario registrados en el periodo.", "SwapHorizontal", true)
+            "Movimientos de inventario registrados en el periodo.", "SwapHorizontal", true),
+        new(TipoReporte.Cartera, "Cartera por cobrar",
+            "Clientes que deben, con la antigüedad de su deuda.", "AccountCashOutline", false)
     };
 
     public async Task<ReporteTabular> GenerarAsync(ParametrosReporte parametros, CancellationToken ct = default)
@@ -89,6 +94,7 @@ public class ServicioReportes : IServicioReportes
             TipoReporte.Clientes => GenerarClientesAsync(parametros, ct),
             TipoReporte.Proveedores => GenerarProveedoresAsync(parametros, ct),
             TipoReporte.Caja => GenerarCajaAsync(parametros, ct),
+            TipoReporte.Cartera => GenerarCarteraAsync(parametros, ct),
             _ => GenerarKardexAsync(parametros, ct)
         };
     }
@@ -571,6 +577,49 @@ public class ServicioReportes : IServicioReportes
     }
 
     // ── Terceros ────────────────────────────────────────────────────────────
+
+    private async Task<ReporteTabular> GenerarCarteraAsync(ParametrosReporte parametros, CancellationToken ct)
+    {
+        // Se reutiliza el cálculo del módulo de cartera para que el informe y la
+        // pantalla no puedan dar cifras distintas.
+        var pagina = await _cartera.BuscarAsync(new FiltroCartera
+        {
+            SoloConSaldo = true,
+            Pagina = 1,
+            TamanoPagina = parametros.LimiteFilas + 1
+        }, ct).ConfigureAwait(false);
+
+        var filas = pagina.Elementos
+            .OrderByDescending(c => c.DiasDeMora)
+            .ThenByDescending(c => c.Saldo)
+            .Select(c => new object?[]
+            {
+                c.Nombre, c.NumeroDocumento ?? "—", c.Telefono ?? "—",
+                c.FacturasPendientes, c.DeudaMasAntigua, c.DiasDeMora,
+                c.LimiteCredito, c.Saldo
+            })
+            .ToList();
+
+        return new ReporteTabular
+        {
+            Titulo = Definicion(TipoReporte.Cartera).Nombre,
+            Subtitulo = "Ordenada por antigüedad: primero a quién hay que cobrar",
+            GeneradoPor = _sesion.Usuario?.NombreCompleto ?? string.Empty,
+            Columnas = new[]
+            {
+                new ColumnaReporte { Titulo = "Cliente", Ancho = 2.8f },
+                new ColumnaReporte { Titulo = "Documento", Ancho = 1.4f },
+                new ColumnaReporte { Titulo = "Teléfono", Ancho = 1.4f },
+                new ColumnaReporte { Titulo = "Facturas", Tipo = TipoColumna.Entero, Ancho = 0.9f, Totalizar = true },
+                new ColumnaReporte { Titulo = "Deuda desde", Tipo = TipoColumna.Fecha, Ancho = 1.2f },
+                new ColumnaReporte { Titulo = "Días", Tipo = TipoColumna.Entero, Ancho = 0.7f },
+                new ColumnaReporte { Titulo = "Cupo", Tipo = TipoColumna.Moneda, Ancho = 1.3f },
+                new ColumnaReporte { Titulo = "Debe", Tipo = TipoColumna.Moneda, Ancho = 1.4f, Totalizar = true }
+            },
+            Filas = filas,
+            MensajeVacio = "Ningún cliente tiene deudas pendientes."
+        };
+    }
 
     private async Task<ReporteTabular> GenerarClientesAsync(ParametrosReporte parametros, CancellationToken ct)
     {

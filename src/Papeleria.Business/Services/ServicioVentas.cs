@@ -42,6 +42,50 @@ public class ServicioVentas : IServicioVentas
     /// Consultar facturas se autoriza por el punto de venta o por el historial: el
     /// administrador puede retirar uno de los dos permisos sin cerrar el otro módulo.
     /// </summary>
+    /// <summary>
+    /// Impide fiar por encima del cupo. Sin este control la deuda crece sin tope y el
+    /// negocio se entera cuando ya no hay cómo cobrar.
+    /// </summary>
+    private static async Task ComprobarCupoAsync(
+        IUnidadDeTrabajo unidad, Cliente cliente, decimal total, CancellationToken ct)
+    {
+        if (cliente.EsProtegido)
+        {
+            throw new NegocioException(
+                "No se puede fiar al consumidor final. Registre al cliente para venderle a crédito.");
+        }
+
+        if (cliente.LimiteCredito <= 0)
+        {
+            throw new NegocioException(
+                $"{cliente.Nombre} no tiene cupo de crédito asignado. " +
+                "Edite su ficha para autorizarle un cupo.");
+        }
+
+        var fiado = await unidad.Contexto.Ventas
+            .AsNoTracking()
+            .Where(v => v.ClienteId == cliente.Id
+                        && v.MetodoPago == MetodoPago.Credito
+                        && v.Estado == EstadoVenta.Completada)
+            .SumAsync(v => (double?)v.Total, ct).ConfigureAwait(false) ?? 0;
+
+        var abonado = await unidad.Contexto.AbonosCliente
+            .AsNoTracking()
+            .Where(a => a.ClienteId == cliente.Id && !a.Anulado)
+            .SumAsync(a => (double?)a.Monto, ct).ConfigureAwait(false) ?? 0;
+
+        var saldo = Dinero.Redondear(fiado - abonado);
+        var disponible = cliente.LimiteCredito - saldo;
+
+        if (total > disponible)
+        {
+            throw new NegocioException(
+                $"{cliente.Nombre} debe {Formatos.Moneda(saldo)} y su cupo es " +
+                $"{Formatos.Moneda(cliente.LimiteCredito)}. " +
+                $"Sólo se le puede fiar hasta {Formatos.Moneda(Math.Max(disponible, 0))}.");
+        }
+    }
+
     private void ExigirLecturaDeVentas()
     {
         if (_sesion.Puede(Modulos.HistorialVentas))
@@ -261,6 +305,11 @@ public class ServicioVentas : IServicioVentas
                           .AsNoTracking()
                           .FirstOrDefaultAsync(c => c.Id == solicitud.ClienteId, ct).ConfigureAwait(false)
                       ?? throw new NegocioException("Seleccione un cliente válido.");
+
+        if (solicitud.MetodoPago == MetodoPago.Credito)
+        {
+            await ComprobarCupoAsync(unidad, cliente, solicitud.Total, ct).ConfigureAwait(false);
+        }
 
         var ventaId = await unidad.EjecutarEnTransaccionAsync(async token =>
         {

@@ -46,10 +46,18 @@ public class Cliente : EntidadBase, IActivable
 
     public string? Observaciones { get; set; }
 
+    /// <summary>
+    /// Cupo máximo que se le puede fiar. En cero el cliente no acepta crédito,
+    /// que es lo que conviene para el mostrador y el consumidor final.
+    /// </summary>
+    public decimal LimiteCredito { get; set; }
+
     public bool Activo { get; set; } = true;
 
     /// <summary>El «Consumidor final» no puede eliminarse: es el cliente por defecto del POS.</summary>
     public bool EsProtegido { get; set; }
 
     public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
+
+    public ICollection<AbonoCliente> Abonos { get; set; } = new List<AbonoCliente>();
 }

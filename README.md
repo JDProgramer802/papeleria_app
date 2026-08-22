@@ -102,12 +102,13 @@ elige la vista. Los modelos de vista no conocen ningún tipo de WPF.
 | **Productos** | CRUD completo, búsqueda paginada, duplicado, generación de código de barras EAN-13 e impresión de etiquetas. El botón **Comprar** abre el formulario de compra con el artículo ya cargado, para reponer existencias sin salir del catálogo. |
 | **Inventario** | Existencias con semáforo, entradas, salidas, ajustes por conteo y transferencias de ubicación. |
 | **Compras** | Historial y registro de compras: actualiza existencias, recalcula el costo promedio y escribe en el kardex. |
+| **Cartera** | Cuentas por cobrar de las ventas a crédito: quién debe y desde cuándo, cupo por cliente, estado de cuenta con las facturas fiadas y lo pendiente de cada una, registro y anulación de abonos, y reparto de la deuda por antigüedad. |
 | **Caja** | Apertura con base, ingresos, egresos, arqueo comparando esperado contra contado, cierre e historial de turnos. |
 | **Historial de ventas** | Registro de todas las facturas emitidas: rangos rápidos (hoy, ayer, semana, mes) o fechas a medida, búsqueda por número, cliente o método de pago, resumen del periodo con importe, ticket promedio y utilidad, detalle línea a línea, reimpresión del recibo o de la factura carta, anulación y exportación. |
 | **Kardex** | Consulta filtrable del histórico de movimientos, con exportación. |
 | **Clientes / Proveedores** | Directorios con ficha e historial de documentos. |
 | **Catálogos** | Categorías, marcas y unidades de medida. |
-| **Reportes** | Once informes con vista previa y exportación a Excel, PDF y CSV. |
+| **Reportes** | Doce informes con vista previa y exportación a Excel, PDF y CSV. |
 | **Configuración** | Datos de empresa, logo, impuestos, moneda, numeración de documentos, tema y copias de seguridad. |
 | **Usuarios** | Usuarios, roles y matriz de permisos editable por módulo. |
 

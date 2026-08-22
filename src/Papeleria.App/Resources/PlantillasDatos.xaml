@@ -39,6 +39,10 @@
         <paginas:PuntoVentaView />
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vmPaginas:CarteraVistaModelo}">
+        <paginas:CarteraView />
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vmPaginas:HistorialVentasVistaModelo}">
         <paginas:HistorialVentasView />
     </DataTemplate>
@@ -90,6 +94,10 @@
 
     <DataTemplate DataType="{x:Type vmDialogos:ClienteDialogoVistaModelo}">
         <dialogos:ClienteDialogoView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmDialogos:AbonoDialogoVistaModelo}">
+        <dialogos:AbonoDialogoView />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type vmDialogos:UsuarioDialogoVistaModelo}">

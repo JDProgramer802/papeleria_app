@@ -243,6 +243,7 @@ public partial class MainVistaModelo : ObservableObject
             (Modulos.Productos, "Productos", PackIconKind.PackageVariantClosed, "Catálogo de artículos"),
             (Modulos.Inventario, "Inventario", PackIconKind.Warehouse, "Existencias y movimientos"),
             (Modulos.Compras, "Compras", PackIconKind.TruckDeliveryOutline, "Compras a proveedores"),
+            (Modulos.Cartera, "Cartera", PackIconKind.AccountCashOutline, "Cuentas por cobrar"),
             (Modulos.Caja, "Caja", PackIconKind.CashMultiple, "Apertura, arqueo y cierre"),
             (Modulos.Kardex, "Kardex", PackIconKind.SwapHorizontalBold, "Historial de inventario"),
             (Modulos.Clientes, "Clientes", PackIconKind.AccountGroupOutline, "Directorio de clientes"),

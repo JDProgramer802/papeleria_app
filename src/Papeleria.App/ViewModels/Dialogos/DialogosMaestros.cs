@@ -66,6 +66,9 @@ public partial class ClienteDialogoVistaModelo : DialogoFormularioBase
     [ObservableProperty] private string? _observaciones;
     [ObservableProperty] private bool _activo = true;
 
+    /// <summary>Cupo de crédito. En cero el cliente paga siempre de contado.</summary>
+    [ObservableProperty] private decimal _limiteCredito;
+
     /// <summary>El «Consumidor final» no puede desactivarse ni eliminarse.</summary>
     [ObservableProperty] private bool _esProtegido;
 }
@@ -98,4 +101,40 @@ public partial class UsuarioDialogoVistaModelo : DialogoFormularioBase
     [ObservableProperty] private string _contrasena = string.Empty;
 
     [ObservableProperty] private string _confirmacionContrasena = string.Empty;
+}
+
+/// <summary>Formulario para recibir un abono de un cliente con deuda.</summary>
+public partial class AbonoDialogoVistaModelo : DialogoFormularioBase
+{
+    public AbonoDialogoVistaModelo(
+        IServicioDialogos dialogos, Func<Task> guardar, string cliente, decimal saldo)
+        : base(dialogos, guardar)
+    {
+        Titulo = "Registrar abono";
+        Cliente = cliente;
+        Saldo = saldo;
+        Monto = saldo;
+
+        MetodosPago = new ObservableCollection<OpcionEnum<MetodoPago>>(
+            Enumeraciones.Opciones<MetodoPago>()
+                .Where(o => o.Valor is MetodoPago.Efectivo or MetodoPago.Tarjeta or MetodoPago.Transferencia));
+    }
+
+    public string Cliente { get; }
+
+    /// <summary>Deuda vigente; el abono no puede superarla.</summary>
+    public decimal Saldo { get; }
+
+    public ObservableCollection<OpcionEnum<MetodoPago>> MetodosPago { get; }
+
+    [ObservableProperty] private decimal _monto;
+    [ObservableProperty] private MetodoPago _metodoPago = MetodoPago.Efectivo;
+    [ObservableProperty] private string? _observaciones;
+
+    public string SaldoTexto => Formatos.Moneda(Saldo);
+
+    /// <summary>Lo que quedaría debiendo tras aplicar el abono que se está escribiendo.</summary>
+    public string RestanteTexto => Formatos.Moneda(Math.Max(Saldo - Monto, 0));
+
+    partial void OnMontoChanged(decimal value) => OnPropertyChanged(nameof(RestanteTexto));
 }

@@ -143,6 +143,7 @@ public partial class ClientesVistaModelo : PaginaVistaModelo
                 destino.Direccion = dialogo.Direccion;
                 destino.Ciudad = dialogo.Ciudad;
                 destino.Observaciones = dialogo.Observaciones;
+                destino.LimiteCredito = dialogo.LimiteCredito;
                 destino.Activo = dialogo.Activo;
 
                 if (esNuevo)
@@ -164,6 +165,7 @@ public partial class ClientesVistaModelo : PaginaVistaModelo
             Direccion = cliente.Direccion,
             Ciudad = cliente.Ciudad,
             Observaciones = cliente.Observaciones,
+            LimiteCredito = cliente.LimiteCredito,
             Activo = cliente.Activo,
             EsProtegido = cliente.EsProtegido
         };

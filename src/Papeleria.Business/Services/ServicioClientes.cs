@@ -252,6 +252,12 @@ public class ServicioClientes : IServicioClientes
         cliente.Direccion = Texto.NormalizarOpcional(cliente.Direccion);
         cliente.Ciudad = Texto.NormalizarOpcional(cliente.Ciudad);
         cliente.Observaciones = Texto.NormalizarOpcional(cliente.Observaciones);
+
+        // Un cupo negativo no significa nada: equivale a no fiarle.
+        if (cliente.LimiteCredito < 0)
+        {
+            cliente.LimiteCredito = 0;
+        }
     }
 
     private static async Task ValidarAsync(
@@ -288,6 +294,7 @@ public class ServicioClientes : IServicioClientes
         destino.Direccion = origen.Direccion;
         destino.Ciudad = origen.Ciudad;
         destino.Observaciones = origen.Observaciones;
+        destino.LimiteCredito = origen.LimiteCredito;
         destino.Activo = origen.Activo;
     }
 }

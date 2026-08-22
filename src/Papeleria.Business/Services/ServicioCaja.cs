@@ -217,6 +217,43 @@ public class ServicioCaja : IServicioCaja
         });
     }
 
+    public async Task RegistrarAbonoDeClienteAsync(
+        IUnidadDeTrabajo unidad, AbonoCliente abono, string nombreCliente,
+        int cajaSesionId, int usuarioId, CancellationToken ct = default)
+    {
+        unidad.Contexto.MovimientosCaja.Add(new MovimientoCaja
+        {
+            CajaSesionId = cajaSesionId,
+            Fecha = abono.Fecha,
+            Tipo = TipoMovimientoCaja.Ingreso,
+            Monto = abono.Monto,
+            Concepto = $"Abono de {nombreCliente} ({abono.MetodoPago.Descripcion()})",
+            UsuarioId = usuarioId,
+            // Sólo el efectivo entra al cajón; una transferencia no se cuenta en el arqueo.
+            AfectaEfectivo = abono.MetodoPago == MetodoPago.Efectivo
+        });
+
+        await Task.CompletedTask.ConfigureAwait(false);
+    }
+
+    public async Task RegistrarSalidaPorAbonoAnuladoAsync(
+        IUnidadDeTrabajo unidad, AbonoCliente abono,
+        int cajaSesionId, int usuarioId, CancellationToken ct = default)
+    {
+        unidad.Contexto.MovimientosCaja.Add(new MovimientoCaja
+        {
+            CajaSesionId = cajaSesionId,
+            Fecha = DateTime.Now,
+            Tipo = TipoMovimientoCaja.Egreso,
+            Monto = abono.Monto,
+            Concepto = $"Anulación del abono del {abono.Fecha:dd/MM/yyyy}",
+            UsuarioId = usuarioId,
+            AfectaEfectivo = abono.MetodoPago == MetodoPago.Efectivo
+        });
+
+        await Task.CompletedTask.ConfigureAwait(false);
+    }
+
     /// <summary>
     /// Parte de la venta que se cobró en efectivo. En pagos mixtos se toma el importe
     /// recibido en efectivo, sin superar el total de la factura.
@@ -284,11 +321,16 @@ public class ServicioCaja : IServicioCaja
         var movimientos = await unidad.Contexto.MovimientosCaja
             .AsNoTracking()
             .Where(m => m.CajaSesionId == sesionCaja.Id)
-            .Select(m => new { m.Tipo, m.Monto })
+            .Select(m => new { m.Tipo, m.Monto, m.AfectaEfectivo })
             .ToListAsync(ct).ConfigureAwait(false);
 
-        var ingresos = movimientos.Where(m => m.Tipo == TipoMovimientoCaja.Ingreso).Sum(m => m.Monto);
-        var egresos = movimientos.Where(m => m.Tipo == TipoMovimientoCaja.Egreso).Sum(m => m.Monto);
+        // Sólo cuenta lo que pasa por el cajón: un abono por transferencia entra al
+        // negocio pero no al efectivo, y sumarlo dejaría al cajero con un faltante.
+        var ingresos = movimientos
+            .Where(m => m.Tipo == TipoMovimientoCaja.Ingreso && m.AfectaEfectivo).Sum(m => m.Monto);
+
+        var egresos = movimientos
+            .Where(m => m.Tipo == TipoMovimientoCaja.Egreso && m.AfectaEfectivo).Sum(m => m.Monto);
 
         var devoluciones = await CalcularDevolucionesAsync(unidad, sesionCaja.Id, ct).ConfigureAwait(false);
 

@@ -34,6 +34,7 @@ public static class RegistroCapaNegocio
         servicios.AddSingleton<IServicioCaja, ServicioCaja>();
         servicios.AddSingleton<IServicioCompras, ServicioCompras>();
         servicios.AddSingleton<IServicioVentas, ServicioVentas>();
+        servicios.AddSingleton<IServicioCartera, ServicioCartera>();
         servicios.AddSingleton<IServicioDashboard, ServicioDashboard>();
         servicios.AddSingleton<IServicioReportes, ServicioReportes>();
         servicios.AddSingleton<IServicioBackup, ServicioBackup>();

@@ -30,6 +30,7 @@ public class AppDbContext : DbContext
     public DbSet<MovimientoKardex> MovimientosKardex => Set<MovimientoKardex>();
     public DbSet<CajaSesion> CajaSesiones => Set<CajaSesion>();
     public DbSet<MovimientoCaja> MovimientosCaja => Set<MovimientoCaja>();
+    public DbSet<AbonoCliente> AbonosCliente => Set<AbonoCliente>();
     public DbSet<Configuracion> Configuraciones => Set<Configuracion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

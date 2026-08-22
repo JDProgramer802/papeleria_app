@@ -19,6 +19,7 @@ public class Navegacion : INavegacion
         [Modulos.Compras] = typeof(ComprasVistaModelo),
         [Modulos.Ventas] = typeof(PuntoVentaVistaModelo),
         [Modulos.HistorialVentas] = typeof(HistorialVentasVistaModelo),
+        [Modulos.Cartera] = typeof(CarteraVistaModelo),
         [Modulos.Inventario] = typeof(InventarioVistaModelo),
         [Modulos.Kardex] = typeof(KardexVistaModelo),
         [Modulos.Caja] = typeof(CajaVistaModelo),

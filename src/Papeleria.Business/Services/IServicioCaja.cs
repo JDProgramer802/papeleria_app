@@ -42,6 +42,16 @@ public interface IServicioCaja
         IUnidadDeTrabajo unidad, Venta venta, int usuarioId, CancellationToken ct = default);
 
     /// <summary>Contrapartida en caja cuando se anula una venta ya cobrada.</summary>
+    /// <summary>Suma al turno el abono recibido de un cliente.</summary>
+    Task RegistrarAbonoDeClienteAsync(
+        IUnidadDeTrabajo unidad, AbonoCliente abono, string nombreCliente,
+        int cajaSesionId, int usuarioId, CancellationToken ct = default);
+
+    /// <summary>Devuelve del cajón el efectivo de un abono anulado.</summary>
+    Task RegistrarSalidaPorAbonoAnuladoAsync(
+        IUnidadDeTrabajo unidad, AbonoCliente abono,
+        int cajaSesionId, int usuarioId, CancellationToken ct = default);
+
     Task RegistrarAnulacionDeVentaAsync(
         IUnidadDeTrabajo unidad, Venta venta, int usuarioId, CancellationToken ct = default);
 }

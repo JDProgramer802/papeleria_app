@@ -1,0 +1,82 @@
+<UserControl x:Class="Papeleria.App.Views.Dialogos.AbonoDialogoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:controls="clr-namespace:Papeleria.App.Controls"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
+             d:DataContext="{d:DesignInstance vm:AbonoDialogoVistaModelo}"
+             mc:Ignorable="d"
+             Width="520">
+
+    <controls:PanelFormulario Titulo="{Binding Titulo}"
+                              Subtitulo="El dinero recibido entra al turno de caja abierto."
+                              Icono="CashCheck"
+                              MostrarLeyendaObligatorios="False">
+        <StackPanel>
+            <!-- Deuda actual del cliente, para no tener que volver a la lista -->
+            <Border Background="{DynamicResource MaterialDesignChipBackground}"
+                    CornerRadius="8" Padding="14,12" Margin="0,0,0,18">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{Binding Cliente}" FontWeight="SemiBold" FontSize="14"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="debe actualmente" Style="{StaticResource TextoTenue}"
+                                   FontSize="11.5" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="1" Text="{Binding SaldoTexto}"
+                               VerticalAlignment="Center"
+                               FontWeight="Bold" FontSize="18"
+                               Foreground="{StaticResource BrochaError}" />
+                </Grid>
+            </Border>
+
+            <TextBox Style="{StaticResource CampoNumerico}"
+                     materialDesign:HintAssist.Hint="Monto del abono *"
+                     Text="{Binding Monto, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
+                     FontSize="18" />
+
+            <ComboBox Style="{StaticResource CampoSeleccion}"
+                      materialDesign:HintAssist.Hint="Medio de pago"
+                      ItemsSource="{Binding MetodosPago}"
+                      SelectedValue="{Binding MetodoPago}"
+                      SelectedValuePath="Valor"
+                      DisplayMemberPath="Descripcion" />
+
+            <TextBox Style="{StaticResource CampoTexto}"
+                     materialDesign:HintAssist.Hint="Observaciones"
+                     Text="{Binding Observaciones}"
+                     MaxLength="600" />
+
+            <!-- Lo que quedaría debiendo al aplicar este abono -->
+            <Grid Margin="0,4,0,0">
+                <TextBlock Text="Quedaría debiendo" VerticalAlignment="Center"
+                           Style="{StaticResource TextoTenue}" />
+                <TextBlock Text="{Binding RestanteTexto}" HorizontalAlignment="Right"
+                           FontWeight="SemiBold" FontSize="15" />
+            </Grid>
+        </StackPanel>
+
+        <controls:PanelFormulario.Pie>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Cancelar" Style="{StaticResource BotonTexto}" Margin="0,0,8,0"
+                        IsCancel="True" Command="{Binding CancelarCommand}" />
+
+                <Button Style="{StaticResource BotonPrincipal}" IsDefault="True"
+                        Command="{Binding GuardarCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="CashCheck" VerticalAlignment="Center" />
+                        <TextBlock Text="REGISTRAR ABONO" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </controls:PanelFormulario.Pie>
+    </controls:PanelFormulario>
+</UserControl>

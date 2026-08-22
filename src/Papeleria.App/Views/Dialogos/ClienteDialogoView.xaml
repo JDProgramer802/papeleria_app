@@ -96,6 +96,16 @@
                          Text="{Binding Direccion}" MaxLength="250" />
             </Grid>
 
+            <!-- ══ Crédito ══════════════════════════════════════════════════ -->
+            <TextBlock Text="Crédito" Style="{StaticResource TituloSeccion}" Margin="0,8,0,10" />
+
+            <TextBox Style="{StaticResource CampoNumerico}"
+                     materialDesign:HintAssist.Hint="Cupo de crédito"
+                     materialDesign:HintAssist.HelperText="En cero, el cliente paga siempre de contado"
+                     Text="{Binding LimiteCredito, StringFormat=N2}"
+                     IsEnabled="{Binding EsProtegido, Converter={StaticResource InvertirBool}}"
+                     MaxWidth="260" HorizontalAlignment="Left" />
+
             <!-- ══ Notas ════════════════════════════════════════════════════ -->
             <TextBlock Text="Notas internas" Style="{StaticResource TituloSeccion}" Margin="0,8,0,10" />
 

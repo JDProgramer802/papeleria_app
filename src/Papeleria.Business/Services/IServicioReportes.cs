@@ -15,7 +15,8 @@ public enum TipoReporte
     Clientes = 7,
     Proveedores = 8,
     Caja = 9,
-    Kardex = 10
+    Kardex = 10,
+    Cartera = 11
 }
 
 /// <summary>Metadatos de un reporte, usados para poblar el selector de la interfaz.</summary>

@@ -272,6 +272,7 @@ public partial class App : Application
                 servicios.AddTransient<ComprasVistaModelo>();
                 servicios.AddTransient<PuntoVentaVistaModelo>();
                 servicios.AddTransient<HistorialVentasVistaModelo>();
+                servicios.AddTransient<CarteraVistaModelo>();
                 servicios.AddTransient<InventarioVistaModelo>();
                 servicios.AddTransient<KardexVistaModelo>();
                 servicios.AddTransient<CajaVistaModelo>();

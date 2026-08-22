@@ -121,6 +121,11 @@ public class SembradorDatos
                 case Modulos.HistorialVentas:
                     permiso.PuedeVer = true;
                     break;
+
+                // Consultar la deuda y recibir abonos en el mostrador.
+                case Modulos.Cartera:
+                    permiso.PuedeVer = permiso.PuedeCrear = true;
+                    break;
             }
 
             return permiso;
