@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Papeleria.App.Infrastructure;
@@ -51,7 +53,29 @@ public partial class UsuariosVistaModelo : PaginaVistaModelo
             Enumeraciones.Opciones<RolUsuario>().Where(o => o.Valor != RolUsuario.Administrador));
 
         RolPermisos = Roles.FirstOrDefault()?.Valor ?? RolUsuario.Cajero;
+
+        UsuariosFiltrados = new CollectionViewSource { Source = Usuarios }.View;
+
+        UsuariosFiltrados.Filter = o =>
+        {
+            if (string.IsNullOrWhiteSpace(Busqueda) || o is not Usuario usuario)
+            {
+                return true;
+            }
+
+            var texto = Busqueda.Trim();
+
+            return usuario.NombreCompleto.Contains(texto, StringComparison.CurrentCultureIgnoreCase)
+                   || usuario.NombreUsuario.Contains(texto, StringComparison.CurrentCultureIgnoreCase)
+                   || (usuario.Correo?.Contains(texto, StringComparison.CurrentCultureIgnoreCase) ?? false);
+        };
     }
+
+    public ICollectionView UsuariosFiltrados { get; }
+
+    [ObservableProperty] private string? _busqueda;
+
+    partial void OnBusquedaChanged(string? value) => UsuariosFiltrados.Refresh();
 
     public override string Modulo => Modulos.Usuarios;
 

@@ -290,6 +290,45 @@
         <Setter Property="Foreground" Value="White" />
     </Style>
 
+    <!--
+        Distintivo de activo/inactivo. Va en tinta sobre fondo suave en vez de un
+        bloque de color saturado: en una tabla, el estado es un dato secundario y no
+        debe pesar más que el nombre que acompaña.
+    -->
+    <Style x:Key="ChipEstado" TargetType="Border">
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Padding" Value="9,3" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Background" Value="#EEEEEE" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Activo}" Value="True">
+                <Setter Property="Background" Value="#E8F5E9" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="TextoChipEstado" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Text" Value="Inactivo" />
+        <Setter Property="Foreground" Value="#757575" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Activo}" Value="True">
+                <Setter Property="Text" Value="Activo" />
+                <Setter Property="Foreground" Value="{StaticResource BrochaExito}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Contador junto al título de una lista: «6 categorías». -->
+    <Style x:Key="ContadorLista" TargetType="Border">
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Padding" Value="8,2" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignChipBackground}" />
+    </Style>
+
     <!-- ══ Fila de dato de contacto (fichas de cliente y proveedor) ══════════
          Llevan clave explícita a propósito: un estilo implícito de StackPanel
          declarado dentro de StackPanel.Resources se aplicaría también al propio

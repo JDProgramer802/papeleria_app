@@ -285,13 +285,34 @@
                 <StackPanel Grid.Row="0">
                     <TextBlock Text="Resumen de la venta" Style="{StaticResource TituloSeccion}" />
 
-                    <ComboBox Style="{StaticResource CampoSeleccion}"
-                              ItemsSource="{Binding Clientes}"
-                              SelectedValue="{Binding ClienteId}"
-                              SelectedValuePath="Id" DisplayMemberPath="Nombre"
-                              materialDesign:HintAssist.Hint="Cliente"
-                              materialDesign:HintAssist.IsFloating="True"
-                              ToolTip="Cliente al que se emite la factura" />
+                    <!-- El cliente nuevo se crea aquí mismo para no abandonar la venta. -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ComboBox Grid.Column="0"
+                                  Style="{StaticResource CampoSeleccion}"
+                                  ItemsSource="{Binding Clientes}"
+                                  SelectedValue="{Binding ClienteId}"
+                                  SelectedValuePath="Id" DisplayMemberPath="Nombre"
+                                  IsEditable="True" IsTextSearchEnabled="True"
+                                  TextSearch.TextPath="Nombre"
+                                  materialDesign:HintAssist.Hint="Cliente"
+                                  materialDesign:HintAssist.IsFloating="True"
+                                  ToolTip="Cliente al que se emite la factura. Escriba para buscarlo." />
+
+                        <Button Grid.Column="1"
+                                Style="{StaticResource BotonIconoAccion}"
+                                Margin="6,0,0,16"
+                                VerticalAlignment="Center"
+                                Command="{Binding NuevoClienteCommand}"
+                                Visibility="{Binding PuedeCrearClientes, Converter={StaticResource BoolAVisible}}"
+                                ToolTip="Crear un cliente nuevo sin salir de la venta">
+                            <materialDesign:PackIcon Kind="AccountPlusOutline" Width="20" Height="20" />
+                        </Button>
+                    </Grid>
 
                     <TextBox Style="{StaticResource CampoTexto}"
                              Text="{Binding Observaciones, UpdateSourceTrigger=PropertyChanged}"

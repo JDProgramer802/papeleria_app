@@ -183,6 +183,60 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         await ComprobarCajaAsync().ConfigureAwait(true);
     }
 
+    public bool PuedeCrearClientes => _sesion.Puede(Modulos.Clientes, AccionPermiso.Crear);
+
+    /// <summary>
+    /// Da de alta un cliente sin salir de la venta. En el mostrador el cliente aparece
+    /// cuando ya se está facturando, y obligar a cambiar de módulo corta el cobro.
+    /// </summary>
+    [RelayCommand]
+    private async Task NuevoClienteAsync()
+    {
+        if (!PuedeCrearClientes)
+        {
+            await _dialogos.InformarAsync(
+                "Sin permiso",
+                "Su usuario no puede crear clientes.",
+                esError: true).ConfigureAwait(true);
+
+            return;
+        }
+
+        Cliente? creado = null;
+        ClienteDialogoVistaModelo? dialogo = null;
+
+        dialogo = new ClienteDialogoVistaModelo(
+            _dialogos,
+            async () =>
+            {
+                creado = await _clientes.CrearAsync(new Cliente
+                {
+                    Nombre = dialogo!.Nombre,
+                    TipoDocumento = dialogo.TipoDocumento,
+                    NumeroDocumento = dialogo.NumeroDocumento,
+                    Telefono = dialogo.Telefono,
+                    Correo = dialogo.Correo,
+                    Direccion = dialogo.Direccion,
+                    Ciudad = dialogo.Ciudad,
+                    Observaciones = dialogo.Observaciones,
+                    LimiteCredito = dialogo.LimiteCredito,
+                    Activo = true
+                }).ConfigureAwait(true);
+            },
+            "Nuevo cliente");
+
+        if (await _dialogos.MostrarAsync(dialogo).ConfigureAwait(true) is not true || creado is null)
+        {
+            return;
+        }
+
+        // Queda seleccionado para poder seguir cobrando de inmediato.
+        Clientes.Add(creado);
+        ClienteId = creado.Id;
+
+        _dialogos.Notificar($"Cliente «{creado.Nombre}» creado y seleccionado.");
+    }
+
     private Task CargarClientesAsync() => EjecutarAsync(async () =>
     {
         var clientes = await _clientes.ListarActivosAsync().ConfigureAwait(true);

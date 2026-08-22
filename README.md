@@ -98,7 +98,7 @@ elige la vista. Los modelos de vista no conocen ningún tipo de WPF.
 | Módulo | Qué hace |
 |---|---|
 | **Dashboard** | Nueve indicadores, gráfico comparativo de 12 meses, productos más vendidos, movimientos recientes y alertas accionables. |
-| **Punto de venta** | Facturación con lector de código de barras, carrito editable, descuentos, diálogo de cobro con cambio e impresión del recibo. |
+| **Punto de venta** | Facturación con lector de código de barras, carrito editable, descuentos, diálogo de cobro con cambio e impresión del recibo. El cliente se busca escribiendo y se puede dar de alta uno nuevo sin salir de la venta. |
 | **Productos** | CRUD completo, búsqueda paginada, duplicado, generación de código de barras EAN-13 e impresión de etiquetas. El botón **Comprar** abre el formulario de compra con el artículo ya cargado, para reponer existencias sin salir del catálogo. |
 | **Inventario** | Existencias con semáforo, entradas, salidas, ajustes por conteo y transferencias de ubicación. |
 | **Compras** | Historial y registro de compras: actualiza existencias, recalcula el costo promedio y escribe en el kardex. |

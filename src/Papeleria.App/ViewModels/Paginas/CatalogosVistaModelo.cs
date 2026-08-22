@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Papeleria.App.Infrastructure;
@@ -37,6 +39,33 @@ public partial class CatalogosVistaModelo : PaginaVistaModelo
 
         Titulo = "Catálogos";
         Subtitulo = "Categorías, marcas y unidades de medida usadas por los productos";
+
+        // Vistas propias (no la predeterminada) para que cada lista filtre por su cuenta.
+        CategoriasFiltradas = new CollectionViewSource { Source = Categorias }.View;
+        MarcasFiltradas = new CollectionViewSource { Source = Marcas }.View;
+        UnidadesFiltradas = new CollectionViewSource { Source = Unidades }.View;
+
+        CategoriasFiltradas.Filter = o =>
+            Coincide(BusquedaCategorias, (o as Categoria)?.Nombre, (o as Categoria)?.Descripcion);
+
+        MarcasFiltradas.Filter = o =>
+            Coincide(BusquedaMarcas, (o as Marca)?.Nombre, (o as Marca)?.Descripcion);
+
+        UnidadesFiltradas.Filter = o =>
+            Coincide(BusquedaUnidades, (o as UnidadMedida)?.Nombre, (o as UnidadMedida)?.Abreviatura);
+    }
+
+    /// <summary>Compara el texto buscado contra los campos visibles de la fila.</summary>
+    private static bool Coincide(string? busqueda, params string?[] campos)
+    {
+        if (string.IsNullOrWhiteSpace(busqueda))
+        {
+            return true;
+        }
+
+        var texto = busqueda.Trim();
+
+        return campos.Any(c => c?.Contains(texto, StringComparison.CurrentCultureIgnoreCase) == true);
     }
 
     public override string Modulo => Modulos.Catalogos;
@@ -46,6 +75,20 @@ public partial class CatalogosVistaModelo : PaginaVistaModelo
     public ObservableCollection<Marca> Marcas { get; } = new();
 
     public ObservableCollection<UnidadMedida> Unidades { get; } = new();
+
+    public ICollectionView CategoriasFiltradas { get; }
+
+    public ICollectionView MarcasFiltradas { get; }
+
+    public ICollectionView UnidadesFiltradas { get; }
+
+    [ObservableProperty] private string? _busquedaCategorias;
+    [ObservableProperty] private string? _busquedaMarcas;
+    [ObservableProperty] private string? _busquedaUnidades;
+
+    partial void OnBusquedaCategoriasChanged(string? value) => CategoriasFiltradas.Refresh();
+    partial void OnBusquedaMarcasChanged(string? value) => MarcasFiltradas.Refresh();
+    partial void OnBusquedaUnidadesChanged(string? value) => UnidadesFiltradas.Refresh();
 
     [ObservableProperty] private Categoria? _categoriaSeleccionada;
     [ObservableProperty] private Marca? _marcaSeleccionada;
