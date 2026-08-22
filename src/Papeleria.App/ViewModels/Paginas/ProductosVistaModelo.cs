@@ -24,6 +24,7 @@ public partial class ProductosVistaModelo : PaginaVistaModelo
     private readonly IServicioDocumentos _documentos;
     private readonly IServicioArchivos _archivos;
     private readonly IServicioDialogos _dialogos;
+    private readonly INavegacion _navegacion;
     private readonly IContextoSesion _sesion;
 
     private List<Categoria> _catalogoCategorias = new();
@@ -40,6 +41,7 @@ public partial class ProductosVistaModelo : PaginaVistaModelo
         IServicioDocumentos documentos,
         IServicioArchivos archivos,
         IServicioDialogos dialogos,
+        INavegacion navegacion,
         IContextoSesion sesion)
     {
         _productos = productos;
@@ -50,12 +52,16 @@ public partial class ProductosVistaModelo : PaginaVistaModelo
         _documentos = documentos;
         _archivos = archivos;
         _dialogos = dialogos;
+        _navegacion = navegacion;
         _sesion = sesion;
 
         Titulo = "Productos";
         Subtitulo = "Catálogo de artículos, precios y niveles de existencias";
 
         Paginador.PaginaCambiada += (_, _) => _ = BuscarAsync();
+
+        WeakReferenceMessenger.Default.Register<ProductosVistaModelo, InventarioCambiadoMensaje>(
+            this, (destinatario, mensaje) => { _ = destinatario.BuscarAsync(); });
     }
 
     public override string Modulo => Modulos.Productos;
@@ -92,6 +98,9 @@ public partial class ProductosVistaModelo : PaginaVistaModelo
 
     public bool PuedeEliminar => _sesion.Puede(Modulos.Productos, AccionPermiso.Eliminar);
 
+    /// <summary>Comprar no depende del catálogo sino del permiso sobre compras.</summary>
+    public bool PuedeComprar => _sesion.Puede(Modulos.Compras, AccionPermiso.Crear);
+
     public bool HaySeleccion => ProductoSeleccionado is not null;
 
     partial void OnProductoSeleccionadoChanged(ProductoListadoDto? value)
@@ -102,6 +111,7 @@ public partial class ProductosVistaModelo : PaginaVistaModelo
         EliminarCommand.NotifyCanExecuteChanged();
         ImprimirEtiquetaCommand.NotifyCanExecuteChanged();
         AlternarEstadoCommand.NotifyCanExecuteChanged();
+        RegistrarCompraCommand.NotifyCanExecuteChanged();
     }
 
     // Cualquier cambio de filtro reinicia la paginación y vuelve a consultar.
@@ -399,6 +409,45 @@ public partial class ProductosVistaModelo : PaginaVistaModelo
             _archivos.AbrirConAplicacionPredeterminada(ruta);
             _dialogos.Notificar($"Se generaron {copias} etiquetas.");
         }, "No se pudieron generar las etiquetas.");
+    }
+
+    /// <summary>
+    /// Abre el módulo de compras con este producto en la primera línea. Reponer
+    /// existencias es lo que más se hace desde el catálogo, y obligaba a cambiar de
+    /// pantalla y volver a buscar el artículo a mano.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(PuedeOperarSobreSeleccion))]
+    private async Task RegistrarCompraAsync()
+    {
+        if (ProductoSeleccionado is null)
+        {
+            return;
+        }
+
+        if (!PuedeComprar)
+        {
+            await _dialogos.InformarAsync(
+                "Sin permiso",
+                "Su usuario no puede registrar compras a proveedores.",
+                esError: true).ConfigureAwait(true);
+
+            return;
+        }
+
+        if (!_navegacion.PuedeNavegar(Modulos.Compras))
+        {
+            await _dialogos.InformarAsync(
+                "Módulo no disponible",
+                "No tiene acceso al módulo de compras.",
+                esError: true).ConfigureAwait(true);
+
+            return;
+        }
+
+        await _navegacion.NavegarAsync(Modulos.Compras, new CompraDeProducto(
+            ProductoSeleccionado.Id,
+            ProductoSeleccionado.Codigo,
+            ProductoSeleccionado.Nombre)).ConfigureAwait(true);
     }
 
     [RelayCommand]

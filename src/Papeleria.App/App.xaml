@@ -19,6 +19,7 @@
 
                 <ResourceDictionary Source="Resources/Convertidores.xaml" />
                 <ResourceDictionary Source="Resources/Estilos.xaml" />
+                <ResourceDictionary Source="Resources/Controles.xaml" />
                 <ResourceDictionary Source="Resources/PlantillasDatos.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

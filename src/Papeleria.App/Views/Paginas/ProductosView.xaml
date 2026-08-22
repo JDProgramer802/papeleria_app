@@ -38,6 +38,17 @@
                 </Button>
 
                 <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
+                        Command="{Binding RegistrarCompraCommand}"
+                        IsEnabled="{Binding HaySeleccion}"
+                        Visibility="{Binding PuedeComprar, Converter={StaticResource BoolAVisible}}"
+                        ToolTip="Registrar una compra a proveedor de este producto">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="TruckDeliveryOutline" VerticalAlignment="Center" />
+                        <TextBlock Text="Comprar" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
                         Command="{Binding DuplicarCommand}"
                         IsEnabled="{Binding HaySeleccion}"
                         Visibility="{Binding PuedeCrear, Converter={StaticResource BoolAVisible}}"
@@ -82,7 +93,8 @@
                          materialDesign:TextFieldAssist.HasLeadingIcon="True"
                          materialDesign:TextFieldAssist.LeadingIcon="Magnify" />
 
-                <ComboBox Grid.Column="2" Height="40"
+                <ComboBox Grid.Column="2" Style="{StaticResource FiltroSeleccion}"
+                          materialDesign:HintAssist.Hint="Categoría"
                           ItemsSource="{Binding FiltroCategorias}"
                           SelectedValue="{Binding CategoriaSeleccionadaId}"
                           SelectedValuePath="Id"
@@ -90,7 +102,8 @@
                           VerticalContentAlignment="Center"
                           ToolTip="Filtrar por categoría" />
 
-                <ComboBox Grid.Column="4" Height="40"
+                <ComboBox Grid.Column="4" Style="{StaticResource FiltroSeleccion}"
+                          materialDesign:HintAssist.Hint="Marca"
                           ItemsSource="{Binding FiltroMarcas}"
                           SelectedValue="{Binding MarcaSeleccionadaId}"
                           SelectedValuePath="Id"
@@ -98,7 +111,8 @@
                           VerticalContentAlignment="Center"
                           ToolTip="Filtrar por marca" />
 
-                <ComboBox Grid.Column="6" Height="40"
+                <ComboBox Grid.Column="6" Style="{StaticResource FiltroSeleccion}"
+                          materialDesign:HintAssist.Hint="Existencias"
                           ItemsSource="{Binding EstadosStock}"
                           SelectedValue="{Binding EstadoSeleccionado}"
                           SelectedValuePath="Key"
@@ -189,13 +203,9 @@
                         </DataGridTemplateColumn>
 
                         <DataGridTextColumn Header="Costo" Width="100"
-                                            Binding="{Binding Costo, Converter={StaticResource Moneda}}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                                            Binding="{Binding Costo, Converter={StaticResource Moneda}}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                         <DataGridTextColumn Header="P. venta" Width="105"
                                             Binding="{Binding PrecioVenta, Converter={StaticResource Moneda}}">
@@ -208,22 +218,14 @@
                         </DataGridTextColumn>
 
                         <DataGridTextColumn Header="Margen" Width="85"
-                                            Binding="{Binding MargenPorcentaje, Converter={StaticResource Porcentaje}}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                                            Binding="{Binding MargenPorcentaje, Converter={StaticResource Porcentaje}}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                         <DataGridTextColumn Header="IVA" Width="70"
-                                            Binding="{Binding PorcentajeIva, Converter={StaticResource Porcentaje}, ConverterParameter=0}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                                            Binding="{Binding PorcentajeIva, Converter={StaticResource Porcentaje}, ConverterParameter=0}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                         <DataGridTemplateColumn Header="Estado" Width="90" CanUserSort="False">
                             <DataGridTemplateColumn.CellTemplate>
@@ -256,10 +258,20 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="" Width="126" CanUserSort="False">
+                        <DataGridTemplateColumn Header="" Width="164" CanUserSort="False">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Style="{StaticResource BotonIconoAccion}"
+                                                Command="{Binding DataContext.RegistrarCompraCommand,
+                                                          RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                Visibility="{Binding DataContext.PuedeComprar,
+                                                             RelativeSource={RelativeSource AncestorType=UserControl},
+                                                             Converter={StaticResource BoolAVisible}}"
+                                                ToolTip="Registrar una compra de este producto">
+                                            <materialDesign:PackIcon Kind="TruckDeliveryOutline" Width="17" Height="17" />
+                                        </Button>
+
                                         <Button Style="{StaticResource BotonIconoAccion}"
                                                 Command="{Binding DataContext.EditarCommand,
                                                           RelativeSource={RelativeSource AncestorType=UserControl}}"

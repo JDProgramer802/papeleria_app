@@ -116,6 +116,11 @@ public class SembradorDatos
                 case Modulos.Caja:
                     permiso.PuedeVer = permiso.PuedeCrear = permiso.PuedeEditar = true;
                     break;
+
+                // Consultar y reimprimir facturas pasadas; anular sigue siendo del administrador.
+                case Modulos.HistorialVentas:
+                    permiso.PuedeVer = true;
+                    break;
             }
 
             return permiso;

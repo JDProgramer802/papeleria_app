@@ -1,5 +1,6 @@
 using System.IO;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using System.Windows;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,15 @@ namespace Papeleria.App;
 /// </summary>
 public partial class App : Application
 {
+    /// <summary>
+    /// Semáforo que impide dos copias abiertas a la vez. Dos procesos sobre la misma
+    /// base de datos pueden repetir el consecutivo de factura o pelearse por la caja
+    /// abierta, así que la segunda copia se cierra avisando al usuario.
+    /// </summary>
+    private const string NombreInstanciaUnica = @"Local\PapeleriaApp.InstanciaUnica";
+
     private IHost? _anfitrion;
+    private Mutex? _instanciaUnica;
 
     public App()
     {
@@ -80,6 +89,21 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // Se comprueba antes que nada: la segunda copia debe salir sin tocar
+        // siquiera los archivos de registro de la primera.
+        if (!TomarInstanciaUnica())
+        {
+            MessageBox.Show(
+                "El sistema ya está abierto." + Environment.NewLine + Environment.NewLine +
+                "Utilice la ventana que ya está en marcha. Trabajar con dos copias a la vez " +
+                "puede duplicar números de factura y descuadrar la caja.",
+                "Sistema de Gestión de Papelería",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+
+            Shutdown();
+            return;
+        }
+
         RutasAplicacion.AsegurarCarpetas();
         ConfigurarRegistroDeEventos();
         RegistrarManejoGlobalDeErrores();
@@ -123,6 +147,34 @@ public partial class App : Application
                 "Error de arranque", MessageBoxButton.OK, MessageBoxImage.Error);
 
             Shutdown(1);
+        }
+    }
+
+    /// <summary>
+    /// Reserva el semáforo de instancia única. Devuelve <c>false</c> si otra copia
+    /// del programa ya lo tiene tomado en esta sesión de Windows.
+    /// </summary>
+    private bool TomarInstanciaUnica()
+    {
+        try
+        {
+            _instanciaUnica = new Mutex(true, NombreInstanciaUnica, out var creado);
+
+            if (creado)
+            {
+                return true;
+            }
+
+            _instanciaUnica.Dispose();
+            _instanciaUnica = null;
+
+            return false;
+        }
+        catch (Exception)
+        {
+            // Si el sistema no deja crear el semáforo, es preferible arrancar
+            // a dejar al usuario sin programa.
+            return true;
         }
     }
 
@@ -219,6 +271,7 @@ public partial class App : Application
                 servicios.AddTransient<ClientesVistaModelo>();
                 servicios.AddTransient<ComprasVistaModelo>();
                 servicios.AddTransient<PuntoVentaVistaModelo>();
+                servicios.AddTransient<HistorialVentasVistaModelo>();
                 servicios.AddTransient<InventarioVistaModelo>();
                 servicios.AddTransient<KardexVistaModelo>();
                 servicios.AddTransient<CajaVistaModelo>();
@@ -317,6 +370,13 @@ public partial class App : Application
         }
         finally
         {
+            if (_instanciaUnica is not null)
+            {
+                _instanciaUnica.ReleaseMutex();
+                _instanciaUnica.Dispose();
+                _instanciaUnica = null;
+            }
+
             Log.Information("=== Sistema finalizado ===");
             Log.CloseAndFlush();
         }

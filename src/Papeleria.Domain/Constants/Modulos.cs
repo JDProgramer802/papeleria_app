@@ -13,6 +13,7 @@ public static class Modulos
     public const string Clientes = "clientes";
     public const string Compras = "compras";
     public const string Ventas = "ventas";
+    public const string HistorialVentas = "historialVentas";
     public const string Inventario = "inventario";
     public const string Kardex = "kardex";
     public const string Caja = "caja";
@@ -31,6 +32,7 @@ public static class Modulos
         [Clientes] = "Clientes",
         [Compras] = "Compras",
         [Ventas] = "Ventas (POS)",
+        [HistorialVentas] = "Historial de ventas",
         [Inventario] = "Inventario",
         [Kardex] = "Kardex",
         [Caja] = "Caja",

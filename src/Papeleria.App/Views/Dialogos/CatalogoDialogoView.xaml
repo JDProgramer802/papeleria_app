@@ -4,49 +4,62 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:controls="clr-namespace:Papeleria.App.Controls"
              xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
              d:DataContext="{d:DesignInstance vm:CatalogoDialogoVistaModelo}"
              mc:Ignorable="d"
-             Width="480">
+             Width="500">
 
-    <StackPanel Margin="24,22,24,16">
-        <TextBlock Text="{Binding Titulo}"
-                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                   Margin="0,0,0,18" />
+    <controls:PanelFormulario Titulo="{Binding Titulo}"
+                              Subtitulo="Los catálogos organizan el maestro de productos."
+                              Icono="ShapeOutline">
+        <StackPanel>
+            <TextBox Style="{StaticResource CampoTexto}"
+                     materialDesign:HintAssist.Hint="Nombre *"
+                     materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                     materialDesign:TextFieldAssist.LeadingIcon="FormatTitle"
+                     Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}"
+                     MaxLength="100" />
 
-        <TextBox Style="{StaticResource CampoTexto}"
-                 materialDesign:HintAssist.Hint="Nombre"
-                 Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}"
-                 MaxLength="100" />
+            <TextBox Style="{StaticResource CampoTexto}"
+                     materialDesign:HintAssist.Hint="Abreviatura *"
+                     materialDesign:HintAssist.HelperText="Aparece en facturas y grillas: UND, CJA, RSM…"
+                     materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                     materialDesign:TextFieldAssist.LeadingIcon="FormatLetterCase"
+                     Text="{Binding Abreviatura, UpdateSourceTrigger=PropertyChanged}"
+                     CharacterCasing="Upper"
+                     MaxLength="10"
+                     Visibility="{Binding UsaAbreviatura, Converter={StaticResource BoolAVisible}}" />
 
-        <TextBox Style="{StaticResource CampoTexto}"
-                 materialDesign:HintAssist.Hint="Abreviatura (ej. UND, CJA)"
-                 Text="{Binding Abreviatura, UpdateSourceTrigger=PropertyChanged}"
-                 CharacterCasing="Upper"
-                 MaxLength="10"
-                 Visibility="{Binding UsaAbreviatura, Converter={StaticResource BoolAVisible}}" />
+            <TextBox Style="{StaticResource CampoTexto}"
+                     materialDesign:HintAssist.Hint="Descripción"
+                     Text="{Binding Descripcion}"
+                     AcceptsReturn="True" TextWrapping="Wrap" MinHeight="72"
+                     VerticalContentAlignment="Top"
+                     MaxLength="300" />
 
-        <TextBox Style="{StaticResource CampoTexto}"
-                 materialDesign:HintAssist.Hint="Descripción (opcional)"
-                 Text="{Binding Descripcion}"
-                 AcceptsReturn="True" TextWrapping="Wrap" MinHeight="66"
-                 VerticalContentAlignment="Top"
-                 MaxLength="300" />
+            <!-- Desactivar en vez de borrar: deja de ofrecerse en productos nuevos
+                 pero no rompe los que ya lo usan. -->
+            <CheckBox Content="Activo" IsChecked="{Binding Activo}" Margin="0,4,0,0" />
 
-        <CheckBox Content="Activo" IsChecked="{Binding Activo}" Margin="0,0,0,10" />
-
-        <Border Background="{StaticResource BrochaErrorSuave}" CornerRadius="6" Padding="12,9"
-                Margin="0,0,0,12"
-                Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
-            <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrochaError}"
-                       TextWrapping="Wrap" FontSize="12.5" />
-        </Border>
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Cancelar" Style="{StaticResource BotonTexto}" Margin="0,0,8,0"
-                    IsCancel="True" Command="{Binding CancelarCommand}" />
-            <Button Content="Guardar" Style="{StaticResource BotonPrincipal}" IsDefault="True"
-                    Command="{Binding GuardarCommand}" />
+            <TextBlock Text="Al desactivarlo deja de aparecer al crear productos, pero los que ya lo usan no se ven afectados."
+                       Style="{StaticResource TextoTenue}"
+                       FontSize="11.5" TextWrapping="Wrap" Margin="30,4,0,0" />
         </StackPanel>
-    </StackPanel>
+
+        <controls:PanelFormulario.Pie>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Cancelar" Style="{StaticResource BotonTexto}" Margin="0,0,8,0"
+                        IsCancel="True" Command="{Binding CancelarCommand}" />
+
+                <Button Style="{StaticResource BotonPrincipal}" IsDefault="True"
+                        Command="{Binding GuardarCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentSaveOutline" VerticalAlignment="Center" />
+                        <TextBlock Text="GUARDAR" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </controls:PanelFormulario.Pie>
+    </controls:PanelFormulario>
 </UserControl>

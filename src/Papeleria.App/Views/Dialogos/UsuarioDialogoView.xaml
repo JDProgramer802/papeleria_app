@@ -4,61 +4,55 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:controls="clr-namespace:Papeleria.App.Controls"
              xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
              d:DataContext="{d:DesignInstance vm:UsuarioDialogoVistaModelo}"
              mc:Ignorable="d"
-             Width="620">
+             Width="700">
 
-    <StackPanel Margin="24,22,24,16">
-        <TextBlock Text="{Binding Titulo}"
-                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                   Margin="0,0,0,18" />
+    <controls:PanelFormulario Titulo="{Binding Titulo}"
+                              Subtitulo="El rol define a qué módulos puede entrar la persona."
+                              Icono="AccountCogOutline">
+        <StackPanel>
+            <!-- El administrador principal no puede quedar sin acceso -->
+            <Border Background="{StaticResource BrochaAdvertenciaSuave}"
+                    CornerRadius="8" Padding="13,10" Margin="0,0,0,16"
+                    Visibility="{Binding EsProtegido, Converter={StaticResource BoolAVisible}}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="ShieldCrownOutline"
+                                             Foreground="{StaticResource BrochaAdvertencia}"
+                                             VerticalAlignment="Top" Margin="0,1,10,0" />
+                    <TextBlock Text="Es el administrador principal del sistema: debe conservar su rol y no puede desactivarse ni eliminarse."
+                               Foreground="{StaticResource BrochaAdvertencia}"
+                               TextWrapping="Wrap" MaxWidth="540" FontSize="12.5" />
+                </StackPanel>
+            </Border>
 
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+            <!-- ══ Datos de la persona ══════════════════════════════════════ -->
+            <TextBlock Text="Datos de la persona" Style="{StaticResource TituloSeccion}" />
 
-            <TextBox Grid.Row="0" Grid.Column="0" Style="{StaticResource CampoTexto}"
-                     materialDesign:HintAssist.Hint="Nombre de usuario"
-                     Text="{Binding NombreUsuario, UpdateSourceTrigger=PropertyChanged}"
-                     CharacterCasing="Lower" MaxLength="50"
-                     IsEnabled="{Binding EsProtegido, Converter={StaticResource InvertirBool}}" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.4*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
 
-            <ComboBox Grid.Row="0" Grid.Column="2" Style="{StaticResource CampoSeleccion}"
-                      materialDesign:HintAssist.Hint="Rol"
-                      ItemsSource="{Binding Roles}"
-                      DisplayMemberPath="Descripcion"
-                      SelectedValuePath="Valor"
-                      SelectedValue="{Binding Rol}"
-                      IsEnabled="{Binding EsProtegido, Converter={StaticResource InvertirBool}}" />
+                <TextBox Grid.Column="0" Style="{StaticResource CampoTexto}"
+                         materialDesign:HintAssist.Hint="Nombre completo *"
+                         materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                         materialDesign:TextFieldAssist.LeadingIcon="AccountOutline"
+                         Text="{Binding NombreCompleto, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="150" />
 
-            <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource CampoTexto}"
-                     materialDesign:HintAssist.Hint="Nombre completo"
-                     Text="{Binding NombreCompleto, UpdateSourceTrigger=PropertyChanged}" MaxLength="150" />
-
-            <TextBox Grid.Row="2" Grid.Column="0" Style="{StaticResource CampoTexto}"
-                     materialDesign:HintAssist.Hint="Correo electrónico"
-                     Text="{Binding Correo}" MaxLength="150" />
-
-            <TextBox Grid.Row="2" Grid.Column="2" Style="{StaticResource CampoTexto}"
-                     materialDesign:HintAssist.Hint="Teléfono" Text="{Binding Telefono}" MaxLength="30" />
-        </Grid>
-
-        <!-- La contraseña solo se pide al crear; después se usa «Restablecer contraseña». -->
-        <StackPanel Visibility="{Binding EsNuevo, Converter={StaticResource BoolAVisible}}">
-            <Separator Style="{StaticResource SeparadorHorizontal}" />
-
-            <TextBlock Text="Contraseña de acceso" Style="{StaticResource TituloSeccion}" />
-            <TextBlock Text="Mínimo 6 caracteres, combinando letras y números."
-                       Style="{StaticResource TextoTenue}" FontSize="11.5" Margin="0,0,0,12" />
+                <ComboBox Grid.Column="2" Style="{StaticResource CampoSeleccion}"
+                          ItemsSource="{Binding Roles}"
+                          SelectedValue="{Binding Rol}"
+                          SelectedValuePath="Valor" DisplayMemberPath="Descripcion"
+                          IsEnabled="{Binding EsProtegido, Converter={StaticResource InvertirBool}}"
+                          materialDesign:HintAssist.Hint="Rol *"
+                          materialDesign:HintAssist.IsFloating="True" />
+            </Grid>
 
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -68,36 +62,93 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBox Grid.Column="0" Style="{StaticResource CampoTexto}"
-                         materialDesign:HintAssist.Hint="Contraseña"
-                         Text="{Binding Contrasena, UpdateSourceTrigger=PropertyChanged}"
-                         MaxLength="80" />
+                         materialDesign:HintAssist.Hint="Correo electrónico"
+                         materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                         materialDesign:TextFieldAssist.LeadingIcon="EmailOutline"
+                         Text="{Binding Correo}" MaxLength="150" />
 
                 <TextBox Grid.Column="2" Style="{StaticResource CampoTexto}"
-                         materialDesign:HintAssist.Hint="Repetir contraseña"
-                         Text="{Binding ConfirmacionContrasena, UpdateSourceTrigger=PropertyChanged}"
-                         MaxLength="80" />
+                         materialDesign:HintAssist.Hint="Teléfono"
+                         materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                         materialDesign:TextFieldAssist.LeadingIcon="PhoneOutline"
+                         Text="{Binding Telefono}" MaxLength="30" />
             </Grid>
+
+            <!-- ══ Acceso ═══════════════════════════════════════════════════ -->
+            <TextBlock Text="Acceso al sistema" Style="{StaticResource TituloSeccion}" Margin="0,8,0,10" />
+
+            <TextBox Style="{StaticResource CampoTexto}"
+                     materialDesign:HintAssist.Hint="Nombre de usuario *"
+                     materialDesign:HintAssist.HelperText="Sin espacios, mínimo 3 caracteres. Es con lo que inicia sesión."
+                     materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                     materialDesign:TextFieldAssist.LeadingIcon="AccountCircleOutline"
+                     Text="{Binding NombreUsuario, UpdateSourceTrigger=PropertyChanged}"
+                     CharacterCasing="Lower" MaxLength="50" />
+
+            <!-- La contraseña solo se pide al crear; después se usa «Restablecer» -->
+            <Grid Visibility="{Binding EsNuevo, Converter={StaticResource BoolAVisible}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <PasswordBox Grid.Column="0"
+                             Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                             Margin="0,0,0,14" VerticalContentAlignment="Center"
+                             materialDesign:HintAssist.Hint="Contraseña *"
+                             materialDesign:HintAssist.HelperText="Mínimo 6 caracteres, con letras y números"
+                             materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                             materialDesign:TextFieldAssist.LeadingIcon="LockOutline"
+                             materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
+                             MaxLength="80"
+                             PasswordChanged="ContrasenaCambiada" />
+
+                <PasswordBox Grid.Column="2"
+                             Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                             Margin="0,0,0,14" VerticalContentAlignment="Center"
+                             materialDesign:HintAssist.Hint="Repetir contraseña *"
+                             materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                             materialDesign:TextFieldAssist.LeadingIcon="LockCheckOutline"
+                             materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
+                             MaxLength="80"
+                             PasswordChanged="ConfirmacionCambiada" />
+            </Grid>
+
+            <Border Background="{StaticResource BrochaInformacionSuave}"
+                    CornerRadius="8" Padding="13,10" Margin="0,0,0,12"
+                    Visibility="{Binding EsNuevo, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="InformationOutline"
+                                             Foreground="{StaticResource BrochaInformacion}"
+                                             VerticalAlignment="Top" Margin="0,1,10,0" />
+                    <TextBlock Text="Para cambiar la contraseña de este usuario, cierre esta ventana y use «Restablecer contraseña» en el listado."
+                               Foreground="{StaticResource BrochaInformacion}"
+                               TextWrapping="Wrap" MaxWidth="540" FontSize="12.5" />
+                </StackPanel>
+            </Border>
+
+            <CheckBox Content="Usuario activo" IsChecked="{Binding Activo}" Margin="0,4,0,0"
+                      IsEnabled="{Binding EsProtegido, Converter={StaticResource InvertirBool}}" />
+
+            <TextBlock Text="Un usuario inactivo conserva su historial pero no puede iniciar sesión."
+                       Style="{StaticResource TextoTenue}"
+                       FontSize="11.5" TextWrapping="Wrap" Margin="30,4,0,0" />
         </StackPanel>
 
-        <CheckBox Content="Usuario activo" IsChecked="{Binding Activo}" Margin="0,0,0,4"
-                  IsEnabled="{Binding EsProtegido, Converter={StaticResource InvertirBool}}" />
+        <controls:PanelFormulario.Pie>
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Cancelar" Style="{StaticResource BotonTexto}" Margin="0,0,8,0"
+                        IsCancel="True" Command="{Binding CancelarCommand}" />
 
-        <TextBlock Text="Este es el administrador principal: no puede cambiar de rol ni desactivarse."
-                   Style="{StaticResource TextoTenue}" FontSize="11.5" Margin="0,0,0,10"
-                   Visibility="{Binding EsProtegido, Converter={StaticResource BoolAVisible}}" />
-
-        <Border Background="{StaticResource BrochaErrorSuave}" CornerRadius="6" Padding="12,9"
-                Margin="0,0,0,12"
-                Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
-            <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrochaError}"
-                       TextWrapping="Wrap" FontSize="12.5" />
-        </Border>
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Cancelar" Style="{StaticResource BotonTexto}" Margin="0,0,8,0"
-                    IsCancel="True" Command="{Binding CancelarCommand}" />
-            <Button Content="Guardar" Style="{StaticResource BotonPrincipal}" IsDefault="True"
-                    Command="{Binding GuardarCommand}" />
-        </StackPanel>
-    </StackPanel>
+                <Button Style="{StaticResource BotonPrincipal}" IsDefault="True"
+                        Command="{Binding GuardarCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentSaveOutline" VerticalAlignment="Center" />
+                        <TextBlock Text="GUARDAR" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </controls:PanelFormulario.Pie>
+    </controls:PanelFormulario>
 </UserControl>

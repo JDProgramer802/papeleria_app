@@ -26,6 +26,11 @@ public class ArqueoCajaDto
 
     public decimal Egresos { get; init; }
 
+    /// <summary>Efectivo devuelto por anular ventas cobradas en sesiones anteriores.</summary>
+    public decimal Devoluciones { get; init; }
+
+    public bool HayDevoluciones => Devoluciones > 0;
+
     public int CantidadVentas { get; init; }
 
     /// <summary>Total facturado en la sesión, con independencia del medio de pago.</summary>
@@ -34,8 +39,11 @@ public class ArqueoCajaDto
 
     public decimal VentasOtrosMedios => Dinero.Redondear(VentasTarjeta + VentasTransferencia + VentasCredito);
 
-    /// <summary>Efectivo teórico en el cajón: base + ventas en efectivo + ingresos − egresos.</summary>
-    public decimal MontoEsperado => Dinero.Redondear(MontoInicial + VentasEfectivo + Ingresos - Egresos);
+    /// <summary>
+    /// Efectivo teórico en el cajón: base + ventas en efectivo + ingresos − egresos − devoluciones.
+    /// </summary>
+    public decimal MontoEsperado =>
+        Dinero.Redondear(MontoInicial + VentasEfectivo + Ingresos - Egresos - Devoluciones);
 }
 
 /// <summary>Fila del historial de sesiones de caja.</summary>

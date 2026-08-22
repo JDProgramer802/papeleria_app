@@ -122,22 +122,14 @@
                                                 Binding="{Binding NumeroFacturaProveedor}" Width="130" />
                             <DataGridTextColumn Header="Registró" Binding="{Binding UsuarioNombre}" Width="160" />
 
-                            <DataGridTextColumn Header="Ítems" Binding="{Binding CantidadItems}" Width="70">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Ítems" Binding="{Binding CantidadItems}" Width="70"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTextColumn Header="IVA" Width="105"
-                                                Binding="{Binding TotalIva, Converter={StaticResource Moneda}}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                                                Binding="{Binding TotalIva, Converter={StaticResource Moneda}}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTextColumn Header="Total" Width="125"
                                                 Binding="{Binding Total, Converter={StaticResource Moneda}}">
@@ -342,40 +334,24 @@
                                                 IsReadOnly="True" />
 
                             <DataGridTextColumn Header="Cantidad" Width="95"
-                                                Binding="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                                                Binding="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTextColumn Header="Costo unit." Width="115"
-                                                Binding="{Binding CostoUnitario, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                                                Binding="{Binding CostoUnitario, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTextColumn Header="Desc. %" Width="85"
-                                                Binding="{Binding PorcentajeDescuento, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                                                Binding="{Binding PorcentajeDescuento, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTextColumn Header="IVA %" Width="80"
-                                                Binding="{Binding PorcentajeIva, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                                                Binding="{Binding PorcentajeIva, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTextColumn Header="Total" Width="125" IsReadOnly="True"
                                                 Binding="{Binding Total, Converter={StaticResource Moneda}}">

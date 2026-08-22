@@ -10,16 +10,6 @@
              mc:Ignorable="d"
              d:DesignHeight="900" d:DesignWidth="1300">
 
-    <UserControl.Resources>
-        <!-- Tarjeta de indicador reutilizada por las nueve métricas del panel. -->
-        <Style x:Key="TarjetaIndicador" TargetType="materialDesign:Card"
-               BasedOn="{StaticResource TarjetaInteractiva}">
-            <Setter Property="Padding" Value="16" />
-            <Setter Property="Margin" Value="0,0,14,14" />
-            <Setter Property="Width" Value="228" />
-        </Style>
-    </UserControl.Resources>
-
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
@@ -50,110 +40,27 @@
                 </Grid>
 
                 <!-- ══ Tarjetas de indicadores ═════════════════════════════ -->
-                <WrapPanel>
-                    <!-- Productos -->
-                    <materialDesign:Card Style="{StaticResource TarjetaIndicador}"
-                                         ToolTip="Ir al catálogo de productos">
-                        <materialDesign:Card.InputBindings>
-                            <MouseBinding MouseAction="LeftClick"
-                                          Command="{Binding IrAModuloCommand}"
-                                          CommandParameter="productos" />
-                        </materialDesign:Card.InputBindings>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Border Width="38" Height="38" CornerRadius="10" Background="#E3F2FD">
-                                    <materialDesign:PackIcon Kind="PackageVariantClosed" Width="21" Height="21"
-                                                             Foreground="#1565C0"
-                                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <TextBlock Text="Productos" Style="{StaticResource EtiquetaCampo}"
-                                           VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12.5" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding Resumen.TotalProductos, Converter={StaticResource Cantidad}}"
-                                       Style="{StaticResource ValorDestacado}" Margin="0,10,0,0" />
-                            <TextBlock Text="artículos activos" Style="{StaticResource TextoTenue}" FontSize="11.5" />
-                        </StackPanel>
-                    </materialDesign:Card>
-
-                    <!-- Valor del inventario -->
-                    <materialDesign:Card Style="{StaticResource TarjetaIndicador}"
-                                         ToolTip="Ir al inventario">
-                        <materialDesign:Card.InputBindings>
-                            <MouseBinding MouseAction="LeftClick"
-                                          Command="{Binding IrAModuloCommand}"
-                                          CommandParameter="inventario" />
-                        </materialDesign:Card.InputBindings>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Border Width="38" Height="38" CornerRadius="10" Background="#E8F5E9">
-                                    <materialDesign:PackIcon Kind="Warehouse" Width="21" Height="21"
-                                                             Foreground="#2E7D32"
-                                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <TextBlock Text="Valor inventario" Style="{StaticResource EtiquetaCampo}"
-                                           VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12.5" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding Resumen.ValorInventario, Converter={StaticResource Moneda}}"
-                                       Style="{StaticResource ValorDestacado}" Margin="0,10,0,0" />
-                            <TextBlock Text="valorado a costo" Style="{StaticResource TextoTenue}" FontSize="11.5" />
-                        </StackPanel>
-                    </materialDesign:Card>
-
-                    <!-- Compras del mes -->
-                    <materialDesign:Card Style="{StaticResource TarjetaIndicador}"
-                                         ToolTip="Ir a compras">
-                        <materialDesign:Card.InputBindings>
-                            <MouseBinding MouseAction="LeftClick"
-                                          Command="{Binding IrAModuloCommand}"
-                                          CommandParameter="compras" />
-                        </materialDesign:Card.InputBindings>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Border Width="38" Height="38" CornerRadius="10" Background="#FFF3E0">
-                                    <materialDesign:PackIcon Kind="TruckDeliveryOutline" Width="21" Height="21"
-                                                             Foreground="#EF6C00"
-                                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <TextBlock Text="Compras del mes" Style="{StaticResource EtiquetaCampo}"
-                                           VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12.5" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding Resumen.ComprasDelMes, Converter={StaticResource Moneda}}"
-                                       Style="{StaticResource ValorDestacado}" Margin="0,10,0,0" />
-                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                <materialDesign:PackIcon
-                                    Kind="{Binding Resumen.VariacionCompras, Converter={StaticResource VariacionAIcono}}"
-                                    Foreground="{Binding Resumen.VariacionCompras, Converter={StaticResource VariacionABrocha}, ConverterParameter=Invertir}"
-                                    Width="15" Height="15" VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding Resumen.VariacionCompras, Converter={StaticResource VariacionATexto}}"
-                                           Foreground="{Binding Resumen.VariacionCompras, Converter={StaticResource VariacionABrocha}, ConverterParameter=Invertir}"
-                                           FontSize="11.5" VerticalAlignment="Center" Margin="4,0,0,0" />
-                                <TextBlock Text="vs. mes anterior" Style="{StaticResource TextoTenue}"
-                                           FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" />
-                            </StackPanel>
-                        </StackPanel>
-                    </materialDesign:Card>
-
-                    <!-- Ventas del mes -->
-                    <materialDesign:Card Style="{StaticResource TarjetaIndicador}"
-                                         ToolTip="Ir al punto de venta">
-                        <materialDesign:Card.InputBindings>
+                <!--
+                    Rejilla uniforme en lugar de flujo libre: así las tarjetas reparten
+                    el ancho por igual y no queda un hueco de tamaño arbitrario al final
+                    de la primera fila. El orden va del dinero del mes a las existencias
+                    y los directorios, que es como se consulta el panel.
+                -->
+                <UniformGrid Columns="5" Margin="0,0,-14,4">
+                    <controls:TarjetaMetrica
+                        Icono="CashRegister"
+                        FondoIcono="#E1F5FE"
+                        ColorIcono="#0277BD"
+                        Etiqueta="Ventas del mes"
+                        Valor="{Binding Resumen.VentasDelMes, Converter={StaticResource Moneda}}"
+                        ToolTip="Ir al punto de venta">
+                        <controls:TarjetaMetrica.InputBindings>
                             <MouseBinding MouseAction="LeftClick"
                                           Command="{Binding IrAModuloCommand}"
                                           CommandParameter="ventas" />
-                        </materialDesign:Card.InputBindings>
-                        <StackPanel>
+                        </controls:TarjetaMetrica.InputBindings>
+                        <controls:TarjetaMetrica.Pie>
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="38" Height="38" CornerRadius="10" Background="#E1F5FE">
-                                    <materialDesign:PackIcon Kind="CashRegister" Width="21" Height="21"
-                                                             Foreground="#0277BD"
-                                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <TextBlock Text="Ventas del mes" Style="{StaticResource EtiquetaCampo}"
-                                           VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12.5" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding Resumen.VentasDelMes, Converter={StaticResource Moneda}}"
-                                       Style="{StaticResource ValorDestacado}" Margin="0,10,0,0" />
-                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                 <materialDesign:PackIcon
                                     Kind="{Binding Resumen.VariacionVentas, Converter={StaticResource VariacionAIcono}}"
                                     Foreground="{Binding Resumen.VariacionVentas, Converter={StaticResource VariacionABrocha}}"
@@ -164,30 +71,23 @@
                                 <TextBlock Text="vs. mes anterior" Style="{StaticResource TextoTenue}"
                                            FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" />
                             </StackPanel>
-                        </StackPanel>
-                    </materialDesign:Card>
+                        </controls:TarjetaMetrica.Pie>
+                    </controls:TarjetaMetrica>
 
-                    <!-- Ganancias -->
-                    <materialDesign:Card Style="{StaticResource TarjetaIndicador}"
-                                         ToolTip="Ver el reporte de ganancias">
-                        <materialDesign:Card.InputBindings>
+                    <controls:TarjetaMetrica
+                        Icono="ChartLine"
+                        FondoIcono="#F1F8E9"
+                        ColorIcono="#558B2F"
+                        Etiqueta="Ganancias del mes"
+                        Valor="{Binding Resumen.GananciasDelMes, Converter={StaticResource Moneda}}"
+                        ToolTip="Ver el reporte de ganancias">
+                        <controls:TarjetaMetrica.InputBindings>
                             <MouseBinding MouseAction="LeftClick"
                                           Command="{Binding IrAModuloCommand}"
                                           CommandParameter="reportes" />
-                        </materialDesign:Card.InputBindings>
-                        <StackPanel>
+                        </controls:TarjetaMetrica.InputBindings>
+                        <controls:TarjetaMetrica.Pie>
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="38" Height="38" CornerRadius="10" Background="#F1F8E9">
-                                    <materialDesign:PackIcon Kind="ChartLine" Width="21" Height="21"
-                                                             Foreground="#558B2F"
-                                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <TextBlock Text="Ganancias del mes" Style="{StaticResource EtiquetaCampo}"
-                                           VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12.5" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding Resumen.GananciasDelMes, Converter={StaticResource Moneda}}"
-                                       Style="{StaticResource ValorDestacado}" Margin="0,10,0,0" />
-                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                 <materialDesign:PackIcon
                                     Kind="{Binding Resumen.VariacionGanancias, Converter={StaticResource VariacionAIcono}}"
                                     Foreground="{Binding Resumen.VariacionGanancias, Converter={StaticResource VariacionABrocha}}"
@@ -198,107 +98,128 @@
                                 <TextBlock Text="utilidad bruta" Style="{StaticResource TextoTenue}"
                                            FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" />
                             </StackPanel>
-                        </StackPanel>
-                    </materialDesign:Card>
+                        </controls:TarjetaMetrica.Pie>
+                    </controls:TarjetaMetrica>
 
-                    <!-- Bajo stock -->
-                    <materialDesign:Card Style="{StaticResource TarjetaIndicador}"
-                                         ToolTip="Ver productos por reponer">
-                        <materialDesign:Card.InputBindings>
+                    <controls:TarjetaMetrica
+                        Icono="TruckDeliveryOutline"
+                        FondoIcono="#FFF3E0"
+                        ColorIcono="#EF6C00"
+                        Etiqueta="Compras del mes"
+                        Valor="{Binding Resumen.ComprasDelMes, Converter={StaticResource Moneda}}"
+                        ToolTip="Ir a compras">
+                        <controls:TarjetaMetrica.InputBindings>
+                            <MouseBinding MouseAction="LeftClick"
+                                          Command="{Binding IrAModuloCommand}"
+                                          CommandParameter="compras" />
+                        </controls:TarjetaMetrica.InputBindings>
+                        <controls:TarjetaMetrica.Pie>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Kind="{Binding Resumen.VariacionCompras, Converter={StaticResource VariacionAIcono}}"
+                                    Foreground="{Binding Resumen.VariacionCompras, Converter={StaticResource VariacionABrocha}, ConverterParameter=Invertir}"
+                                    Width="15" Height="15" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding Resumen.VariacionCompras, Converter={StaticResource VariacionATexto}}"
+                                           Foreground="{Binding Resumen.VariacionCompras, Converter={StaticResource VariacionABrocha}, ConverterParameter=Invertir}"
+                                           FontSize="11.5" VerticalAlignment="Center" Margin="4,0,0,0" />
+                                <TextBlock Text="vs. mes anterior" Style="{StaticResource TextoTenue}"
+                                           FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" />
+                            </StackPanel>
+                        </controls:TarjetaMetrica.Pie>
+                    </controls:TarjetaMetrica>
+
+                    <controls:TarjetaMetrica
+                        Icono="Warehouse"
+                        FondoIcono="#E8F5E9"
+                        ColorIcono="#2E7D32"
+                        Etiqueta="Valor inventario"
+                        Valor="{Binding Resumen.ValorInventario, Converter={StaticResource Moneda}}"
+                        Nota="valorado a costo"
+                        ToolTip="Ir al inventario">
+                        <controls:TarjetaMetrica.InputBindings>
                             <MouseBinding MouseAction="LeftClick"
                                           Command="{Binding IrAModuloCommand}"
                                           CommandParameter="inventario" />
-                        </materialDesign:Card.InputBindings>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Border Width="38" Height="38" CornerRadius="10" Background="#FFF8E1">
-                                    <materialDesign:PackIcon Kind="AlertOutline" Width="21" Height="21"
-                                                             Foreground="#F57F17"
-                                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <TextBlock Text="Bajo stock" Style="{StaticResource EtiquetaCampo}"
-                                           VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12.5" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding Resumen.ProductosBajoStock}"
-                                       Style="{StaticResource ValorDestacado}" Margin="0,10,0,0"
-                                       Foreground="#F57F17" />
-                            <TextBlock Text="productos por reponer" Style="{StaticResource TextoTenue}" FontSize="11.5" />
-                        </StackPanel>
-                    </materialDesign:Card>
+                        </controls:TarjetaMetrica.InputBindings>
+                    </controls:TarjetaMetrica>
 
-                    <!-- Agotados -->
-                    <materialDesign:Card Style="{StaticResource TarjetaIndicador}"
-                                         ToolTip="Ver productos agotados">
-                        <materialDesign:Card.InputBindings>
+                    <controls:TarjetaMetrica
+                        Icono="PackageVariantClosed"
+                        FondoIcono="#E3F2FD"
+                        ColorIcono="#1565C0"
+                        Etiqueta="Productos"
+                        Valor="{Binding Resumen.TotalProductos, Converter={StaticResource Cantidad}}"
+                        Nota="artículos activos"
+                        ToolTip="Ir al catálogo de productos">
+                        <controls:TarjetaMetrica.InputBindings>
+                            <MouseBinding MouseAction="LeftClick"
+                                          Command="{Binding IrAModuloCommand}"
+                                          CommandParameter="productos" />
+                        </controls:TarjetaMetrica.InputBindings>
+                    </controls:TarjetaMetrica>
+
+                    <controls:TarjetaMetrica
+                        Icono="AlertOutline"
+                        FondoIcono="#FFF8E1"
+                        ColorIcono="#F57F17"
+                        Etiqueta="Bajo stock"
+                        Valor="{Binding Resumen.ProductosBajoStock}"
+                        Nota="productos por reponer"
+                        EsAlerta="{Binding Resumen.ProductosBajoStock, Converter={StaticResource MayorQueCeroABool}}"
+                        ToolTip="Ver productos por reponer">
+                        <controls:TarjetaMetrica.InputBindings>
                             <MouseBinding MouseAction="LeftClick"
                                           Command="{Binding IrAModuloCommand}"
                                           CommandParameter="inventario" />
-                        </materialDesign:Card.InputBindings>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Border Width="38" Height="38" CornerRadius="10" Background="#FFEBEE">
-                                    <materialDesign:PackIcon Kind="CloseCircleOutline" Width="21" Height="21"
-                                                             Foreground="#C62828"
-                                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <TextBlock Text="Agotados" Style="{StaticResource EtiquetaCampo}"
-                                           VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12.5" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding Resumen.ProductosAgotados}"
-                                       Style="{StaticResource ValorDestacado}" Margin="0,10,0,0"
-                                       Foreground="#C62828" />
-                            <TextBlock Text="sin existencias" Style="{StaticResource TextoTenue}" FontSize="11.5" />
-                        </StackPanel>
-                    </materialDesign:Card>
+                        </controls:TarjetaMetrica.InputBindings>
+                    </controls:TarjetaMetrica>
 
-                    <!-- Proveedores -->
-                    <materialDesign:Card Style="{StaticResource TarjetaIndicador}"
-                                         ToolTip="Ir a proveedores">
-                        <materialDesign:Card.InputBindings>
+                    <controls:TarjetaMetrica
+                        Icono="CloseCircleOutline"
+                        FondoIcono="#FFEBEE"
+                        ColorIcono="#C62828"
+                        Etiqueta="Agotados"
+                        Valor="{Binding Resumen.ProductosAgotados}"
+                        Nota="sin existencias"
+                        EsAlerta="{Binding Resumen.ProductosAgotados, Converter={StaticResource MayorQueCeroABool}}"
+                        ToolTip="Ver productos agotados">
+                        <controls:TarjetaMetrica.InputBindings>
                             <MouseBinding MouseAction="LeftClick"
                                           Command="{Binding IrAModuloCommand}"
-                                          CommandParameter="proveedores" />
-                        </materialDesign:Card.InputBindings>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Border Width="38" Height="38" CornerRadius="10" Background="#EDE7F6">
-                                    <materialDesign:PackIcon Kind="DomainPlus" Width="21" Height="21"
-                                                             Foreground="#5E35B1"
-                                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <TextBlock Text="Proveedores" Style="{StaticResource EtiquetaCampo}"
-                                           VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12.5" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding Resumen.TotalProveedores}"
-                                       Style="{StaticResource ValorDestacado}" Margin="0,10,0,0" />
-                            <TextBlock Text="proveedores activos" Style="{StaticResource TextoTenue}" FontSize="11.5" />
-                        </StackPanel>
-                    </materialDesign:Card>
+                                          CommandParameter="inventario" />
+                        </controls:TarjetaMetrica.InputBindings>
+                    </controls:TarjetaMetrica>
 
-                    <!-- Clientes -->
-                    <materialDesign:Card Style="{StaticResource TarjetaIndicador}"
-                                         ToolTip="Ir a clientes">
-                        <materialDesign:Card.InputBindings>
+                    <controls:TarjetaMetrica
+                        Icono="AccountGroupOutline"
+                        FondoIcono="#E0F7FA"
+                        ColorIcono="#00838F"
+                        Etiqueta="Clientes"
+                        Valor="{Binding Resumen.TotalClientes}"
+                        Nota="clientes registrados"
+                        ToolTip="Ir a clientes">
+                        <controls:TarjetaMetrica.InputBindings>
                             <MouseBinding MouseAction="LeftClick"
                                           Command="{Binding IrAModuloCommand}"
                                           CommandParameter="clientes" />
-                        </materialDesign:Card.InputBindings>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Border Width="38" Height="38" CornerRadius="10" Background="#E0F7FA">
-                                    <materialDesign:PackIcon Kind="AccountGroupOutline" Width="21" Height="21"
-                                                             Foreground="#00838F"
-                                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
-                                <TextBlock Text="Clientes" Style="{StaticResource EtiquetaCampo}"
-                                           VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12.5" />
-                            </StackPanel>
-                            <TextBlock Text="{Binding Resumen.TotalClientes}"
-                                       Style="{StaticResource ValorDestacado}" Margin="0,10,0,0" />
-                            <TextBlock Text="clientes registrados" Style="{StaticResource TextoTenue}" FontSize="11.5" />
-                        </StackPanel>
-                    </materialDesign:Card>
-                </WrapPanel>
+                        </controls:TarjetaMetrica.InputBindings>
+                    </controls:TarjetaMetrica>
+
+                    <controls:TarjetaMetrica
+                        Icono="DomainPlus"
+                        FondoIcono="#EDE7F6"
+                        ColorIcono="#5E35B1"
+                        Etiqueta="Proveedores"
+                        Valor="{Binding Resumen.TotalProveedores}"
+                        Nota="proveedores activos"
+                        ToolTip="Ir a proveedores">
+                        <controls:TarjetaMetrica.InputBindings>
+                            <MouseBinding MouseAction="LeftClick"
+                                          Command="{Binding IrAModuloCommand}"
+                                          CommandParameter="proveedores" />
+                        </controls:TarjetaMetrica.InputBindings>
+                    </controls:TarjetaMetrica>
+                </UniformGrid>
 
                 <!-- ══ Actividad del día y alertas ═════════════════════════ -->
                 <Grid Margin="0,6,0,0">
@@ -321,9 +242,16 @@
 
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                                             VerticalAlignment="Top">
+                                    <!-- El distintivo imita el trazo: línea para ventas, bloque para compras. -->
                                     <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
-                                        <Border Width="11" Height="11" CornerRadius="3" Background="#1E88E5"
-                                                VerticalAlignment="Center" />
+                                        <Grid Width="18" Height="11" VerticalAlignment="Center">
+                                            <Border Height="2.5" CornerRadius="2" Background="#1E88E5"
+                                                    VerticalAlignment="Center" />
+                                            <Ellipse Width="7" Height="7" Fill="#1E88E5"
+                                                     Stroke="{DynamicResource MaterialDesignPaper}"
+                                                     StrokeThickness="1.5"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Grid>
                                         <TextBlock Text="Ventas" FontSize="12" VerticalAlignment="Center"
                                                    Margin="6,0,0,0" />
                                     </StackPanel>
@@ -336,17 +264,22 @@
                                 </StackPanel>
                             </Grid>
 
-                            <controls:GraficoBarras Height="290" Margin="0,16,0,0"
-                                                    SerieA="{Binding SerieVentas}"
-                                                    SerieB="{Binding SerieCompras}"
-                                                    NombreSerieA="Ventas"
-                                                    NombreSerieB="Compras" />
+                            <controls:GraficoComparativo Height="290" Margin="0,16,0,0"
+                                                         SerieBarras="{Binding SerieCompras}"
+                                                         SerieLinea="{Binding SerieVentas}"
+                                                         NombreSerieBarras="Compras"
+                                                         NombreSerieLinea="Ventas" />
                         </StackPanel>
                     </materialDesign:Card>
 
                     <!-- Alertas y actividad del día -->
-                    <StackPanel Grid.Column="2">
-                        <materialDesign:Card Style="{StaticResource TarjetaBase}">
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <materialDesign:Card Grid.Row="0" Style="{StaticResource TarjetaBase}">
                             <StackPanel>
                                 <TextBlock Text="Actividad de hoy" Style="{StaticResource TituloSeccion}" />
 
@@ -385,8 +318,10 @@
                             </StackPanel>
                         </materialDesign:Card>
 
-                        <materialDesign:Card Style="{StaticResource TarjetaBase}">
-                            <StackPanel>
+                        <!-- Ocupa el alto sobrante para que ambas columnas cierren igual. -->
+                        <materialDesign:Card Grid.Row="1" Style="{StaticResource TarjetaBase}"
+                                             VerticalAlignment="Stretch">
+                            <StackPanel VerticalAlignment="Top">
                                 <TextBlock Text="Alertas" Style="{StaticResource TituloSeccion}" />
 
                                 <TextBlock Text="Todo en orden. No hay avisos pendientes."
@@ -429,7 +364,7 @@
                                 </ItemsControl>
                             </StackPanel>
                         </materialDesign:Card>
-                    </StackPanel>
+                    </Grid>
                 </Grid>
 
                 <!-- ══ Más vendidos y movimientos recientes ════════════════ -->
@@ -498,7 +433,7 @@
                                 <Button Style="{StaticResource BotonTexto}"
                                         HorizontalAlignment="Right" VerticalAlignment="Top"
                                         Command="{Binding IrAModuloCommand}" CommandParameter="kardex"
-                                        Content="VER KARDEX" FontSize="11" />
+                                        Content="Ver kardex" FontSize="11" />
                             </Grid>
 
                             <TextBlock Text="Aún no hay movimientos de inventario."

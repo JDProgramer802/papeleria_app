@@ -394,6 +394,24 @@ public class EnumADescripcion : IValueConverter
 }
 
 /// <summary>Visible cuando el número es mayor que cero.</summary>
+/// <summary>
+/// Indica si un número es mayor que cero. Se usa para encender avisos visuales
+/// cuando un contador deja de estar a cero (productos agotados, bajo mínimo).
+/// </summary>
+public class MayorQueCeroABooleano : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var numero = value is null ? 0 : System.Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+        var positivo = numero > 0;
+
+        return BooleanoAVisibilidad.EsInvertido(parameter) ? !positivo : positivo;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
 public class MayorQueCeroAVisibilidad : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)

@@ -496,13 +496,9 @@
                                             <DataGridTextColumn Header="Fecha" Width="145"
                                                                 Binding="{Binding Fecha, Converter={StaticResource Fecha}, ConverterParameter=Hora}" />
                                             <DataGridTextColumn Header="Tamaño" Binding="{Binding TamanoTexto}"
-                                                                Width="95">
-                                                <DataGridTextColumn.ElementStyle>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                                    </Style>
-                                                </DataGridTextColumn.ElementStyle>
-                                            </DataGridTextColumn>
+                                                                Width="95"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
                                         </DataGrid.Columns>
                                     </DataGrid>
 

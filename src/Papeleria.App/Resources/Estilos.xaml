@@ -148,11 +148,14 @@
     <!-- ══ Entradas ══════════════════════════════════════════════════════════ -->
     <Style x:Key="CampoTexto" TargetType="TextBox"
            BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
-        <Setter Property="Margin" Value="0,0,0,14" />
+        <Setter Property="Margin" Value="0,0,0,16" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <!-- El contador «12 / 50» que Material muestra al fijar MaxLength distrae
              en un formulario de gestión; el límite sigue vigente, solo se oculta. -->
         <Setter Property="materialDesign:TextFieldAssist.CharacterCounterVisibility" Value="Collapsed" />
+        <!-- Rótulo siempre arriba: en un formulario con muchos campos ya rellenos,
+             que la etiqueta desaparezca al escribir obliga a adivinar qué es cada dato. -->
+        <Setter Property="materialDesign:HintAssist.IsFloating" Value="True" />
     </Style>
 
     <Style x:Key="CampoNumerico" TargetType="TextBox"
@@ -162,12 +165,14 @@
 
     <Style x:Key="CampoSeleccion" TargetType="ComboBox"
            BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
-        <Setter Property="Margin" Value="0,0,0,14" />
+        <Setter Property="Margin" Value="0,0,0,16" />
+        <Setter Property="materialDesign:HintAssist.IsFloating" Value="True" />
     </Style>
 
     <Style x:Key="CampoFecha" TargetType="DatePicker"
            BasedOn="{StaticResource MaterialDesignOutlinedDatePicker}">
-        <Setter Property="Margin" Value="0,0,0,14" />
+        <Setter Property="Margin" Value="0,0,0,16" />
+        <Setter Property="materialDesign:HintAssist.IsFloating" Value="True" />
     </Style>
 
     <Style x:Key="CampoBusqueda" TargetType="TextBox"
@@ -177,6 +182,32 @@
         <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True" />
         <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="6" />
         <Setter Property="materialDesign:TextFieldAssist.CharacterCounterVisibility" Value="Collapsed" />
+    </Style>
+
+    <!--
+        Controles de las barras de filtro. Comparten alto, esquinas y borde con
+        CampoBusqueda: en una misma fila, un campo enmarcado junto a otro subrayado
+        se lee como algo a medio terminar, y sin rótulo no se sabe qué filtra.
+    -->
+    <!--
+        El rótulo no flota: en una barra de 40 px de alto no cabe encima del valor
+        sin apretar el contenido. Actúa de texto guía y desaparece al elegir, igual
+        que en el campo de búsqueda que va a su lado.
+    -->
+    <Style x:Key="FiltroSeleccion" TargetType="ComboBox"
+           BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
+        <Setter Property="Height" Value="40" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
+        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="6" />
+    </Style>
+
+    <Style x:Key="FiltroFecha" TargetType="DatePicker"
+           BasedOn="{StaticResource MaterialDesignOutlinedDatePicker}">
+        <Setter Property="Height" Value="40" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
+        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="6" />
     </Style>
 
     <!-- Campos del formulario de acceso: mismo aspecto para el campo enmascarado
@@ -222,6 +253,20 @@
         <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling" />
         <Setter Property="materialDesign:DataGridAssist.CellPadding" Value="10,4" />
         <Setter Property="materialDesign:DataGridAssist.ColumnHeaderPadding" Value="10,4" />
+    </Style>
+
+    <!--
+        Columnas numéricas: la cifra y su rótulo se alinean por el mismo borde. Un
+        encabezado a la izquierda sobre importes a la derecha rompe la lectura de
+        la columna y obliga a buscar a qué corresponde cada número.
+    -->
+    <Style x:Key="CeldaNumerica" TargetType="TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <Style x:Key="EncabezadoNumerico" TargetType="DataGridColumnHeader"
+           BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+        <Setter Property="HorizontalContentAlignment" Value="Right" />
     </Style>
 
     <!-- Grilla editable usada en compras y en el carrito del punto de venta. -->

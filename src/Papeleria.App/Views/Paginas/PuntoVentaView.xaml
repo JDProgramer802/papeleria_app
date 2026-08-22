@@ -223,22 +223,14 @@
                             </DataGridTemplateColumn>
 
                             <DataGridTextColumn Header="Precio" Width="110"
-                                                Binding="{Binding PrecioUnitario, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                                                Binding="{Binding PrecioUnitario, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTextColumn Header="Desc. %" Width="80"
-                                                Binding="{Binding PorcentajeDescuento, UpdateSourceTrigger=PropertyChanged, StringFormat=N1}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                                                Binding="{Binding PorcentajeDescuento, UpdateSourceTrigger=PropertyChanged, StringFormat=N1}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTextColumn Header="Total" Width="120" IsReadOnly="True"
                                                 Binding="{Binding Total, Converter={StaticResource Moneda}}">

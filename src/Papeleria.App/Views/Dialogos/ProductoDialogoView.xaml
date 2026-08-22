@@ -4,23 +4,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:controls="clr-namespace:Papeleria.App.Controls"
              xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
              d:DataContext="{d:DesignInstance vm:ProductoDialogoVistaModelo}"
              mc:Ignorable="d"
-             Width="920" MaxHeight="760">
+             Width="940">
 
-    <Grid Margin="24,22,24,16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <TextBlock Grid.Row="0" Text="{Binding Titulo}"
-                   Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                   Margin="0,0,0,16" />
-
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
+    <controls:PanelFormulario Titulo="{Binding Titulo}"
+                              Subtitulo="{Binding TextoAyudaStock}"
+                              Icono="PackageVariantClosed"
+                              AltoMaximoContenido="520">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="2*" />
@@ -277,27 +270,20 @@
                     </Border>
                 </StackPanel>
             </Grid>
-        </ScrollViewer>
 
-        <StackPanel Grid.Row="2" Margin="0,16,0,0">
-            <Border Background="{StaticResource BrochaErrorSuave}" CornerRadius="6" Padding="12,9"
-                    Margin="0,0,0,12"
-                    Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
-                <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrochaError}"
-                           TextWrapping="Wrap" FontSize="12.5" />
-            </Border>
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <controls:PanelFormulario.Pie>
+            <StackPanel Orientation="Horizontal">
                 <Button Content="Cancelar" Style="{StaticResource BotonTexto}" Margin="0,0,8,0"
                         IsCancel="True" Command="{Binding CancelarCommand}" />
-                <Button Style="{StaticResource BotonPrincipal}" IsDefault="True"
+
+                <Button Style="{StaticResource BotonPrincipal}" MinWidth="180" IsDefault="True"
                         Command="{Binding GuardarCommand}">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ContentSave" VerticalAlignment="Center" />
-                        <TextBlock Text="Guardar producto" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        <materialDesign:PackIcon Kind="ContentSaveOutline" VerticalAlignment="Center" />
+                        <TextBlock Text="GUARDAR PRODUCTO" Margin="8,0,0,0" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
             </StackPanel>
-        </StackPanel>
-    </Grid>
+        </controls:PanelFormulario.Pie>
+    </controls:PanelFormulario>
 </UserControl>

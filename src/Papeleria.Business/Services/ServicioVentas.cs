@@ -38,13 +38,48 @@ public class ServicioVentas : IServicioVentas
         _log = log;
     }
 
+    /// <summary>
+    /// Consultar facturas se autoriza por el punto de venta o por el historial: el
+    /// administrador puede retirar uno de los dos permisos sin cerrar el otro módulo.
+    /// </summary>
+    private void ExigirLecturaDeVentas()
+    {
+        if (_sesion.Puede(Modulos.HistorialVentas))
+        {
+            return;
+        }
+
+        _sesion.Exigir(Modulos.Ventas, AccionPermiso.Ver);
+    }
+
     public async Task<ResultadoPaginado<VentaResumenDto>> BuscarAsync(
         FiltroVentas filtro, CancellationToken ct = default)
     {
-        _sesion.Exigir(Modulos.Ventas, AccionPermiso.Ver);
+        ExigirLecturaDeVentas();
 
         await using var unidad = _fabrica.Crear();
 
+        var consulta = ConstruirConsulta(unidad, filtro);
+
+        var total = await consulta.CountAsync(ct).ConfigureAwait(false);
+
+        var elementos = await consulta
+            .OrderByDescending(v => v.Fecha)
+            .ThenByDescending(v => v.Id)
+            .Skip((Math.Max(filtro.Pagina, 1) - 1) * filtro.TamanoPagina)
+            .Take(filtro.TamanoPagina)
+            .Select(ProyeccionResumen)
+            .ToListAsync(ct).ConfigureAwait(false);
+
+        return new ResultadoPaginado<VentaResumenDto>(elementos, total, filtro.Pagina, filtro.TamanoPagina);
+    }
+
+    /// <summary>
+    /// Traduce el filtro a condiciones SQL. Se comparte entre el listado y el resumen
+    /// para que las cifras del encabezado correspondan exactamente a lo que se lista.
+    /// </summary>
+    private static IQueryable<Venta> ConstruirConsulta(IUnidadDeTrabajo unidad, FiltroVentas filtro)
+    {
         var consulta = unidad.Contexto.Ventas.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filtro.Texto))
@@ -75,6 +110,7 @@ public class ServicioVentas : IServicioVentas
 
         if (filtro.Hasta is { } hasta)
         {
+            // El filtro es inclusivo: se toma hasta el último instante del día indicado.
             var fin = hasta.Date.AddDays(1);
             consulta = consulta.Where(v => v.Fecha < fin);
         }
@@ -89,37 +125,74 @@ public class ServicioVentas : IServicioVentas
             consulta = consulta.Where(v => v.Estado == EstadoVenta.Completada);
         }
 
-        var total = await consulta.CountAsync(ct).ConfigureAwait(false);
+        return consulta;
+    }
 
-        var elementos = await consulta
-            .OrderByDescending(v => v.Fecha)
-            .ThenByDescending(v => v.Id)
-            .Skip((Math.Max(filtro.Pagina, 1) - 1) * filtro.TamanoPagina)
-            .Take(filtro.TamanoPagina)
-            .Select(v => new VentaResumenDto
+    private static System.Linq.Expressions.Expression<Func<Venta, VentaResumenDto>> ProyeccionResumen =>
+        v => new VentaResumenDto
+        {
+            Id = v.Id,
+            NumeroFactura = v.NumeroFactura,
+            Fecha = v.Fecha,
+            ClienteId = v.ClienteId,
+            ClienteNombre = v.Cliente!.Nombre,
+            UsuarioNombre = v.Usuario!.NombreCompleto,
+            Subtotal = v.Subtotal,
+            TotalDescuento = v.TotalDescuento,
+            TotalIva = v.TotalIva,
+            Total = v.Total,
+            CostoTotal = v.CostoTotal,
+            CantidadItems = v.Detalles.Count,
+            MetodoPago = v.MetodoPago,
+            Estado = v.Estado
+        };
+
+    public async Task<ResumenVentasDto> ObtenerResumenAsync(
+        FiltroVentas filtro, CancellationToken ct = default)
+    {
+        ExigirLecturaDeVentas();
+
+        await using var unidad = _fabrica.Crear();
+
+        // Las cifras se calculan sobre todo el rango filtrado, no sobre la página
+        // mostrada: un total que solo sumara lo visible daría una lectura falsa.
+        var consulta = ConstruirConsulta(unidad, filtro);
+
+        var datos = await consulta
+            .GroupBy(_ => 1)
+            .Select(g => new
             {
-                Id = v.Id,
-                NumeroFactura = v.NumeroFactura,
-                Fecha = v.Fecha,
-                ClienteId = v.ClienteId,
-                ClienteNombre = v.Cliente!.Nombre,
-                UsuarioNombre = v.Usuario!.NombreCompleto,
-                Subtotal = v.Subtotal,
-                TotalDescuento = v.TotalDescuento,
-                TotalIva = v.TotalIva,
-                Total = v.Total,
-                CostoTotal = v.CostoTotal,
-                CantidadItems = v.Detalles.Count,
-                MetodoPago = v.MetodoPago,
-                Estado = v.Estado
+                Facturas = g.Count(v => v.Estado == EstadoVenta.Completada),
+                Total = g.Sum(v => v.Estado == EstadoVenta.Completada ? (double)v.Total : 0d),
+                Utilidad = g.Sum(v => v.Estado == EstadoVenta.Completada
+                    ? (double)(v.Subtotal - v.TotalDescuento - v.CostoTotal)
+                    : 0d),
+                Anuladas = g.Count(v => v.Estado == EstadoVenta.Anulada),
+                TotalAnulado = g.Sum(v => v.Estado == EstadoVenta.Anulada ? (double)v.Total : 0d),
+                Lineas = g.Sum(v => v.Estado == EstadoVenta.Completada ? v.Detalles.Count : 0)
             })
-            .ToListAsync(ct).ConfigureAwait(false);
+            .FirstOrDefaultAsync(ct).ConfigureAwait(false);
 
-        return new ResultadoPaginado<VentaResumenDto>(elementos, total, filtro.Pagina, filtro.TamanoPagina);
+        if (datos is null)
+        {
+            return new ResumenVentasDto();
+        }
+
+        return new ResumenVentasDto
+        {
+            CantidadFacturas = datos.Facturas,
+            TotalFacturado = Dinero.Redondear(datos.Total),
+            TotalUtilidad = Dinero.Redondear(datos.Utilidad),
+            CantidadAnuladas = datos.Anuladas,
+            TotalAnulado = Dinero.Redondear(datos.TotalAnulado),
+            LineasFacturadas = datos.Lineas
+        };
     }
 
     public async Task<VentaDetalladaDto?> ObtenerDetalleAsync(int ventaId, CancellationToken ct = default)
     {
+        ExigirLecturaDeVentas();
+
         await using var unidad = _fabrica.Crear();
         return await ObtenerDetalleInternoAsync(unidad, ventaId, ct).ConfigureAwait(false);
     }

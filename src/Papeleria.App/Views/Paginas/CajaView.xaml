@@ -115,6 +115,14 @@
                                        Foreground="{StaticResource BrochaError}" />
                         </StackPanel>
 
+                        <StackPanel Visibility="{Binding Arqueo.HayDevoluciones,
+                                                 Converter={StaticResource BoolAVisible}}">
+                            <TextBlock Text="Devoluciones" Style="{StaticResource EtiquetaCampo}" />
+                            <TextBlock Text="{Binding Arqueo.Devoluciones, Converter={StaticResource Moneda}}"
+                                       FontWeight="SemiBold" FontSize="15"
+                                       Foreground="{StaticResource BrochaError}" />
+                        </StackPanel>
+
                         <StackPanel>
                             <TextBlock Text="Ventas del turno" Style="{StaticResource EtiquetaCampo}" />
                             <TextBlock Text="{Binding Arqueo.CantidadVentas}"
@@ -223,31 +231,19 @@
                                                 Binding="{Binding FechaCierre, Converter={StaticResource Fecha}, ConverterParameter=Hora}" />
                             <DataGridTextColumn Header="Responsable" Binding="{Binding UsuarioApertura}" Width="*" />
 
-                            <DataGridTextColumn Header="Ventas" Binding="{Binding CantidadVentas}" Width="70">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Ventas" Binding="{Binding CantidadVentas}" Width="70"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTextColumn Header="Esperado" Width="110"
-                                                Binding="{Binding MontoEsperado, Converter={StaticResource Moneda}}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                                                Binding="{Binding MontoEsperado, Converter={StaticResource Moneda}}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTextColumn Header="Contado" Width="110"
-                                                Binding="{Binding MontoReal, Converter={StaticResource Moneda}}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
+                                                Binding="{Binding MontoReal, Converter={StaticResource Moneda}}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTemplateColumn Header="Diferencia" Width="120">
                                 <DataGridTemplateColumn.CellTemplate>

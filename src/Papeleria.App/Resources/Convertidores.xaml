@@ -21,6 +21,7 @@
     <conv:IgualAParametro x:Key="IgualAParametro" />
     <conv:EnumADescripcion x:Key="EnumADescripcion" />
     <conv:MayorQueCeroAVisibilidad x:Key="MayorQueCeroAVisible" />
+    <conv:MayorQueCeroABooleano x:Key="MayorQueCeroABool" />
     <conv:NivelAlertaABrocha x:Key="NivelAlertaABrocha" />
     <conv:MenuColapsadoAAncho x:Key="MenuColapsadoAAncho" />
 

@@ -86,18 +86,19 @@
                          materialDesign:TextFieldAssist.HasLeadingIcon="True"
                          materialDesign:TextFieldAssist.LeadingIcon="Magnify" />
 
-                <ComboBox Grid.Column="2" Height="40"
+                <ComboBox Grid.Column="2" Style="{StaticResource FiltroSeleccion}"
+                          materialDesign:HintAssist.Hint="Tipo de movimiento"
                           ItemsSource="{Binding TiposMovimiento}"
                           SelectedValue="{Binding TipoSeleccionado}"
                           SelectedValuePath="Key" DisplayMemberPath="Value"
                           VerticalContentAlignment="Center" ToolTip="Filtrar por tipo de movimiento" />
 
-                <DatePicker Grid.Column="4" Height="40"
+                <DatePicker Grid.Column="4" Style="{StaticResource FiltroFecha}"
                             SelectedDate="{Binding Desde}"
                             materialDesign:HintAssist.Hint="Desde"
                             VerticalContentAlignment="Center" />
 
-                <DatePicker Grid.Column="6" Height="40"
+                <DatePicker Grid.Column="6" Style="{StaticResource FiltroFecha}"
                             SelectedDate="{Binding Hasta}"
                             materialDesign:HintAssist.Hint="Hasta"
                             VerticalContentAlignment="Center" />

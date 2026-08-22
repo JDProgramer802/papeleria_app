@@ -52,6 +52,16 @@
                     </TextBlock>
                 </Grid>
 
+                <!-- Dinero devuelto por anular ventas de turnos anteriores. -->
+                <Grid Visibility="{Binding Arqueo.HayDevoluciones, Converter={StaticResource BoolAVisible}}">
+                    <TextBlock Text="Devoluciones por anulación" />
+                    <TextBlock HorizontalAlignment="Right"
+                               Foreground="{StaticResource BrochaError}">
+                        <Run Text="-" />
+                        <Run Text="{Binding Arqueo.Devoluciones, Converter={StaticResource Moneda}, Mode=OneWay}" />
+                    </TextBlock>
+                </Grid>
+
                 <Separator Style="{StaticResource SeparadorHorizontal}" Margin="0,4" />
 
                 <Grid>

@@ -30,7 +30,7 @@
                     Command="{Binding VerKardexCommand}" ToolTip="Ver el historial completo de movimientos">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="SwapHorizontalBold" VerticalAlignment="Center" />
-                    <TextBlock Text="VER KARDEX" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    <TextBlock Text="Ver kardex" Margin="8,0,0,0" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
         </Grid>
@@ -120,13 +120,15 @@
                              materialDesign:TextFieldAssist.HasLeadingIcon="True"
                              materialDesign:TextFieldAssist.LeadingIcon="Magnify" />
 
-                    <ComboBox Grid.Column="2" Height="40"
+                    <ComboBox Grid.Column="2" Style="{StaticResource FiltroSeleccion}"
+                              materialDesign:HintAssist.Hint="Categoría"
                               ItemsSource="{Binding Categorias}"
                               SelectedValue="{Binding CategoriaSeleccionadaId}"
                               SelectedValuePath="Id" DisplayMemberPath="Nombre"
                               VerticalContentAlignment="Center" ToolTip="Filtrar por categoría" />
 
-                    <ComboBox Grid.Column="4" Height="40"
+                    <ComboBox Grid.Column="4" Style="{StaticResource FiltroSeleccion}"
+                              materialDesign:HintAssist.Hint="Existencias"
                               ItemsSource="{Binding EstadosStock}"
                               SelectedValue="{Binding EstadoSeleccionado}"
                               SelectedValuePath="Key" DisplayMemberPath="Value"
@@ -220,31 +222,19 @@
                         </DataGridTextColumn>
 
                         <DataGridTextColumn Header="Mínimo" Width="85"
-                                            Binding="{Binding StockMinimo, Converter={StaticResource Cantidad}}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                                            Binding="{Binding StockMinimo, Converter={StaticResource Cantidad}}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                         <DataGridTextColumn Header="Máximo" Width="85"
-                                            Binding="{Binding StockMaximo, Converter={StaticResource Cantidad}}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                                            Binding="{Binding StockMaximo, Converter={StaticResource Cantidad}}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                         <DataGridTextColumn Header="Costo" Width="100"
-                                            Binding="{Binding Costo, Converter={StaticResource Moneda}}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                                            Binding="{Binding Costo, Converter={StaticResource Moneda}}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                         <DataGridTextColumn Header="Valor" Width="115"
                                             Binding="{Binding ValorInventario, Converter={StaticResource Moneda}}">

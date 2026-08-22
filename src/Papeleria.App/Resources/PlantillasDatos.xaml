@@ -39,6 +39,10 @@
         <paginas:PuntoVentaView />
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vmPaginas:HistorialVentasVistaModelo}">
+        <paginas:HistorialVentasView />
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vmPaginas:InventarioVistaModelo}">
         <paginas:InventarioView />
     </DataTemplate>

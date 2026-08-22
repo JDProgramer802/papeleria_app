@@ -7,6 +7,12 @@ public interface IRecibeParametro
 }
 
 /// <summary>
+/// Parámetro de navegación hacia Compras: abre el formulario de registro con el
+/// producto ya cargado, para poder comprar directamente desde el catálogo.
+/// </summary>
+public record CompraDeProducto(int ProductoId, string Codigo, string Nombre);
+
+/// <summary>
 /// Navegación centrada en el modelo de vista: se navega indicando la clave del módulo
 /// y el contenedor resuelve el modelo correspondiente; la vista la elige un DataTemplate.
 /// </summary>

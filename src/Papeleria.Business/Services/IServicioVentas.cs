@@ -42,6 +42,11 @@ public interface IServicioVentas
     /// <summary>Anula la factura devolviendo la mercancía al inventario. Reservado al administrador.</summary>
     Task AnularAsync(int ventaId, string motivo, CancellationToken ct = default);
 
+    /// <summary>
+    /// Cifras acumuladas del conjunto filtrado: facturas, importe, utilidad y anuladas.
+    /// </summary>
+    Task<ResumenVentasDto> ObtenerResumenAsync(FiltroVentas filtro, CancellationToken ct = default);
+
     /// <summary>Productos más vendidos en un periodo, para el dashboard y los reportes.</summary>
     Task<List<ProductoVendidoDto>> ObtenerMasVendidosAsync(
         DateTime desde, DateTime hasta, int cantidad = 10, CancellationToken ct = default);

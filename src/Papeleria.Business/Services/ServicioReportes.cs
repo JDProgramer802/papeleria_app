@@ -46,10 +46,37 @@ public class ServicioReportes : IServicioReportes
             "Movimientos de inventario registrados en el periodo.", "SwapHorizontal", true)
     };
 
-    public Task<ReporteTabular> GenerarAsync(ParametrosReporte parametros, CancellationToken ct = default)
+    public async Task<ReporteTabular> GenerarAsync(ParametrosReporte parametros, CancellationToken ct = default)
     {
         _sesion.Exigir(Modulos.Reportes, AccionPermiso.Ver);
 
+        var reporte = await GenerarSegunTipoAsync(parametros, ct).ConfigureAwait(false);
+
+        AplicarLimite(reporte, parametros.LimiteFilas);
+
+        return reporte;
+    }
+
+    /// <summary>
+    /// Recorta el resultado al máximo configurado y lo deja dicho. Las consultas piden
+    /// una fila de más justo para poder distinguir «cabe entero» de «hay más».
+    /// </summary>
+    private static void AplicarLimite(ReporteTabular reporte, int limite)
+    {
+        if (limite <= 0 || reporte.Filas.Count <= limite)
+        {
+            return;
+        }
+
+        reporte.Filas = reporte.Filas.Take(limite).ToList();
+
+        reporte.Advertencia =
+            $"El reporte supera el máximo de {Formatos.Entero(limite)} filas y se muestra recortado. " +
+            "Acote el periodo o los filtros para ver la información completa.";
+    }
+
+    private Task<ReporteTabular> GenerarSegunTipoAsync(ParametrosReporte parametros, CancellationToken ct)
+    {
         return parametros.Tipo switch
         {
             TipoReporte.InventarioValorizado => GenerarInventarioAsync(parametros, ct),
@@ -86,7 +113,7 @@ public class ServicioReportes : IServicioReportes
 
         var datos = await consulta
             .OrderBy(p => p.Categoria!.Nombre).ThenBy(p => p.Nombre)
-            .Take(parametros.LimiteFilas)
+            .Take(parametros.LimiteFilas + 1)
             .Select(p => new
             {
                 p.Codigo,
@@ -168,7 +195,7 @@ public class ServicioReportes : IServicioReportes
 
         var datos = await consulta
             .OrderBy(p => p.StockActual).ThenBy(p => p.Nombre)
-            .Take(parametros.LimiteFilas)
+            .Take(parametros.LimiteFilas + 1)
             .Select(p => new
             {
                 p.Codigo,
@@ -252,7 +279,7 @@ public class ServicioReportes : IServicioReportes
                 Facturas = g.Select(d => d.VentaId).Distinct().Count()
             })
             .OrderByDescending(g => g.Cantidad)
-            .Take(parametros.LimiteFilas)
+            .Take(parametros.LimiteFilas + 1)
             .ToListAsync(ct).ConfigureAwait(false);
 
         var totalIngresos = datos.Sum(d => d.Ingresos);
@@ -320,7 +347,7 @@ public class ServicioReportes : IServicioReportes
 
         var datos = await consulta
             .OrderBy(v => v.Fecha)
-            .Take(parametros.LimiteFilas)
+            .Take(parametros.LimiteFilas + 1)
             .Select(v => new
             {
                 v.NumeroFactura,
@@ -417,7 +444,7 @@ public class ServicioReportes : IServicioReportes
                 Costo = g.Sum(d => (double)(d.Cantidad * d.CostoUnitario))
             })
             .OrderByDescending(g => g.Ingresos - g.Costo)
-            .Take(parametros.LimiteFilas)
+            .Take(parametros.LimiteFilas + 1)
             .ToListAsync(ct).ConfigureAwait(false);
 
         var filas = datos.Select(d =>
@@ -486,7 +513,7 @@ public class ServicioReportes : IServicioReportes
 
         var datos = await consulta
             .OrderBy(c => c.Fecha)
-            .Take(parametros.LimiteFilas)
+            .Take(parametros.LimiteFilas + 1)
             .Select(c => new
             {
                 c.Numero,
@@ -551,7 +578,7 @@ public class ServicioReportes : IServicioReportes
 
         var datos = await unidad.Contexto.Clientes
             .AsNoTracking()
-            .Take(parametros.LimiteFilas)
+            .Take(parametros.LimiteFilas + 1)
             .Select(c => new
             {
                 c.Nombre,
@@ -612,7 +639,7 @@ public class ServicioReportes : IServicioReportes
 
         var datos = await unidad.Contexto.Proveedores
             .AsNoTracking()
-            .Take(parametros.LimiteFilas)
+            .Take(parametros.LimiteFilas + 1)
             .Select(p => new
             {
                 p.Nombre,
@@ -679,7 +706,7 @@ public class ServicioReportes : IServicioReportes
             .AsNoTracking()
             .Where(s => s.FechaApertura >= inicio && s.FechaApertura < fin)
             .OrderByDescending(s => s.FechaApertura)
-            .Take(parametros.LimiteFilas)
+            .Take(parametros.LimiteFilas + 1)
             .Select(s => new
             {
                 s.Id,
@@ -771,7 +798,7 @@ public class ServicioReportes : IServicioReportes
 
         var datos = await consulta
             .OrderBy(m => m.Fecha).ThenBy(m => m.Id)
-            .Take(parametros.LimiteFilas)
+            .Take(parametros.LimiteFilas + 1)
             .Select(m => new
             {
                 m.Fecha,

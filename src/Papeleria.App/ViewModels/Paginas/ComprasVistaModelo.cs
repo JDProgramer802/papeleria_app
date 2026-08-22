@@ -60,7 +60,7 @@ public partial class LineaCompraEditable : ObservableObject
 /// Módulo de compras: historial de documentos y formulario de registro.
 /// Ambos conviven en la misma pantalla alternando <see cref="EnModoRegistro"/>.
 /// </summary>
-public partial class ComprasVistaModelo : PaginaVistaModelo
+public partial class ComprasVistaModelo : PaginaVistaModelo, IRecibeParametro
 {
     private readonly IServicioCompras _compras;
     private readonly IServicioProveedores _proveedores;
@@ -188,6 +188,76 @@ public partial class ComprasVistaModelo : PaginaVistaModelo
     {
         await CargarProveedoresAsync().ConfigureAwait(true);
         await BuscarAsync().ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Entrada desde el catálogo de productos: abre el formulario de compra con el
+    /// artículo ya puesto en la primera línea, para no tener que buscarlo de nuevo.
+    /// </summary>
+    public async Task RecibirParametroAsync(object parametro)
+    {
+        await CargarAsync().ConfigureAwait(true);
+
+        if (parametro is not CompraDeProducto solicitud)
+        {
+            return;
+        }
+
+        if (!PuedeRegistrar)
+        {
+            await _dialogos.InformarAsync(
+                "Sin permiso",
+                "Su usuario no puede registrar compras.",
+                esError: true).ConfigureAwait(true);
+
+            return;
+        }
+
+        await NuevaCompraAsync().ConfigureAwait(true);
+
+        // Si no hay proveedores, NuevaCompraAsync ya avisó y no abrió el formulario.
+        if (!EnModoRegistro)
+        {
+            return;
+        }
+
+        var producto = await ObtenerProductoParaCompraAsync(solicitud).ConfigureAwait(true);
+
+        if (producto is null)
+        {
+            MensajeError = $"No se pudo cargar «{solicitud.Nombre}». Búsquelo en el formulario.";
+            return;
+        }
+
+        AgregarProducto(producto);
+    }
+
+    /// <summary>Recupera la ficha del producto que se quiere comprar.</summary>
+    private async Task<ProductoPosDto?> ObtenerProductoParaCompraAsync(CompraDeProducto solicitud)
+    {
+        try
+        {
+            var porCodigo = await _productos
+                .BuscarPorCodigoExactoAsync(solicitud.Codigo)
+                .ConfigureAwait(true);
+
+            if (porCodigo is not null)
+            {
+                return porCodigo;
+            }
+
+            // Si el código cambió entre pantallas, se busca por nombre y se confirma por id.
+            var candidatos = await _productos
+                .BuscarParaVentaAsync(solicitud.Nombre, 25)
+                .ConfigureAwait(true);
+
+            return candidatos.FirstOrDefault(p => p.Id == solicitud.ProductoId);
+        }
+        catch (Exception ex)
+        {
+            MensajeError = ex.Message;
+            return null;
+        }
     }
 
     private Task CargarProveedoresAsync() => EjecutarAsync(async () =>

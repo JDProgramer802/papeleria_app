@@ -290,8 +290,7 @@ public class ServicioCaja : IServicioCaja
         var ingresos = movimientos.Where(m => m.Tipo == TipoMovimientoCaja.Ingreso).Sum(m => m.Monto);
         var egresos = movimientos.Where(m => m.Tipo == TipoMovimientoCaja.Egreso).Sum(m => m.Monto);
 
-        // Las anulaciones de ventas cobradas en efectivo devuelven dinero del cajón.
-        var anulaciones = movimientos.Where(m => m.Tipo == TipoMovimientoCaja.AnulacionVenta).Sum(m => m.Monto);
+        var devoluciones = await CalcularDevolucionesAsync(unidad, sesionCaja.Id, ct).ConfigureAwait(false);
 
         return new ArqueoCajaDto
         {
@@ -304,9 +303,46 @@ public class ServicioCaja : IServicioCaja
             VentasTransferencia = Dinero.Redondear(transferencia),
             VentasCredito = Dinero.Redondear(credito),
             Ingresos = Dinero.Redondear(ingresos),
-            Egresos = Dinero.Redondear(egresos + anulaciones),
+            Egresos = Dinero.Redondear(egresos),
+            Devoluciones = Dinero.Redondear(devoluciones),
             CantidadVentas = ventas.Count
         };
+    }
+
+    /// <summary>
+    /// Efectivo devuelto del cajón por anulaciones registradas en esta sesión.
+    /// </summary>
+    /// <remarks>
+    /// Sólo cuentan las ventas de <b>otras</b> sesiones. Si la venta anulada es de esta
+    /// misma sesión, ya dejó de sumar en <c>VentasEfectivo</c> al pasar a anulada, y
+    /// restarla otra vez descuadraría el arqueo por el doble. Del importe se toma
+    /// únicamente la parte que se cobró en efectivo: anular una venta con tarjeta no
+    /// saca nada del cajón.
+    /// </remarks>
+    private static async Task<decimal> CalcularDevolucionesAsync(
+        IUnidadDeTrabajo unidad, int cajaSesionId, CancellationToken ct)
+    {
+        var anuladas = await unidad.Contexto.MovimientosCaja
+            .AsNoTracking()
+            .Where(m => m.CajaSesionId == cajaSesionId
+                        && m.Tipo == TipoMovimientoCaja.AnulacionVenta
+                        && m.Venta != null
+                        && m.Venta.CajaSesionId != cajaSesionId)
+            .Select(m => new
+            {
+                m.Venta!.MetodoPago,
+                m.Venta.Total,
+                m.Venta.MontoRecibido,
+                m.Venta.Cambio
+            })
+            .ToListAsync(ct).ConfigureAwait(false);
+
+        return anuladas.Sum(v => v.MetodoPago switch
+        {
+            MetodoPago.Efectivo => v.Total,
+            MetodoPago.Mixto => Math.Min(Math.Max(v.MontoRecibido - v.Cambio, 0), v.Total),
+            _ => 0m
+        });
     }
 
     public async Task<CajaSesion> CerrarAsync(

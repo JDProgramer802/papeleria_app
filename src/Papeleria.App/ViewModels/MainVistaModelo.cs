@@ -238,6 +238,8 @@ public partial class MainVistaModelo : ObservableObject
         {
             (Modulos.Dashboard, "Dashboard", PackIconKind.ViewDashboardOutline, "Resumen del negocio"),
             (Modulos.Ventas, "Punto de venta", PackIconKind.CashRegister, "Registrar ventas"),
+            (Modulos.HistorialVentas, "Historial de ventas", PackIconKind.ReceiptTextOutline,
+                "Facturas emitidas y ventas del día"),
             (Modulos.Productos, "Productos", PackIconKind.PackageVariantClosed, "Catálogo de artículos"),
             (Modulos.Inventario, "Inventario", PackIconKind.Warehouse, "Existencias y movimientos"),
             (Modulos.Compras, "Compras", PackIconKind.TruckDeliveryOutline, "Compras a proveedores"),

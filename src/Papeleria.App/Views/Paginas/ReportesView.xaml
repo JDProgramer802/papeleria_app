@@ -157,11 +157,11 @@
 
                         <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
                             <Button Style="{StaticResource BotonTexto}" FontSize="11"
-                                    Command="{Binding PeriodoMesActualCommand}" Content="MES ACTUAL" />
+                                    Command="{Binding PeriodoMesActualCommand}" Content="Mes actual" />
                             <Button Style="{StaticResource BotonTexto}" FontSize="11"
-                                    Command="{Binding PeriodoMesAnteriorCommand}" Content="MES ANTERIOR" />
+                                    Command="{Binding PeriodoMesAnteriorCommand}" Content="Mes anterior" />
                             <Button Style="{StaticResource BotonTexto}" FontSize="11"
-                                    Command="{Binding PeriodoAnioActualCommand}" Content="AÑO ACTUAL" />
+                                    Command="{Binding PeriodoAnioActualCommand}" Content="Año actual" />
                         </StackPanel>
 
                         <Button Grid.Column="8" Style="{StaticResource BotonPrincipal}"
@@ -175,12 +175,29 @@
                 </StackPanel>
             </materialDesign:Card>
 
-            <Border Grid.Row="1" Background="{StaticResource BrochaErrorSuave}"
-                    CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
-                    Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
-                <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrochaError}"
-                           TextWrapping="Wrap" FontSize="12.5" />
-            </Border>
+            <!-- Los dos avisos comparten fila: apilados para que no se superpongan. -->
+            <StackPanel Grid.Row="1">
+                <Border Background="{StaticResource BrochaErrorSuave}"
+                        CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
+                        Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
+                    <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrochaError}"
+                               TextWrapping="Wrap" FontSize="12.5" />
+                </Border>
+
+                <!-- Aviso de reporte recortado -->
+                <Border Background="{StaticResource BrochaAdvertenciaSuave}"
+                        CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
+                        Visibility="{Binding Reporte.TieneAdvertencia, Converter={StaticResource BoolAVisible}}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="AlertOutline"
+                                                 Foreground="{StaticResource BrochaAdvertencia}"
+                                                 VerticalAlignment="Top" Margin="0,1,10,0" />
+                        <TextBlock Text="{Binding Reporte.Advertencia}"
+                                   Foreground="{StaticResource BrochaAdvertencia}"
+                                   TextWrapping="Wrap" FontSize="12.5" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
 
             <!-- Indicadores del reporte -->
             <ItemsControl Grid.Row="2" ItemsSource="{Binding Reporte.Indicadores}" Margin="0,0,0,12"

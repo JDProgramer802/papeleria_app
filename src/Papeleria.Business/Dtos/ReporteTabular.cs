@@ -54,7 +54,16 @@ public class ReporteTabular
     public required IReadOnlyList<ColumnaReporte> Columnas { get; init; }
 
     /// <summary>Filas del reporte; cada arreglo sigue el orden de <see cref="Columnas"/>.</summary>
-    public required IReadOnlyList<object?[]> Filas { get; init; }
+    public required IReadOnlyList<object?[]> Filas { get; set; }
+
+    /// <summary>
+    /// Aviso mostrado junto al reporte. Se usa sobre todo para advertir de que el
+    /// resultado se recortó: un informe incompleto que parezca completo induce a
+    /// tomar decisiones sobre datos que no están.
+    /// </summary>
+    public string? Advertencia { get; set; }
+
+    public bool TieneAdvertencia => !string.IsNullOrWhiteSpace(Advertencia);
 
     public IReadOnlyList<IndicadorReporte> Indicadores { get; init; } = Array.Empty<IndicadorReporte>();
 

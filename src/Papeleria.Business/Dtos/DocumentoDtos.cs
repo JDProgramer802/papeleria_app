@@ -117,3 +117,32 @@ public class ResumenTerceroDto
     public decimal PromedioDocumento =>
         CantidadDocumentos == 0 ? 0 : Math.Round(MontoTotal / CantidadDocumentos, 2);
 }
+
+/// <summary>
+/// Cifras acumuladas de un conjunto de ventas. Se calcula sobre todo el rango
+/// filtrado, no sobre la página que se está mostrando.
+/// </summary>
+public class ResumenVentasDto
+{
+    public int CantidadFacturas { get; init; }
+
+    public decimal TotalFacturado { get; init; }
+
+    /// <summary>Utilidad bruta: base gravable menos el costo de la mercancía vendida.</summary>
+    public decimal TotalUtilidad { get; init; }
+
+    public int CantidadAnuladas { get; init; }
+
+    public decimal TotalAnulado { get; init; }
+
+    /// <summary>Número de líneas facturadas, no de unidades.</summary>
+    public int LineasFacturadas { get; init; }
+
+    public decimal TicketPromedio =>
+        CantidadFacturas == 0 ? 0 : Math.Round(TotalFacturado / CantidadFacturas, 2);
+
+    public decimal MargenPorcentaje =>
+        TotalFacturado == 0 ? 0 : Math.Round(TotalUtilidad / TotalFacturado * 100m, 1);
+
+    public bool HayAnuladas => CantidadAnuladas > 0;
+}

@@ -468,6 +468,13 @@ public class ServicioExportacion : IServicioExportacion
             yield return $"Periodo: {reporte.Periodo}";
         }
 
+        // Si el reporte salió recortado, el archivo exportado tiene que decirlo:
+        // de lo contrario parecería completo fuera de la aplicación.
+        if (reporte.TieneAdvertencia)
+        {
+            yield return $"AVISO: {reporte.Advertencia}";
+        }
+
         var generado = $"Generado el {Formatos.FechaHora(reporte.GeneradoEn)}";
 
         yield return string.IsNullOrWhiteSpace(reporte.GeneradoPor)

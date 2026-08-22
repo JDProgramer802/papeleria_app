@@ -99,10 +99,11 @@ elige la vista. Los modelos de vista no conocen ningún tipo de WPF.
 |---|---|
 | **Dashboard** | Nueve indicadores, gráfico comparativo de 12 meses, productos más vendidos, movimientos recientes y alertas accionables. |
 | **Punto de venta** | Facturación con lector de código de barras, carrito editable, descuentos, diálogo de cobro con cambio e impresión del recibo. |
-| **Productos** | CRUD completo, búsqueda paginada, duplicado, generación de código de barras EAN-13 e impresión de etiquetas. |
+| **Productos** | CRUD completo, búsqueda paginada, duplicado, generación de código de barras EAN-13 e impresión de etiquetas. El botón **Comprar** abre el formulario de compra con el artículo ya cargado, para reponer existencias sin salir del catálogo. |
 | **Inventario** | Existencias con semáforo, entradas, salidas, ajustes por conteo y transferencias de ubicación. |
 | **Compras** | Historial y registro de compras: actualiza existencias, recalcula el costo promedio y escribe en el kardex. |
 | **Caja** | Apertura con base, ingresos, egresos, arqueo comparando esperado contra contado, cierre e historial de turnos. |
+| **Historial de ventas** | Registro de todas las facturas emitidas: rangos rápidos (hoy, ayer, semana, mes) o fechas a medida, búsqueda por número, cliente o método de pago, resumen del periodo con importe, ticket promedio y utilidad, detalle línea a línea, reimpresión del recibo o de la factura carta, anulación y exportación. |
 | **Kardex** | Consulta filtrable del histórico de movimientos, con exportación. |
 | **Clientes / Proveedores** | Directorios con ficha e historial de documentos. |
 | **Catálogos** | Categorías, marcas y unidades de medida. |
