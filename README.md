@@ -104,7 +104,7 @@ elige la vista. Los modelos de vista no conocen ningún tipo de WPF.
 | **Compras** | Historial y registro de compras: actualiza existencias, recalcula el costo promedio y escribe en el kardex. |
 | **Cartera** | Cuentas por cobrar de las ventas a crédito: quién debe y desde cuándo, cupo por cliente, estado de cuenta con las facturas fiadas y lo pendiente de cada una, registro y anulación de abonos, y reparto de la deuda por antigüedad. |
 | **Caja** | Apertura con base, ingresos, egresos, arqueo comparando esperado contra contado, cierre e historial de turnos. |
-| **Historial de ventas** | Registro de todas las facturas emitidas: rangos rápidos (hoy, ayer, semana, mes) o fechas a medida, búsqueda por número, cliente o método de pago, resumen del periodo con importe, ticket promedio y utilidad, detalle línea a línea, reimpresión del recibo o de la factura carta, anulación y exportación. |
+| **Historial de ventas** | Registro de todas las facturas emitidas: rangos rápidos (hoy, ayer, semana, mes) o fechas a medida, búsqueda por número, cliente o método de pago, resumen del periodo con importe, ticket promedio y utilidad, detalle con los productos de cada factura, impresión de una factura suelta o del listado completo del periodo, anulación y exportación. |
 | **Kardex** | Consulta filtrable del histórico de movimientos, con exportación. |
 | **Clientes / Proveedores** | Directorios con ficha e historial de documentos. |
 | **Catálogos** | Categorías, marcas y unidades de medida. |

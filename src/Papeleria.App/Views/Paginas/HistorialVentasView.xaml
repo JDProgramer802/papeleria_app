@@ -44,6 +44,16 @@
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <!-- Imprime el listado del periodo, no una factura suelta. -->
+                <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
+                        Command="{Binding ImprimirListadoCommand}"
+                        ToolTip="Imprimir el listado completo del periodo consultado">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="PrinterOutline" VerticalAlignment="Center" />
+                        <TextBlock Text="Imprimir listado" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
                 <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
                         Command="{Binding ExportarExcelCommand}" ToolTip="Exportar a Excel">
                     <StackPanel Orientation="Horizontal">
@@ -287,7 +297,7 @@
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Factura" Binding="{Binding NumeroFactura}" Width="120" />
 
-                                <DataGridTemplateColumn Header="Fecha y hora" Width="160" SortMemberPath="Fecha">
+                                <DataGridTemplateColumn Header="Fecha y hora" Width="145" SortMemberPath="Fecha">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel VerticalAlignment="Center">
@@ -301,7 +311,7 @@
                                 </DataGridTemplateColumn>
 
                                 <DataGridTextColumn Header="Cliente" Binding="{Binding ClienteNombre}" Width="*" />
-                                <DataGridTextColumn Header="Cajero" Binding="{Binding UsuarioNombre}" Width="150" />
+                                <DataGridTextColumn Header="Cajero" Binding="{Binding UsuarioNombre}" Width="130" />
                                 <DataGridTextColumn Header="Pago" Binding="{Binding MetodoPagoTexto}" Width="110" />
 
                                 <DataGridTextColumn Header="Ítems" Binding="{Binding CantidadItems}" Width="65"
@@ -335,6 +345,22 @@
                                                 <TextBlock Text="{Binding EstadoTexto}"
                                                            Style="{StaticResource TextoDistintivo}" />
                                             </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <!-- Imprimir la factura de esta fila sin abrir su detalle. -->
+                                <DataGridTemplateColumn Header="" Width="52" CanUserSort="False">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Style="{StaticResource BotonIconoAccion}"
+                                                    HorizontalAlignment="Center"
+                                                    Command="{Binding DataContext.ImprimirFacturaCommand,
+                                                              RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    ToolTip="Imprimir esta factura con su detalle de productos">
+                                                <materialDesign:PackIcon Kind="PrinterOutline"
+                                                                         Width="17" Height="17" />
+                                            </Button>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -403,7 +429,7 @@
                                 <TextBlock Text="{Binding Detalle.Fecha, Converter={StaticResource Fecha}, ConverterParameter=Hora}"
                                            Style="{StaticResource TextoTenue}" FontSize="11.5" Margin="0,2,0,0" />
 
-                                <Separator Style="{StaticResource SeparadorHorizontal}" Margin="0,10" />
+                                <Separator Style="{StaticResource SeparadorHorizontal}" Margin="0,8" />
 
                                 <StackPanel Style="{StaticResource FilaContacto}">
                                     <materialDesign:PackIcon Kind="AccountOutline"
@@ -425,27 +451,39 @@
                         </Border>
 
                         <!-- Líneas de la factura -->
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="18,12,18,0">
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="18,8,18,0">
                             <ItemsControl ItemsSource="{Binding Detalle.Lineas}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,0,0,11">
+                                        <!--
+                                            Cada producto en un solo renglón: en dos, apenas cabían
+                                            dos artículos y había que desplazar para ver la factura.
+                                        -->
+                                        <Grid Margin="0,0,0,7">
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
 
-                                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                            <Border Grid.Column="0" CornerRadius="5" Padding="5,1"
+                                                    Background="{DynamicResource MaterialDesignChipBackground}"
+                                                    VerticalAlignment="Center" Margin="0,0,8,0" MinWidth="30">
+                                                <TextBlock Text="{Binding Cantidad, Converter={StaticResource Cantidad}}"
+                                                           FontSize="11" FontWeight="SemiBold"
+                                                           TextAlignment="Center" />
+                                            </Border>
+
+                                            <StackPanel Grid.Column="1" Margin="0,0,8,0"
+                                                        VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Descripcion}" FontSize="12.5"
-                                                           TextWrapping="Wrap" />
-                                                <TextBlock Style="{StaticResource TextoTenue}" FontSize="11">
-                                                    <Run Text="{Binding Cantidad, Converter={StaticResource Cantidad}, Mode=OneWay}" />
-                                                    <Run Text="×" />
-                                                    <Run Text="{Binding ValorUnitario, Converter={StaticResource Moneda}, Mode=OneWay}" />
-                                                </TextBlock>
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTip="{Binding Descripcion}" />
+                                                <TextBlock Style="{StaticResource TextoTenue}" FontSize="10.5"
+                                                           Text="{Binding ValorUnitario, Converter={StaticResource Moneda}, StringFormat={}{0} c/u}" />
                                             </StackPanel>
 
-                                            <TextBlock Grid.Column="1"
+                                            <TextBlock Grid.Column="2"
                                                        Text="{Binding Total, Converter={StaticResource Moneda}}"
                                                        FontWeight="SemiBold" FontSize="12.5"
                                                        VerticalAlignment="Center" />
@@ -456,8 +494,8 @@
                         </ScrollViewer>
 
                         <!-- Totales -->
-                        <StackPanel Grid.Row="2" Margin="18,10,18,0">
-                            <Separator Style="{StaticResource SeparadorHorizontal}" Margin="0,0,0,10" />
+                        <StackPanel Grid.Row="2" Margin="18,6,18,0">
+                            <Separator Style="{StaticResource SeparadorHorizontal}" Margin="0,0,0,8" />
 
                             <Grid Margin="0,0,0,5">
                                 <TextBlock Text="Subtotal" Style="{StaticResource TextoTenue}" />
@@ -475,14 +513,14 @@
                                 </TextBlock>
                             </Grid>
 
-                            <Grid Margin="0,0,0,8">
+                            <Grid Margin="0,0,0,6">
                                 <TextBlock Text="IVA" Style="{StaticResource TextoTenue}" />
                                 <TextBlock Text="{Binding Detalle.TotalIva, Converter={StaticResource Moneda}}"
                                            HorizontalAlignment="Right" FontSize="12.5" />
                             </Grid>
 
                             <Border BorderBrush="{DynamicResource MaterialDesignDivider}"
-                                    BorderThickness="0,1,0,0" Padding="0,9,0,0">
+                                    BorderThickness="0,1,0,0" Padding="0,8,0,0">
                                 <Grid>
                                     <TextBlock Text="TOTAL" FontWeight="Bold" VerticalAlignment="Center" />
                                     <TextBlock Text="{Binding Detalle.Total, Converter={StaticResource Moneda}}"
@@ -506,26 +544,20 @@
                         </StackPanel>
 
                         <!-- Acciones -->
-                        <StackPanel Grid.Row="3" Margin="18,14,18,18">
-                            <Button Style="{StaticResource BotonPrincipal}" Height="42"
+                        <StackPanel Grid.Row="3" Margin="18,12,18,16">
+                            <Button Style="{StaticResource BotonPrincipal}" Height="40"
                                     Command="{Binding ReimprimirReciboCommand}"
                                     ToolTip="Volver a imprimir el recibo de 80 mm">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="PrinterOutline" VerticalAlignment="Center" />
-                                    <TextBlock Text="REIMPRIMIR RECIBO" Margin="8,0,0,0"
+                                    <TextBlock Text="IMPRIMIR RECIBO" Margin="8,0,0,0"
                                                VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 
-                            <Grid Margin="0,8,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-
-                                <Button Grid.Column="0" Style="{StaticResource BotonSecundario}"
-                                        MinWidth="0"
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0"
+                                        HorizontalAlignment="Center">
+                                <Button Style="{StaticResource BotonSecundario}" MinWidth="0" Margin="0,0,8,0"
                                         Command="{Binding ImprimirCartaCommand}"
                                         ToolTip="Generar la factura en tamaño carta">
                                     <StackPanel Orientation="Horizontal">
@@ -535,8 +567,7 @@
                                     </StackPanel>
                                 </Button>
 
-                                <Button Grid.Column="2" Style="{StaticResource BotonSecundario}"
-                                        MinWidth="0"
+                                <Button Style="{StaticResource BotonSecundario}" MinWidth="0"
                                         Foreground="{StaticResource BrochaError}"
                                         Command="{Binding AnularVentaCommand}"
                                         Visibility="{Binding PuedeAnular, Converter={StaticResource BoolAVisible}}"
@@ -548,7 +579,7 @@
                                         <TextBlock Text="Anular" Margin="6,0,0,0" VerticalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
-                            </Grid>
+                            </StackPanel>
                         </StackPanel>
                     </Grid>
                 </Grid>

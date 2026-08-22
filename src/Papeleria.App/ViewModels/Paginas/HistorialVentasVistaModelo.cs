@@ -292,6 +292,73 @@ public partial class HistorialVentasVistaModelo : PaginaVistaModelo
     [RelayCommand]
     private Task ImprimirCartaAsync() => ImprimirAsync(FormatoFactura.Carta);
 
+    /// <summary>
+    /// Imprime una factura concreta desde su fila del listado, sin tener que abrir
+    /// primero el detalle. Lleva el desglose de productos, cantidades y totales.
+    /// </summary>
+    [RelayCommand]
+    private Task ImprimirFacturaAsync(VentaResumenDto? venta) => EjecutarAsync(async () =>
+    {
+        if (venta is null)
+        {
+            return;
+        }
+
+        var detalle = await _ventas.ObtenerDetalleAsync(venta.Id).ConfigureAwait(true);
+
+        if (detalle is null)
+        {
+            return;
+        }
+
+        var ruta = await _documentos
+            .GenerarFacturaAsync(detalle, FormatoFactura.Recibo80mm)
+            .ConfigureAwait(true);
+
+        _archivos.AbrirConAplicacionPredeterminada(ruta);
+    }, "No se pudo preparar la factura para imprimir.");
+
+    /// <summary>
+    /// Imprime el listado completo del periodo consultado: una fila por factura con
+    /// sus totales, que es el resumen que se archiva o se entrega al contador.
+    /// </summary>
+    [RelayCommand]
+    private Task ImprimirListadoAsync() => EjecutarAsync(async () =>
+    {
+        var reporte = await _reportes
+            .GenerarAsync(ConstruirParametrosReporte())
+            .ConfigureAwait(true);
+
+        if (!reporte.TieneDatos)
+        {
+            await _dialogos.InformarAsync(
+                "Nada que imprimir",
+                "No hay ventas en el periodo consultado.").ConfigureAwait(true);
+
+            return;
+        }
+
+        // Va a un archivo temporal y se abre directamente: al imprimir no se
+        // quiere elegir dónde guardar, se quiere ver el papel.
+        var ruta = Data.Storage.RutasAplicacion.RutaTemporal(".pdf");
+
+        await _exportacion.ExportarAsync(reporte, FormatoExportacion.Pdf, ruta).ConfigureAwait(true);
+
+        _archivos.AbrirConAplicacionPredeterminada(ruta);
+    }, "No se pudo preparar el listado para imprimir.");
+
+    /// <summary>
+    /// Parámetros del informe del periodo. Los comparten imprimir y exportar para que
+    /// el papel y el archivo nunca muestren cosas distintas.
+    /// </summary>
+    private ParametrosReporte ConstruirParametrosReporte() => new()
+    {
+        Tipo = TipoReporte.Ventas,
+        Desde = Desde ?? DateTime.Today,
+        Hasta = Hasta ?? DateTime.Today,
+        ClienteId = ClienteId
+    };
+
     private Task ImprimirAsync(FormatoFactura formato) => EjecutarAsync(async () =>
     {
         if (Detalle is null)
@@ -357,13 +424,7 @@ public partial class HistorialVentasVistaModelo : PaginaVistaModelo
 
     private Task ExportarAsync(FormatoExportacion formato) => EjecutarAsync(async () =>
     {
-        var reporte = await _reportes.GenerarAsync(new ParametrosReporte
-        {
-            Tipo = TipoReporte.Ventas,
-            Desde = Desde ?? DateTime.Today,
-            Hasta = Hasta ?? DateTime.Today,
-            ClienteId = ClienteId
-        }).ConfigureAwait(true);
+        var reporte = await _reportes.GenerarAsync(ConstruirParametrosReporte()).ConfigureAwait(true);
 
         var extension = _exportacion.ObtenerExtension(formato);
         var etiqueta = extension.TrimStart('.').ToUpperInvariant();
