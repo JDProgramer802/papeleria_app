@@ -42,6 +42,47 @@
                       materialDesign:HintAssist.Hint="Seleccione cómo paga el cliente" />
         </StackPanel>
 
+        <!-- Situación del crédito del cliente -->
+        <StackPanel Grid.Row="2"
+                    Visibility="{Binding EsCredito, Converter={StaticResource BoolAVisible}}">
+            <!-- Se puede fiar: se recuerda cuánto cupo queda tras la venta. -->
+            <Border Background="{StaticResource BrochaExitoSuave}"
+                    CornerRadius="8" Padding="13,10" Margin="0,0,0,16"
+                    Visibility="{Binding PuedeFiar, Converter={StaticResource BoolAVisible}}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="AccountCashOutline"
+                                             Foreground="{StaticResource BrochaExito}"
+                                             VerticalAlignment="Top" Margin="0,1,10,0" />
+                    <StackPanel>
+                        <TextBlock Text="La venta queda a deber"
+                                   Foreground="{StaticResource BrochaExito}"
+                                   FontWeight="SemiBold" FontSize="12.5" />
+                        <TextBlock Foreground="{StaticResource BrochaExito}"
+                                   FontSize="11.5" TextWrapping="Wrap" Margin="0,2,0,0">
+                            <Run Text="Al cliente le quedará un cupo de" />
+                            <Run Text="{Binding CupoRestante, Converter={StaticResource Moneda}, Mode=OneWay}"
+                                 FontWeight="SemiBold" />
+                            <Run Text="· se cobra desde Cartera." />
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- No se puede fiar: se explica el motivo en lugar de dejar el botón muerto. -->
+            <Border Background="{StaticResource BrochaAdvertenciaSuave}"
+                    CornerRadius="8" Padding="13,10" Margin="0,0,0,16"
+                    Visibility="{Binding TieneAvisoCredito, Converter={StaticResource BoolAVisible}}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="AlertOutline"
+                                             Foreground="{StaticResource BrochaAdvertencia}"
+                                             VerticalAlignment="Top" Margin="0,1,10,0" />
+                    <TextBlock Text="{Binding AvisoCredito}"
+                               Foreground="{StaticResource BrochaAdvertencia}"
+                               TextWrapping="Wrap" MaxWidth="330" FontSize="12" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
         <!-- Efectivo recibido -->
         <StackPanel Grid.Row="2"
                     Visibility="{Binding RequiereEfectivo, Converter={StaticResource BoolAVisible}}">

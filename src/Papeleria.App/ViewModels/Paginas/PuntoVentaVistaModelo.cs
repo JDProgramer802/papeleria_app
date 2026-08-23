@@ -74,6 +74,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
     private readonly IServicioVentas _ventas;
     private readonly IServicioProductos _productos;
     private readonly IServicioClientes _clientes;
+    private readonly IServicioCartera _cartera;
     private readonly IServicioCaja _caja;
     private readonly IServicioDocumentos _documentos;
     private readonly IServicioArchivos _archivos;
@@ -86,6 +87,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         IServicioVentas ventas,
         IServicioProductos productos,
         IServicioClientes clientes,
+        IServicioCartera cartera,
         IServicioCaja caja,
         IServicioDocumentos documentos,
         IServicioArchivos archivos,
@@ -95,6 +97,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         _ventas = ventas;
         _productos = productos;
         _clientes = clientes;
+        _cartera = cartera;
         _caja = caja;
         _documentos = documentos;
         _archivos = archivos;
@@ -184,6 +187,35 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
     }
 
     public bool PuedeCrearClientes => _sesion.Puede(Modulos.Clientes, AccionPermiso.Crear);
+
+    /// <summary>
+    /// Cupo del cliente de la venta, para poder ofrecer el pago a crédito en el cobro
+    /// y avisar en el momento si no le alcanza, en lugar de fallar al guardar.
+    /// </summary>
+    private async Task<CreditoCliente?> ConsultarCreditoAsync()
+    {
+        var cliente = Clientes.FirstOrDefault(c => c.Id == ClienteId);
+
+        if (cliente is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var saldo = await _cartera.ObtenerSaldoAsync(cliente.Id).ConfigureAwait(true);
+
+            // Al consumidor final no se le fía: no hay a quién cobrarle después.
+            var admite = !cliente.EsProtegido && cliente.LimiteCredito > 0;
+
+            return new CreditoCliente(cliente.Nombre, admite, saldo.CupoDisponible);
+        }
+        catch (Exception)
+        {
+            // Si la consulta falla, el cobro sigue disponible por los demás medios.
+            return new CreditoCliente(cliente.Nombre, false, 0);
+        }
+    }
 
     /// <summary>
     /// Da de alta un cliente sin salir de la venta. En el mostrador el cliente aparece
@@ -487,7 +519,8 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
             return;
         }
 
-        var dialogoPago = new PagoDialogoVistaModelo(_dialogos, Total);
+        var dialogoPago = new PagoDialogoVistaModelo(
+            _dialogos, Total, await ConsultarCreditoAsync().ConfigureAwait(true));
 
         if (await _dialogos.MostrarAsync(dialogoPago).ConfigureAwait(true) is not true)
         {
