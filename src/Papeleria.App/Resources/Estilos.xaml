@@ -379,7 +379,8 @@
     <!-- Elemento del menú lateral: icono + texto, con resaltado al seleccionar. -->
     <Style x:Key="BotonMenuLateral" TargetType="RadioButton">
         <Setter Property="GroupName" Value="MenuLateral" />
-        <Setter Property="Height" Value="46" />
+        <!-- Con quince módulos, cada píxel de alto decide si el último se ve. -->
+        <Setter Property="Height" Value="44" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -387,10 +388,14 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
+                    <!--
+                        Margen vertical mínimo: con quince módulos, dos píxeles por
+                        entrada son treinta que deciden si el menú cabe o se desplaza.
+                    -->
                     <Border x:Name="Fondo"
                             Background="Transparent"
                             CornerRadius="8"
-                            Margin="8,2">
+                            Margin="8,1">
                         <Grid>
                             <Border x:Name="Indicador"
                                     Width="3" HorizontalAlignment="Left"

@@ -26,5 +26,8 @@
     <conv:PorcentajeAProporcion x:Key="PorcentajeAProporcion" />
     <conv:NivelAlertaABrocha x:Key="NivelAlertaABrocha" />
     <conv:MenuColapsadoAAncho x:Key="MenuColapsadoAAncho" />
+    <conv:MenuColapsadoAAlineacion x:Key="MenuColapsadoAAlineacion" />
+    <conv:MenuColapsadoATamanoLogo x:Key="MenuColapsadoATamanoLogo" />
+    <conv:MenuColapsadoAMargenCabecera x:Key="MenuColapsadoAMargenCabecera" />
 
 </ResourceDictionary>

@@ -48,8 +48,13 @@
 
                     <!-- Cabecera del menú -->
                     <Grid Grid.Row="0" Height="{StaticResource AlturaBarraSuperior}" Margin="8,0">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
-                            <Grid Width="38" Height="38" ToolTip="{Binding NombreEmpresa}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                    HorizontalAlignment="{Binding MenuColapsado,
+                                                          Converter={StaticResource MenuColapsadoAAlineacion}}"
+                                    Margin="{Binding MenuColapsado, Converter={StaticResource MenuColapsadoAMargenCabecera}}">
+                            <Grid Width="{Binding MenuColapsado, Converter={StaticResource MenuColapsadoATamanoLogo}}"
+                                  Height="{Binding MenuColapsado, Converter={StaticResource MenuColapsadoATamanoLogo}}"
+                                  ToolTip="{Binding NombreEmpresa}">
                                 <!-- Marca por defecto mientras no se cargue un logotipo -->
                                 <Border CornerRadius="10"
                                         Background="{DynamicResource MaterialDesign.Brush.Primary}"
@@ -92,8 +97,15 @@
                         <ItemsControl ItemsSource="{Binding Menu}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type vm:ElementoMenu}">
+                                    <!--
+                                        Plegado, el rótulo emergente es la única etiqueta que
+                                        tiene el icono: aparece pronto y al lado, no encima.
+                                    -->
                                     <RadioButton Style="{StaticResource BotonMenuLateral}"
                                                  IsChecked="{Binding EstaSeleccionado, Mode=OneWay}"
+                                                 ToolTipService.Placement="Right"
+                                                 ToolTipService.InitialShowDelay="220"
+                                                 ToolTipService.HorizontalOffset="6"
                                                  Command="{Binding DataContext.NavegarCommand,
                                                            RelativeSource={RelativeSource AncestorType=Window}}"
                                                  CommandParameter="{Binding Modulo}">
@@ -106,7 +118,10 @@
                                             </ToolTip>
                                         </RadioButton.ToolTip>
 
-                                        <StackPanel Orientation="Horizontal">
+                                        <StackPanel Orientation="Horizontal"
+                                                    HorizontalAlignment="{Binding DataContext.MenuColapsado,
+                                                                          RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                                                          Converter={StaticResource MenuColapsadoAAlineacion}}">
                                             <materialDesign:PackIcon Kind="{Binding Icono}"
                                                                      Width="21" Height="21"
                                                                      VerticalAlignment="Center" />
@@ -115,7 +130,7 @@
                                                        Margin="16,0,0,0"
                                                        TextTrimming="CharacterEllipsis"
                                                        Visibility="{Binding DataContext.MenuColapsado,
-                                                                    RelativeSource={RelativeSource AncestorType=Window},
+                                                                    RelativeSource={RelativeSource AncestorType=ItemsControl},
                                                                     Converter={StaticResource BoolAVisible},
                                                                     ConverterParameter=Invertir}" />
                                         </StackPanel>
@@ -129,7 +144,14 @@
                     <StackPanel Grid.Row="2" Margin="8,6,8,12">
                         <Separator Style="{StaticResource MaterialDesignSeparator}" Margin="6,0,6,8" />
 
-                        <StackPanel Orientation="Horizontal" Margin="6,0,6,6">
+                        <!--
+                            Plegado se oculta entero: unas iniciales sueltas no dicen
+                            nada y sus cuarenta píxeles son los que hacen que el último
+                            módulo del menú quede fuera de la pantalla.
+                        -->
+                        <StackPanel Orientation="Horizontal" Margin="6,0,6,6"
+                                    Visibility="{Binding MenuColapsado, Converter={StaticResource BoolAVisible},
+                                                 ConverterParameter=Invertir}">
                             <Border Width="34" Height="34" CornerRadius="17"
                                     Background="{DynamicResource MaterialDesign.Brush.Secondary}">
                                 <TextBlock Text="{Binding InicialesUsuario}"
@@ -150,9 +172,11 @@
                         </StackPanel>
 
                         <Button Style="{StaticResource MaterialDesignFlatButton}"
-                                HorizontalContentAlignment="Left"
+                                HorizontalContentAlignment="{Binding MenuColapsado,
+                                                             Converter={StaticResource MenuColapsadoAAlineacion}}"
                                 Command="{Binding CerrarSesionCommand}"
                                 ToolTip="Cerrar la sesión actual"
+                                ToolTipService.Placement="Right"
                                 Margin="0,4,0,0" Height="36">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="LogoutVariant"

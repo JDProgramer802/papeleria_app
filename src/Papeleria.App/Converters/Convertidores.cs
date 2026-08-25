@@ -481,6 +481,39 @@ public class NivelAlertaABrocha : IValueConverter
 }
 
 /// <summary>Ancho del panel lateral según esté expandido o colapsado.</summary>
+/// <summary>
+/// Alineación del contenido del menú: centrada cuando solo se ve el icono, pegada
+/// a la izquierda cuando el icono va acompañado de su texto.
+/// </summary>
+public class MenuColapsadoAAlineacion : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is true ? HorizontalAlignment.Center : HorizontalAlignment.Left;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        Binding.DoNothing;
+}
+
+/// <summary>Tamaño del logotipo: más pequeño en la barra estrecha para que respire.</summary>
+/// <summary>Margen de la cabecera: sin desplazamiento lateral cuando va centrada.</summary>
+public class MenuColapsadoAMargenCabecera : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is true ? new Thickness(0) : new Thickness(6, 0, 0, 0);
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        Binding.DoNothing;
+}
+
+public class MenuColapsadoATamanoLogo : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is true ? 34d : 38d;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        Binding.DoNothing;
+}
+
 public class MenuColapsadoAAncho : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
