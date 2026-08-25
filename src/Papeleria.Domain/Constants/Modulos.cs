@@ -22,6 +22,7 @@ public static class Modulos
     public const string Configuracion = "configuracion";
     public const string Usuarios = "usuarios";
     public const string Backup = "backup";
+    public const string Manual = "manual";
 
     /// <summary>Nombre legible de cada módulo, para el editor de permisos.</summary>
     public static readonly IReadOnlyDictionary<string, string> Nombres = new Dictionary<string, string>
@@ -41,7 +42,8 @@ public static class Modulos
         [Reportes] = "Reportes",
         [Configuracion] = "Configuración",
         [Usuarios] = "Usuarios y permisos",
-        [Backup] = "Copias de seguridad"
+        [Backup] = "Copias de seguridad",
+        [Manual] = "Manual de uso"
     };
 
     public static IReadOnlyList<string> Todos { get; } = Nombres.Keys.ToList();

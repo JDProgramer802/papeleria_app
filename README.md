@@ -112,6 +112,7 @@ elige la vista. Los modelos de vista no conocen ningún tipo de WPF.
 | **Reportes** | Doce informes con vista previa y exportación a Excel, PDF y CSV. |
 | **Configuración** | Datos de empresa, logo, impuestos, moneda, numeración de documentos, tema y copias de seguridad. |
 | **Usuarios** | Usuarios, roles y matriz de permisos editable por módulo. |
+| **Manual de uso** | Guía de uso dentro del propio programa, con buscador sobre el texto completo, y un tutorial guiado que revisa la base de datos y señala qué pasos de la puesta en marcha siguen pendientes, con acceso directo al módulo de cada uno. |
 
 ---
 

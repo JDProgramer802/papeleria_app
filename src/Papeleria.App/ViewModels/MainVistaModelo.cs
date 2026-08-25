@@ -251,7 +251,9 @@ public partial class MainVistaModelo : ObservableObject
             (Modulos.Catalogos, "Catálogos", PackIconKind.ShapeOutline, "Categorías, marcas y unidades"),
             (Modulos.Reportes, "Reportes", PackIconKind.ChartBoxOutline, "Informes y exportación"),
             (Modulos.Usuarios, "Usuarios", PackIconKind.AccountCogOutline, "Usuarios y permisos"),
-            (Modulos.Configuracion, "Configuración", PackIconKind.CogOutline, "Empresa, impuestos y respaldos")
+            (Modulos.Configuracion, "Configuración", PackIconKind.CogOutline, "Empresa, impuestos y respaldos"),
+            (Modulos.Manual, "Manual de uso", PackIconKind.BookOpenPageVariantOutline,
+                "Guía de uso y tutorial guiado")
         };
 
         Menu.Clear();

@@ -22,6 +22,8 @@
     <conv:EnumADescripcion x:Key="EnumADescripcion" />
     <conv:MayorQueCeroAVisibilidad x:Key="MayorQueCeroAVisible" />
     <conv:MayorQueCeroABooleano x:Key="MayorQueCeroABool" />
+    <conv:IndiceANumero x:Key="IndiceANumero" />
+    <conv:PorcentajeAProporcion x:Key="PorcentajeAProporcion" />
     <conv:NivelAlertaABrocha x:Key="NivelAlertaABrocha" />
     <conv:MenuColapsadoAAncho x:Key="MenuColapsadoAAncho" />
 

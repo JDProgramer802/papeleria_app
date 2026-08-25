@@ -279,6 +279,7 @@ public partial class App : Application
                 servicios.AddTransient<ReportesVistaModelo>();
                 servicios.AddTransient<ConfiguracionVistaModelo>();
                 servicios.AddTransient<UsuariosVistaModelo>();
+                servicios.AddTransient<ManualVistaModelo>();
 
                 // Los modelos de vista de los diálogos los construye la página que los
                 // abre, porque reciben la entidad que se está editando como parámetro.

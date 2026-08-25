@@ -90,6 +90,14 @@ public class SembradorDatos
     {
         var permiso = new PermisoRol { Rol = rol, Modulo = modulo };
 
+        // El manual y el tutorial son para quien está aprendiendo a usar el programa:
+        // negárselos a un rol sería justo al revés de lo que hace falta.
+        if (modulo == Modulos.Manual)
+        {
+            permiso.PuedeVer = true;
+            return permiso;
+        }
+
         if (rol == RolUsuario.Administrador)
         {
             permiso.PuedeVer = permiso.PuedeCrear = permiso.PuedeEditar = permiso.PuedeEliminar = true;

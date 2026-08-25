@@ -1,0 +1,427 @@
+<UserControl x:Class="Papeleria.App.Views.Paginas.ManualView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Paginas"
+             d:DataContext="{d:DesignInstance vm:ManualVistaModelo}"
+             mc:Ignorable="d"
+             d:DesignHeight="800" d:DesignWidth="1360">
+
+    <UserControl.Resources>
+        <!-- Botón de pestaña entre el manual y el tutorial. -->
+        <Style x:Key="BotonModo" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Padding" Value="16,0" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="17" />
+        </Style>
+
+        <Style x:Key="BotonModoActivo" TargetType="Button" BasedOn="{StaticResource BotonModo}">
+            <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary.Foreground}" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="{StaticResource MargenPagina}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ══ Encabezado y selector de modo ═══════════════════════════════ -->
+        <Grid Grid.Row="0" Margin="0,0,0,14">
+            <StackPanel>
+                <TextBlock Text="{Binding Titulo}" Style="{StaticResource TituloPagina}" />
+                <TextBlock Text="{Binding Subtitulo}" Style="{StaticResource SubtituloPagina}" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Command="{Binding VerManualCommand}" Content="Manual">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource BotonModo}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding MostrandoManual}" Value="True">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                                    <Setter Property="BorderBrush"
+                                            Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource MaterialDesign.Brush.Primary.Foreground}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button Command="{Binding VerTutorialCommand}" Content="Tutorial guiado">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource BotonModo}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding MostrandoTutorial}" Value="True">
+                                    <Setter Property="Background"
+                                            Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                                    <Setter Property="BorderBrush"
+                                            Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                                    <Setter Property="Foreground"
+                                            Value="{DynamicResource MaterialDesign.Brush.Primary.Foreground}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- ══ Manual ══════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" Visibility="{Binding MostrandoManual, Converter={StaticResource BoolAVisible}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="320" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Índice -->
+            <materialDesign:Card Grid.Column="0" Style="{StaticResource TarjetaBase}" Padding="0" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBox Grid.Row="0" Margin="14,14,14,10"
+                             Style="{StaticResource CampoBusqueda}"
+                             Text="{Binding Busqueda, UpdateSourceTrigger=PropertyChanged, Delay=150}"
+                             materialDesign:HintAssist.Hint="Buscar en el manual"
+                             materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                             materialDesign:TextFieldAssist.LeadingIcon="Magnify"
+                             ToolTip="Busca dentro del texto completo, no solo en los títulos" />
+
+                    <ListBox Grid.Row="1" Margin="6,0,6,10"
+                             BorderThickness="0"
+                             ItemsSource="{Binding Secciones}"
+                             SelectedItem="{Binding SeccionSeleccionada}"
+                             HorizontalContentAlignment="Stretch"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="2,7">
+                                    <materialDesign:PackIcon Kind="{Binding Icono}"
+                                                             Width="20" Height="20"
+                                                             VerticalAlignment="Top" Margin="0,2,0,0" />
+                                    <StackPanel Margin="12,0,0,0" MaxWidth="228">
+                                        <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold"
+                                                   FontSize="12.5" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Resumen}"
+                                                   Style="{StaticResource TextoTenue}"
+                                                   FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{Binding SinResultados, Converter={StaticResource BoolAVisible}}">
+                        <materialDesign:PackIcon Kind="FileSearchOutline" Width="40" Height="40"
+                                                 Opacity="0.2" HorizontalAlignment="Center" />
+                        <TextBlock Text="Nada coincide con esa búsqueda"
+                                   Style="{StaticResource TextoTenue}" Margin="0,8,0,0"
+                                   HorizontalAlignment="Center" FontSize="12" TextWrapping="Wrap"
+                                   TextAlignment="Center" MaxWidth="200" />
+                        <Button Style="{StaticResource BotonTexto}" Margin="0,4,0,0"
+                                HorizontalAlignment="Center"
+                                Command="{Binding LimpiarBusquedaCommand}"
+                                Content="Ver todo el manual" />
+                    </StackPanel>
+                </Grid>
+            </materialDesign:Card>
+
+            <!-- Contenido del apartado -->
+            <materialDesign:Card Grid.Column="2" Style="{StaticResource TarjetaBase}" Padding="0" Margin="0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              Visibility="{Binding HaySeccion, Converter={StaticResource BoolAVisible}}">
+                    <StackPanel Margin="28,24,28,28" MaxWidth="780" HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Border Width="40" Height="40" CornerRadius="11"
+                                    Background="{DynamicResource MaterialDesign.Brush.Primary.Light}">
+                                <materialDesign:PackIcon Kind="{Binding SeccionSeleccionada.Icono}"
+                                                         Width="22" Height="22"
+                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary.Light.Foreground}"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding SeccionSeleccionada.Titulo}"
+                                           Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding SeccionSeleccionada.Resumen}"
+                                           Style="{StaticResource TextoTenue}" FontSize="12" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Separator Style="{StaticResource SeparadorHorizontal}" Margin="0,14" />
+
+                        <ItemsControl ItemsSource="{Binding SeccionSeleccionada.Bloques}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,0,0,18">
+                                        <TextBlock Text="{Binding Titulo}"
+                                                   Style="{StaticResource TituloSeccion}"
+                                                   FontSize="14" Margin="0,0,0,8"
+                                                   Visibility="{Binding TieneTitulo, Converter={StaticResource BoolAVisible}}" />
+
+                                        <!-- Texto corrido -->
+                                        <TextBlock Text="{Binding Texto}" TextWrapping="Wrap"
+                                                   FontSize="13" LineHeight="21"
+                                                   Visibility="{Binding EsParrafo, Converter={StaticResource BoolAVisible}}" />
+
+                                        <!-- Instrucciones numeradas -->
+                                        <ItemsControl ItemsSource="{Binding Puntos}"
+                                                      AlternationCount="99"
+                                                      Visibility="{Binding EsPasos, Converter={StaticResource BoolAVisible}}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,0,0,9">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <Border Grid.Column="0" Width="23" Height="23"
+                                                                CornerRadius="12" VerticalAlignment="Top"
+                                                                Background="{DynamicResource MaterialDesign.Brush.Primary.Light}">
+                                                            <TextBlock VerticalAlignment="Center"
+                                                                       HorizontalAlignment="Center"
+                                                                       FontSize="11" FontWeight="Bold"
+                                                                       Foreground="{DynamicResource MaterialDesign.Brush.Primary.Light.Foreground}"
+                                                                       Text="{Binding (ItemsControl.AlternationIndex),
+                                                                              RelativeSource={RelativeSource AncestorType=ContentPresenter},
+                                                                              Converter={StaticResource IndiceANumero}}" />
+                                                        </Border>
+
+                                                        <TextBlock Grid.Column="1" Text="{Binding}"
+                                                                   TextWrapping="Wrap" FontSize="13"
+                                                                   LineHeight="20" Margin="12,1,0,0" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <!-- Puntos sueltos -->
+                                        <ItemsControl ItemsSource="{Binding Puntos}"
+                                                      Visibility="{Binding EsLista, Converter={StaticResource BoolAVisible}}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,0,0,7">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <Ellipse Grid.Column="0" Width="5" Height="5"
+                                                                 VerticalAlignment="Top" Margin="6,8,0,0"
+                                                                 Fill="{DynamicResource MaterialDesign.Brush.Primary}" />
+
+                                                        <TextBlock Grid.Column="1" Text="{Binding}"
+                                                                   TextWrapping="Wrap" FontSize="13"
+                                                                   LineHeight="20" Margin="12,0,0,0" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <!-- Advertencia -->
+                                        <Border Background="{StaticResource BrochaAdvertenciaSuave}"
+                                                CornerRadius="8" Padding="14,11"
+                                                Visibility="{Binding EsAviso, Converter={StaticResource BoolAVisible}}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="AlertOutline"
+                                                                         Foreground="{StaticResource BrochaAdvertencia}"
+                                                                         VerticalAlignment="Top" Margin="0,1,11,0" />
+                                                <TextBlock Text="{Binding Texto}" TextWrapping="Wrap"
+                                                           FontSize="12.5" LineHeight="20"
+                                                           Foreground="{StaticResource BrochaAdvertencia}" />
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Recomendación -->
+                                        <Border Background="{StaticResource BrochaExitoSuave}"
+                                                CornerRadius="8" Padding="14,11"
+                                                Visibility="{Binding EsConsejo, Converter={StaticResource BoolAVisible}}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="LightbulbOnOutline"
+                                                                         Foreground="{StaticResource BrochaExito}"
+                                                                         VerticalAlignment="Top" Margin="0,1,11,0" />
+                                                <TextBlock Text="{Binding Texto}" TextWrapping="Wrap"
+                                                           FontSize="12.5" LineHeight="20"
+                                                           Foreground="{StaticResource BrochaExito}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </materialDesign:Card>
+        </Grid>
+
+        <!-- ══ Tutorial guiado ═════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" Visibility="{Binding MostrandoTutorial, Converter={StaticResource BoolAVisible}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Avance -->
+            <materialDesign:Card Grid.Row="0" Style="{StaticResource TarjetaBase}" Padding="20,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,20,0">
+                        <TextBlock Style="{StaticResource TituloSeccion}" Margin="0,0,0,4">
+                            <Run Text="Puesta en marcha:" />
+                            <Run Text="{Binding Progreso.Completados, Mode=OneWay}" FontWeight="Bold" />
+                            <Run Text="de" />
+                            <Run Text="{Binding Progreso.Total, Mode=OneWay}" FontWeight="Bold" />
+                            <Run Text="pasos" />
+                        </TextBlock>
+
+                        <!-- Barra propia: la de Material entra con animación y no siempre se ve. -->
+                        <Grid Height="8">
+                            <Border CornerRadius="4"
+                                    Background="{DynamicResource MaterialDesignChipBackground}" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{Binding Progreso.Porcentaje,
+                                                             Converter={StaticResource PorcentajeAProporcion}}" />
+                                    <ColumnDefinition Width="{Binding Progreso.PorcentajeRestante,
+                                                             Converter={StaticResource PorcentajeAProporcion}}" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" CornerRadius="4"
+                                        Background="{DynamicResource MaterialDesign.Brush.Primary}" />
+                            </Grid>
+                        </Grid>
+
+                        <TextBlock Style="{StaticResource TextoTenue}" FontSize="12" Margin="0,8,0,0"
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding Progreso.TodoListo, Converter={StaticResource BoolAVisible},
+                                                ConverterParameter=Invertir}">
+                            <Run Text="Lo siguiente:" />
+                            <Run Text="{Binding Progreso.Siguiente.Titulo, Mode=OneWay}" FontWeight="SemiBold" />
+                        </TextBlock>
+
+                        <TextBlock Text="Todo lo esencial está listo. Su papelería puede operar con normalidad."
+                                   Style="{StaticResource TextoTenue}" FontSize="12" Margin="0,8,0,0"
+                                   Foreground="{StaticResource BrochaExito}"
+                                   Visibility="{Binding Progreso.TodoListo, Converter={StaticResource BoolAVisible}}" />
+                    </StackPanel>
+
+                    <Button Grid.Column="1" Style="{StaticResource BotonSecundario}"
+                            VerticalAlignment="Center"
+                            Command="{Binding ActualizarProgresoCommand}"
+                            ToolTip="Volver a revisar qué pasos están resueltos">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh" VerticalAlignment="Center" />
+                            <TextBlock Text="Revisar de nuevo" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </materialDesign:Card>
+
+            <!-- Pasos -->
+            <materialDesign:Card Grid.Row="1" Style="{StaticResource TarjetaBase}" Padding="0" Margin="0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Pasos}" Margin="20,18,20,20">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="0,0,0,1" Padding="0,14"
+                                        BorderBrush="{DynamicResource MaterialDesignDivider}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Marca de resuelto o número del paso -->
+                                        <Grid Grid.Column="0" Width="38" Height="38" VerticalAlignment="Top">
+                                            <Border CornerRadius="19"
+                                                    Background="{DynamicResource MaterialDesignChipBackground}"
+                                                    Visibility="{Binding Completado, Converter={StaticResource BoolAVisible},
+                                                                 ConverterParameter=Invertir}">
+                                                <materialDesign:PackIcon Kind="{Binding Icono}"
+                                                                         Width="20" Height="20" Opacity="0.65"
+                                                                         HorizontalAlignment="Center"
+                                                                         VerticalAlignment="Center" />
+                                            </Border>
+
+                                            <Border CornerRadius="19" Background="#E8F5E9"
+                                                    Visibility="{Binding Completado, Converter={StaticResource BoolAVisible}}">
+                                                <materialDesign:PackIcon Kind="Check" Width="21" Height="21"
+                                                                         Foreground="{StaticResource BrochaExito}"
+                                                                         HorizontalAlignment="Center"
+                                                                         VerticalAlignment="Center" />
+                                            </Border>
+                                        </Grid>
+
+                                        <StackPanel Grid.Column="1" Margin="16,0,16,0" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Titulo}" FontWeight="SemiBold"
+                                                           FontSize="13.5" TextWrapping="Wrap" />
+
+                                                <Border Style="{StaticResource ContadorLista}" Margin="8,0,0,0"
+                                                        Visibility="{Binding EsOpcional, Converter={StaticResource BoolAVisible}}">
+                                                    <TextBlock Text="opcional" FontSize="10.5" Opacity="0.7" />
+                                                </Border>
+                                            </StackPanel>
+
+                                            <TextBlock Text="{Binding Descripcion}" TextWrapping="Wrap"
+                                                       FontSize="12.5" Margin="0,3,0,0" Opacity="0.85" />
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                                <materialDesign:PackIcon Kind="InformationOutline"
+                                                                         Width="14" Height="14" Opacity="0.5"
+                                                                         VerticalAlignment="Top" Margin="0,2,6,0" />
+                                                <TextBlock Text="{Binding PorQue}" TextWrapping="Wrap"
+                                                           Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                                           MaxWidth="620" />
+                                            </StackPanel>
+
+                                            <TextBlock Text="{Binding Detalle}" FontSize="11.5" Margin="0,5,0,0"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource BrochaExito}"
+                                                       Visibility="{Binding Detalle, Converter={StaticResource TextoAVisible}}" />
+                                        </StackPanel>
+
+                                        <Button Grid.Column="2" Style="{StaticResource BotonSecundario}"
+                                                VerticalAlignment="Center" MinWidth="0"
+                                                Command="{Binding DataContext.IrAlPasoCommand,
+                                                          RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="Abrir el módulo donde se resuelve este paso">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="Ir" VerticalAlignment="Center" />
+                                                <materialDesign:PackIcon Kind="ArrowRight" Margin="6,0,0,0"
+                                                                         VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </materialDesign:Card>
+        </Grid>
+    </Grid>
+</UserControl>

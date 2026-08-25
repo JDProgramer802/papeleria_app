@@ -398,6 +398,36 @@ public class EnumADescripcion : IValueConverter
 /// Indica si un número es mayor que cero. Se usa para encender avisos visuales
 /// cuando un contador deja de estar a cero (productos agotados, bajo mínimo).
 /// </summary>
+/// <summary>
+/// Pasa el índice de una lista, que empieza en cero, al número que ve el usuario.
+/// Se usa en los pasos numerados del manual.
+/// </summary>
+/// <summary>
+/// Convierte un porcentaje en una proporción de rejilla. Sirve para dibujar barras
+/// de avance con dos bordes, que se ven siempre, sin depender de una animación.
+/// </summary>
+public class PorcentajeAProporcion : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var porcentaje = value is null ? 0 : System.Convert.ToDouble(value, CultureInfo.InvariantCulture);
+
+        return new System.Windows.GridLength(Math.Max(porcentaje, 0), System.Windows.GridUnitType.Star);
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
+public class IndiceANumero : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is int indice ? (indice + 1).ToString(CultureInfo.InvariantCulture) : string.Empty;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
 public class MayorQueCeroABooleano : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)

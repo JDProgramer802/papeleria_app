@@ -25,7 +25,8 @@ public class Navegacion : INavegacion
         [Modulos.Caja] = typeof(CajaVistaModelo),
         [Modulos.Reportes] = typeof(ReportesVistaModelo),
         [Modulos.Configuracion] = typeof(ConfiguracionVistaModelo),
-        [Modulos.Usuarios] = typeof(UsuariosVistaModelo)
+        [Modulos.Usuarios] = typeof(UsuariosVistaModelo),
+        [Modulos.Manual] = typeof(ManualVistaModelo)
     };
 
     private readonly IServiceProvider _proveedor;

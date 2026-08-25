@@ -43,6 +43,10 @@
         <paginas:CarteraView />
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vmPaginas:ManualVistaModelo}">
+        <paginas:ManualView />
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vmPaginas:HistorialVentasVistaModelo}">
         <paginas:HistorialVentasView />
     </DataTemplate>

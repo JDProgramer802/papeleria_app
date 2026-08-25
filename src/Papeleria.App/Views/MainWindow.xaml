@@ -246,6 +246,15 @@
                                 </StackPanel>
                             </Border>
 
+                            <!-- La ayuda siempre a un clic, sin buscarla en el menú lateral. -->
+                            <Button Style="{StaticResource MaterialDesignIconButton}"
+                                    Command="{Binding NavegarCommand}"
+                                    CommandParameter="manual"
+                                    ToolTip="Manual de uso y tutorial guiado"
+                                    Width="38" Height="38">
+                                <materialDesign:PackIcon Kind="HelpCircleOutline" Width="20" Height="20" />
+                            </Button>
+
                             <Button Style="{StaticResource MaterialDesignIconButton}"
                                     Command="{Binding RecargarCommand}"
                                     ToolTip="Actualizar la información de la pantalla"
