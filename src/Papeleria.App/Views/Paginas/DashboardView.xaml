@@ -39,6 +39,187 @@
                     </StackPanel>
                 </Grid>
 
+                <!-- ══ Cómo va el negocio ahora mismo ══════════════════════ -->
+                <!--
+                    Lo primero que se mira al abrir el programa: cuánto debería haber en
+                    el cajón, cuánto deben los clientes y cuánta plata está quieta en la
+                    estantería. Las dos primeras se ocultan si el usuario no tiene el
+                    módulo: la UniformGrid reparte el ancho solo entre las visibles.
+                -->
+                <UniformGrid Columns="3" Margin="0,0,-14,0">
+
+                    <!-- Caja del turno -->
+                    <materialDesign:Card Style="{StaticResource TarjetaBase}" Margin="0,0,14,16"
+                                         Cursor="Hand" ToolTip="Ir a caja"
+                                         Visibility="{Binding Resumen.PuedeVerCaja, Converter={StaticResource BoolAVisible}}">
+                        <materialDesign:Card.InputBindings>
+                            <MouseBinding MouseAction="LeftClick"
+                                          Command="{Binding IrAModuloCommand}"
+                                          CommandParameter="caja" />
+                        </materialDesign:Card.InputBindings>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Width="44" Height="44" CornerRadius="12"
+                                    Background="#E8F5E9" VerticalAlignment="Top">
+                                <materialDesign:PackIcon Kind="CashRegister" Width="24" Height="24"
+                                                         Foreground="#2E7D32"
+                                                         HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                                <Grid>
+                                    <TextBlock Text="Efectivo en caja" Style="{StaticResource EtiquetaCampo}" />
+
+                                    <Border CornerRadius="9" Padding="9,2" Background="#E8F5E9"
+                                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                                            Visibility="{Binding Resumen.CajaAbierta, Converter={StaticResource BoolAVisible}}">
+                                        <TextBlock Text="Turno abierto" FontSize="10.5"
+                                                   FontWeight="SemiBold" Foreground="#2E7D32" />
+                                    </Border>
+
+                                    <Border CornerRadius="9" Padding="9,2" Background="#EEEEEE"
+                                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                                            Visibility="{Binding Resumen.CajaAbierta, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+                                        <TextBlock Text="Sin abrir" FontSize="10.5"
+                                                   FontWeight="SemiBold" Foreground="#757575" />
+                                    </Border>
+                                </Grid>
+
+                                <TextBlock Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                           FontWeight="Bold" Margin="0,2,0,0"
+                                           Text="{Binding Resumen.EfectivoEnCaja, Converter={StaticResource Moneda}}"
+                                           Visibility="{Binding Resumen.CajaAbierta, Converter={StaticResource BoolAVisible}}" />
+
+                                <TextBlock Text="—" Opacity="0.4" Margin="0,2,0,0"
+                                           Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                           Visibility="{Binding Resumen.CajaAbierta, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}" />
+
+                                <TextBlock Text="{Binding Resumen.CajaDesdeTexto}"
+                                           Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                           TextWrapping="Wrap" Margin="0,2,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </materialDesign:Card>
+
+                    <!-- Lo que deben los clientes -->
+                    <materialDesign:Card Style="{StaticResource TarjetaBase}" Margin="0,0,14,16"
+                                         Cursor="Hand" ToolTip="Ir a cartera"
+                                         Visibility="{Binding Resumen.PuedeVerCartera, Converter={StaticResource BoolAVisible}}">
+                        <materialDesign:Card.InputBindings>
+                            <MouseBinding MouseAction="LeftClick"
+                                          Command="{Binding IrAModuloCommand}"
+                                          CommandParameter="cartera" />
+                        </materialDesign:Card.InputBindings>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Width="44" Height="44" CornerRadius="12"
+                                    Background="#FFF3E0" VerticalAlignment="Top">
+                                <materialDesign:PackIcon Kind="AccountCashOutline" Width="24" Height="24"
+                                                         Foreground="#EF6C00"
+                                                         HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                                <Grid>
+                                    <TextBlock Text="Nos deben (fiado)" Style="{StaticResource EtiquetaCampo}" />
+
+                                    <!-- La deuda de más de sesenta días es la que se pierde. -->
+                                    <Border CornerRadius="9" Padding="9,2" Background="#FFEBEE"
+                                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                                            Visibility="{Binding Resumen.HayCarteraVencida, Converter={StaticResource BoolAVisible}}"
+                                            ToolTip="Deuda con más de 60 días de vencida">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="+60 días:" FontSize="10.5"
+                                                       Foreground="#C62828" />
+                                            <TextBlock Text="{Binding Resumen.CarteraVencida, Converter={StaticResource Moneda}}"
+                                                       FontSize="10.5" FontWeight="SemiBold"
+                                                       Foreground="#C62828" Margin="4,0,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+
+                                <TextBlock Text="{Binding Resumen.SaldoCartera, Converter={StaticResource Moneda}}"
+                                           Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                           FontWeight="Bold" Margin="0,2,0,0" />
+
+                                <TextBlock Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                           TextWrapping="Wrap" Margin="0,2,0,0">
+                                    <Run Text="{Binding Resumen.ClientesConDeuda, Mode=OneWay}" />
+                                    <Run Text="clientes con saldo pendiente" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </materialDesign:Card>
+
+                    <!-- Mercancía que no se mueve -->
+                    <materialDesign:Card Style="{StaticResource TarjetaBase}" Margin="0,0,14,16"
+                                         Cursor="Hand" ToolTip="Ver el inventario">
+                        <materialDesign:Card.InputBindings>
+                            <MouseBinding MouseAction="LeftClick"
+                                          Command="{Binding IrAModuloCommand}"
+                                          CommandParameter="inventario" />
+                        </materialDesign:Card.InputBindings>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0" Width="44" Height="44" CornerRadius="12"
+                                    Background="#EDE7F6" VerticalAlignment="Top">
+                                <materialDesign:PackIcon Kind="PackageVariantClosedRemove"
+                                                         Width="24" Height="24" Foreground="#5E35B1"
+                                                         HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center" />
+                            </Border>
+
+                            <StackPanel Grid.Column="1" Margin="14,0,0,0">
+                                <Grid>
+                                    <TextBlock Text="Plata quieta en la estantería"
+                                               Style="{StaticResource EtiquetaCampo}" />
+
+                                    <!-- Vender por debajo del costo es la pérdida más silenciosa. -->
+                                    <Border CornerRadius="9" Padding="9,2" Background="#FFEBEE"
+                                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                                            Visibility="{Binding Resumen.HayProductosBajoCosto, Converter={StaticResource BoolAVisible}}"
+                                            ToolTip="Su precio de venta quedó por debajo del costo">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Resumen.ProductosBajoCosto}"
+                                                       FontSize="10.5" FontWeight="SemiBold"
+                                                       Foreground="#C62828" />
+                                            <TextBlock Text="bajo costo" FontSize="10.5"
+                                                       Foreground="#C62828" Margin="4,0,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+
+                                <TextBlock Text="{Binding Resumen.ValorSinRotacion, Converter={StaticResource Moneda}}"
+                                           Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                                           FontWeight="Bold" Margin="0,2,0,0" />
+
+                                <TextBlock Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                           TextWrapping="Wrap" Margin="0,2,0,0">
+                                    <Run Text="{Binding Resumen.ProductosSinRotacion, Mode=OneWay}" />
+                                    <Run Text="productos sin venderse en 90 días" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </materialDesign:Card>
+                </UniformGrid>
+
                 <!-- ══ Tarjetas de indicadores ═════════════════════════════ -->
                 <!--
                     Rejilla uniforme en lugar de flujo libre: así las tarjetas reparten
@@ -60,17 +241,40 @@
                                           CommandParameter="ventas" />
                         </controls:TarjetaMetrica.InputBindings>
                         <controls:TarjetaMetrica.Pie>
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon
-                                    Kind="{Binding Resumen.VariacionVentas, Converter={StaticResource VariacionAIcono}}"
-                                    Foreground="{Binding Resumen.VariacionVentas, Converter={StaticResource VariacionABrocha}}"
-                                    Width="15" Height="15" VerticalAlignment="Center" />
-                                <TextBlock Text="{Binding Resumen.VariacionVentas, Converter={StaticResource VariacionATexto}}"
-                                           Foreground="{Binding Resumen.VariacionVentas, Converter={StaticResource VariacionABrocha}}"
-                                           FontSize="11.5" VerticalAlignment="Center" Margin="4,0,0,0" />
-                                <TextBlock Text="vs. mes anterior" Style="{StaticResource TextoTenue}"
-                                           FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" />
-                            </StackPanel>
+                            <!--
+                                Diciembre siempre le gana a noviembre, así que compararlos
+                                no dice nada. En cuanto hay un año de historia se compara
+                                contra el mismo mes del año pasado, que sí es comparable;
+                                antes de eso se sigue mostrando el mes anterior.
+                            -->
+                            <Grid>
+                                <StackPanel Orientation="Horizontal"
+                                            Visibility="{Binding Resumen.HayHistorialAnual, Converter={StaticResource BoolAVisible}}">
+                                    <materialDesign:PackIcon
+                                        Kind="{Binding Resumen.VariacionInteranual, Converter={StaticResource VariacionAIcono}}"
+                                        Foreground="{Binding Resumen.VariacionInteranual, Converter={StaticResource VariacionABrocha}}"
+                                        Width="15" Height="15" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Resumen.VariacionInteranual, Converter={StaticResource VariacionATexto}}"
+                                               Foreground="{Binding Resumen.VariacionInteranual, Converter={StaticResource VariacionABrocha}}"
+                                               FontSize="11.5" VerticalAlignment="Center" Margin="4,0,0,0" />
+                                    <TextBlock Text="vs. el año pasado" Style="{StaticResource TextoTenue}"
+                                               FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0"
+                                               ToolTip="Comparado con el mismo mes del año anterior" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal"
+                                            Visibility="{Binding Resumen.HayHistorialAnual, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+                                    <materialDesign:PackIcon
+                                        Kind="{Binding Resumen.VariacionVentas, Converter={StaticResource VariacionAIcono}}"
+                                        Foreground="{Binding Resumen.VariacionVentas, Converter={StaticResource VariacionABrocha}}"
+                                        Width="15" Height="15" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Resumen.VariacionVentas, Converter={StaticResource VariacionATexto}}"
+                                               Foreground="{Binding Resumen.VariacionVentas, Converter={StaticResource VariacionABrocha}}"
+                                               FontSize="11.5" VerticalAlignment="Center" Margin="4,0,0,0" />
+                                    <TextBlock Text="vs. mes anterior" Style="{StaticResource TextoTenue}"
+                                               FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" />
+                                </StackPanel>
+                            </Grid>
                         </controls:TarjetaMetrica.Pie>
                     </controls:TarjetaMetrica>
 
@@ -303,6 +507,32 @@
                                                    FontWeight="Bold" />
                                     </StackPanel>
                                 </Grid>
+
+                                <!--
+                                    Un martes no se parece a un sábado: la referencia útil
+                                    es el mismo día de la semana pasada, no el día de ayer.
+                                -->
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
+                                            Visibility="{Binding Resumen.HayReferenciaDiaria, Converter={StaticResource BoolAVisible}}">
+                                    <materialDesign:PackIcon
+                                        Kind="{Binding Resumen.VariacionDiaria, Converter={StaticResource VariacionAIcono}}"
+                                        Foreground="{Binding Resumen.VariacionDiaria, Converter={StaticResource VariacionABrocha}}"
+                                        Width="16" Height="16" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Resumen.VariacionDiaria, Converter={StaticResource VariacionATexto}}"
+                                               Foreground="{Binding Resumen.VariacionDiaria, Converter={StaticResource VariacionABrocha}}"
+                                               FontSize="12" FontWeight="SemiBold"
+                                               VerticalAlignment="Center" Margin="5,0,0,0" />
+                                    <TextBlock Text="que este mismo día la semana pasada"
+                                               Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                               VerticalAlignment="Center" Margin="5,0,0,0"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip="{Binding Resumen.MontoMismoDiaSemanaAnterior, Converter={StaticResource Moneda}}" />
+                                </StackPanel>
+
+                                <TextBlock Text="La semana pasada no hubo ventas este mismo día."
+                                           Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                           Margin="0,10,0,0" TextWrapping="Wrap"
+                                           Visibility="{Binding Resumen.HayReferenciaDiaria, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}" />
 
                                 <Separator Style="{StaticResource SeparadorHorizontal}" />
 

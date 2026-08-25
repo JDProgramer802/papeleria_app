@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Papeleria.Business.Common;
 using Papeleria.Business.Dtos;
+using Papeleria.Business.Security;
 using Papeleria.Data.Repositories;
 using Papeleria.Domain.Enums;
 
@@ -18,18 +19,33 @@ public class ServicioDashboard : IServicioDashboard
 {
     private const int MesesDeHistorial = 12;
 
+    /// <summary>Días sin venderse a partir de los cuales un artículo se considera parado.</summary>
+    private const int DiasSinRotacion = 90;
+
+    /// <summary>Horas de turno abierto a partir de las cuales se avisa del olvido.</summary>
+    private const int HorasParaAvisarCaja = 12;
+
     private readonly IUnidadDeTrabajoFactory _fabrica;
     private readonly IServicioVentas _ventas;
     private readonly IServicioKardex _kardex;
+    private readonly IServicioCartera _cartera;
+    private readonly IServicioCaja _caja;
+    private readonly IContextoSesion _sesion;
 
     public ServicioDashboard(
         IUnidadDeTrabajoFactory fabrica,
         IServicioVentas ventas,
-        IServicioKardex kardex)
+        IServicioKardex kardex,
+        IServicioCartera cartera,
+        IServicioCaja caja,
+        IContextoSesion sesion)
     {
         _fabrica = fabrica;
         _ventas = ventas;
         _kardex = kardex;
+        _cartera = cartera;
+        _caja = caja;
+        _sesion = sesion;
     }
 
     public async Task<ResumenDashboardDto> ObtenerResumenAsync(CancellationToken ct = default)
@@ -61,10 +77,57 @@ public class ServicioDashboard : IServicioDashboard
 
         var proveedores = await unidad.Contexto.Proveedores.CountAsync(p => p.Activo, ct).ConfigureAwait(false);
         var clientes = await unidad.Contexto.Clientes.CountAsync(c => c.Activo, ct).ConfigureAwait(false);
-        var cajaAbierta = await unidad.Contexto.CajaSesiones
-            .AnyAsync(s => s.Estado == EstadoCajaSesion.Abierta, ct).ConfigureAwait(false);
+        // ── Estado del turno de caja ────────────────────────────────────────
+        var turno = await unidad.Contexto.CajaSesiones
+            .AsNoTracking()
+            .Where(s => s.Estado == EstadoCajaSesion.Abierta)
+            .Select(s => new { s.Id, s.FechaApertura, Usuario = s.UsuarioApertura!.NombreCompleto })
+            .FirstOrDefaultAsync(ct).ConfigureAwait(false);
 
-        var alertas = ConstruirAlertas(inventario, cajaAbierta, ventasMes.Cantidad);
+        var cajaAbierta = turno is not null;
+
+        // Las cifras de caja y de cartera se piden a sus servicios, que ya las
+        // calculan bien, pero solo si el usuario puede verlas: al de bodega no le
+        // corresponde el dinero del cajón ni la deuda de los clientes.
+        var puedeVerCaja = _sesion.Puede(Domain.Constants.Modulos.Caja);
+        var puedeVerCartera = _sesion.Puede(Domain.Constants.Modulos.Cartera);
+
+        decimal efectivoEnCaja = 0;
+
+        if (cajaAbierta && puedeVerCaja)
+        {
+            var arqueo = await _caja.CalcularArqueoAsync(turno!.Id, ct).ConfigureAwait(false);
+            efectivoEnCaja = arqueo.MontoEsperado;
+        }
+
+        var cartera = puedeVerCartera
+            ? await _cartera.ObtenerResumenAsync(new FiltroCartera(), ct).ConfigureAwait(false)
+            : new ResumenCarteraDto();
+
+        // ── Comparación honesta: contra el mismo mes del año pasado ─────────
+        var inicioMesAnioAnterior = inicioMes.AddYears(-1);
+
+        var ventasAnioAnterior = await ObtenerTotalesVentaAsync(
+            unidad, inicioMesAnioAnterior, inicioMesAnioAnterior.AddMonths(1), ct).ConfigureAwait(false);
+
+        var hayHistorialAnual = await unidad.Contexto.Ventas
+            .AnyAsync(v => v.Fecha < inicioMes.AddMonths(-11) && v.Estado == EstadoVenta.Completada, ct)
+            .ConfigureAwait(false);
+
+        // Y el día de hoy contra el mismo día de la semana pasada, no contra ayer.
+        var mismoDiaSemanaAnterior = hoy.AddDays(-7);
+
+        var ventasSemanaAnterior = await ObtenerTotalesVentaAsync(
+            unidad, mismoDiaSemanaAnterior, mismoDiaSemanaAnterior.AddDays(1), ct).ConfigureAwait(false);
+
+        var parados = await ObtenerSinRotacionAsync(unidad, hoy.AddDays(-DiasSinRotacion), ct)
+            .ConfigureAwait(false);
+
+        var bajoCosto = await ContarBajoCostoAsync(unidad, ct).ConfigureAwait(false);
+
+        var alertas = ConstruirAlertas(
+            inventario, cajaAbierta, ventasMes.Cantidad, cartera, turno?.FechaApertura,
+            bajoCosto, puedeVerCartera);
 
         return new ResumenDashboardDto
         {
@@ -88,6 +151,25 @@ public class ServicioDashboard : IServicioDashboard
                 ? 0
                 : Dinero.DividirSeguro(ventasMes.Total, ventasMes.Cantidad),
             CajaAbierta = cajaAbierta,
+            CajaAbiertaDesde = turno?.FechaApertura,
+            CajaAbiertaPor = turno?.Usuario,
+            EfectivoEnCaja = efectivoEnCaja,
+            PuedeVerCaja = puedeVerCaja,
+
+            SaldoCartera = cartera.SaldoTotal,
+            CarteraVencida = cartera.VencidoMas60,
+            ClientesConDeuda = cartera.ClientesConDeuda,
+            PuedeVerCartera = puedeVerCartera,
+
+            VentasMismoMesAnioAnterior = ventasAnioAnterior.Total,
+            VariacionInteranual = Dinero.VariacionPorcentual(ventasMes.Total, ventasAnioAnterior.Total),
+            HayHistorialAnual = hayHistorialAnual,
+            MontoMismoDiaSemanaAnterior = ventasSemanaAnterior.Total,
+            VariacionDiaria = Dinero.VariacionPorcentual(ventasHoy.Total, ventasSemanaAnterior.Total),
+
+            ProductosSinRotacion = parados.Cantidad,
+            ValorSinRotacion = parados.Valor,
+            ProductosBajoCosto = bajoCosto,
 
             SerieVentas = serieVentas,
             SerieCompras = serieCompras,
@@ -209,10 +291,104 @@ public class ServicioDashboard : IServicioDashboard
         return puntos;
     }
 
+    private sealed record ExistenciasParadas(int Cantidad, decimal Valor);
+
+    /// <summary>
+    /// Mercancía con existencias que no se ha vendido en el periodo indicado. Es
+    /// dinero quieto en la estantería: lo que conviene liquidar o devolver.
+    /// </summary>
+    private static async Task<ExistenciasParadas> ObtenerSinRotacionAsync(
+        IUnidadDeTrabajo unidad, DateTime desde, CancellationToken ct)
+    {
+        var vendidosRecientemente = unidad.Contexto.VentaDetalles
+            .Where(d => d.Venta!.Fecha >= desde && d.Venta.Estado == EstadoVenta.Completada)
+            .Select(d => d.ProductoId);
+
+        var datos = await unidad.Contexto.Productos
+            .AsNoTracking()
+            .Where(p => p.Activo
+                        && p.Tipo == TipoProducto.Producto
+                        && p.StockActual > 0
+                        && !vendidosRecientemente.Contains(p.Id))
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                Cantidad = g.Count(),
+                Valor = g.Sum(p => (double)(p.StockActual * p.Costo))
+            })
+            .FirstOrDefaultAsync(ct).ConfigureAwait(false);
+
+        return datos is null
+            ? new ExistenciasParadas(0, 0)
+            : new ExistenciasParadas(datos.Cantidad, Dinero.Redondear(datos.Valor));
+    }
+
+    /// <summary>
+    /// Artículos cuyo precio quedó por debajo del costo. Pasa solo: el costo promedio
+    /// sube con cada compra y, si el precio no se actualiza, se vende a pérdida sin
+    /// que nadie se entere hasta cuadrar el mes.
+    /// </summary>
+    private static Task<int> ContarBajoCostoAsync(IUnidadDeTrabajo unidad, CancellationToken ct) =>
+        unidad.Contexto.Productos
+            .AsNoTracking()
+            .CountAsync(p => p.Activo
+                             && p.Tipo == TipoProducto.Producto
+                             && p.Costo > 0
+                             && p.PrecioVenta < p.Costo, ct);
+
+    /// <summary>
+    /// Avisos del día a día. Las de puesta en marcha solo aparecen mientras el
+    /// negocio está a medio montar; después ceden el sitio a las que de verdad
+    /// exigen actuar hoy.
+    /// </summary>
     private static IReadOnlyList<AlertaDto> ConstruirAlertas(
-        TotalesInventario inventario, bool cajaAbierta, int ventasDelMes)
+        TotalesInventario inventario,
+        bool cajaAbierta,
+        int ventasDelMes,
+        ResumenCarteraDto cartera,
+        DateTime? cajaDesde,
+        int productosBajoCosto,
+        bool puedeVerCartera)
     {
         var alertas = new List<AlertaDto>();
+
+        // Vender por debajo del costo es la pérdida más silenciosa que hay.
+        if (productosBajoCosto > 0)
+        {
+            alertas.Add(new AlertaDto
+            {
+                Nivel = NivelAlerta.Critica,
+                Titulo = productosBajoCosto == 1
+                    ? "1 producto se vende por debajo del costo"
+                    : $"{productosBajoCosto} productos se venden por debajo del costo",
+                Detalle = "Subió el costo y el precio no se actualizó: cada venta pierde dinero.",
+                ModuloDestino = Domain.Constants.Modulos.Productos
+            });
+        }
+
+        if (puedeVerCartera && cartera.VencidoMas60 > 0)
+        {
+            alertas.Add(new AlertaDto
+            {
+                Nivel = NivelAlerta.Critica,
+                Titulo = $"{Formatos.Moneda(cartera.VencidoMas60)} con más de 60 días",
+                Detalle = "Es la deuda que se vuelve incobrable. Conviene llamar hoy.",
+                ModuloDestino = Domain.Constants.Modulos.Cartera
+            });
+        }
+
+        // Un turno que lleva medio día abierto casi siempre es un cierre olvidado.
+        if (cajaAbierta && cajaDesde is { } desde &&
+            (DateTime.Now - desde).TotalHours > HorasParaAvisarCaja)
+        {
+            alertas.Add(new AlertaDto
+            {
+                Nivel = NivelAlerta.Advertencia,
+                Titulo = "La caja lleva más de 12 horas abierta",
+                Detalle = $"Se abrió el {desde:dd/MM} a las {desde:HH:mm}. ¿Quedó sin cerrar?",
+                ModuloDestino = Domain.Constants.Modulos.Caja
+            });
+        }
 
         if (!cajaAbierta)
         {
@@ -251,6 +427,7 @@ public class ServicioDashboard : IServicioDashboard
             });
         }
 
+        // Solo mientras el negocio está a medio montar.
         if (inventario.TotalProductos == 0)
         {
             alertas.Add(new AlertaDto
@@ -274,4 +451,5 @@ public class ServicioDashboard : IServicioDashboard
 
         return alertas;
     }
+
 }

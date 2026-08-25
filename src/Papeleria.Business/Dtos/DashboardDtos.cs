@@ -69,6 +69,73 @@ public class ResumenDashboardDto
 
     public bool CajaAbierta { get; init; }
 
+    // ── Estado de la caja ───────────────────────────────────────────────────
+
+    /// <summary>Hora en que se abrió el turno vigente.</summary>
+    public DateTime? CajaAbiertaDesde { get; init; }
+
+    public string? CajaAbiertaPor { get; init; }
+
+    /// <summary>Efectivo que debería haber en el cajón ahora mismo.</summary>
+    public decimal EfectivoEnCaja { get; init; }
+
+    /// <summary>El usuario tiene permiso para ver las cifras de caja.</summary>
+    public bool PuedeVerCaja { get; init; }
+
+    public string CajaDesdeTexto => CajaAbiertaDesde is { } desde
+        ? $"Abierta desde las {desde:HH:mm}" + (string.IsNullOrWhiteSpace(CajaAbiertaPor)
+            ? string.Empty
+            : $" por {CajaAbiertaPor}")
+        : "Sin turno abierto";
+
+    /// <summary>Horas que lleva abierto el turno; sirve para avisar de un olvido.</summary>
+    public double HorasCajaAbierta =>
+        CajaAbiertaDesde is { } desde ? (DateTime.Now - desde).TotalHours : 0;
+
+    // ── Cartera ─────────────────────────────────────────────────────────────
+
+    /// <summary>Total que los clientes deben por ventas a crédito.</summary>
+    public decimal SaldoCartera { get; init; }
+
+    /// <summary>Parte de esa deuda con más de sesenta días.</summary>
+    public decimal CarteraVencida { get; init; }
+
+    public int ClientesConDeuda { get; init; }
+
+    public bool PuedeVerCartera { get; init; }
+
+    public bool HayCarteraVencida => CarteraVencida > 0;
+
+    // ── Comparación con el año anterior ─────────────────────────────────────
+
+    /// <summary>Ventas del mismo mes del año pasado, la única comparación honesta.</summary>
+    public decimal VentasMismoMesAnioAnterior { get; init; }
+
+    public decimal VariacionInteranual { get; init; }
+
+    /// <summary>Hay ventas de hace un año con las que comparar.</summary>
+    public bool HayHistorialAnual { get; init; }
+
+    /// <summary>Ventas del mismo día de la semana pasada, para dar contexto a las de hoy.</summary>
+    public decimal MontoMismoDiaSemanaAnterior { get; init; }
+
+    public decimal VariacionDiaria { get; init; }
+
+    public bool HayReferenciaDiaria => MontoMismoDiaSemanaAnterior > 0;
+
+    // ── Dinero quieto y precios en pérdida ──────────────────────────────────
+
+    /// <summary>Artículos con existencias que no se venden desde hace noventa días.</summary>
+    public int ProductosSinRotacion { get; init; }
+
+    /// <summary>Lo que valen a costo esos artículos parados.</summary>
+    public decimal ValorSinRotacion { get; init; }
+
+    /// <summary>Artículos cuyo precio de venta quedó por debajo del costo.</summary>
+    public int ProductosBajoCosto { get; init; }
+
+    public bool HayProductosBajoCosto => ProductosBajoCosto > 0;
+
     // ── Series y listados ───────────────────────────────────────────────────
     public IReadOnlyList<PuntoSerie> SerieVentas { get; init; } = Array.Empty<PuntoSerie>();
 

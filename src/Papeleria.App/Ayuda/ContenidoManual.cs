@@ -110,6 +110,45 @@ public static class ContenidoManual
         },
         new()
         {
+            Titulo = "El panel de inicio",
+            Resumen = "Qué mirar cada mañana y qué significa cada cifra",
+            Icono = PackIconKind.ViewDashboardOutline,
+            Bloques = new[]
+            {
+                Parrafo(
+                    "Es la primera pantalla al entrar. Está ordenada de arriba abajo por urgencia: " +
+                    "lo de la fila de arriba es lo que puede costarle plata hoy."),
+                Lista("La fila de arriba",
+                    "Efectivo en caja: lo que debería haber en el cajón en este momento, contando " +
+                    "las ventas de contado, los ingresos y los egresos del turno. Si no cuadra al " +
+                    "cerrar, la diferencia sale ahí.",
+                    "Nos deben (fiado): la suma de lo que le deben todos los clientes. La etiqueta " +
+                    "roja avisa de la parte con más de 60 días, que es la que se vuelve incobrable.",
+                    "Plata quieta en la estantería: lo que le costó la mercancía que lleva noventa " +
+                    "días sin venderse. Es dinero suyo detenido en una repisa."),
+                Parrafo(
+                    "Las dos primeras solo aparecen si su usuario tiene esos módulos. A un vendedor " +
+                    "no le sale el dinero del cajón ni la deuda de los clientes."),
+                Lista("Cómo se comparan las ventas",
+                    "Ventas del mes se compara contra el mismo mes del año pasado, no contra el mes " +
+                    "anterior. Diciembre siempre le gana a noviembre; compararlos no dice nada.",
+                    "Mientras no haya un año de historia, el panel compara contra el mes anterior y " +
+                    "lo dice en la propia tarjeta.",
+                    "Las ventas de hoy se comparan contra el mismo día de la semana pasada. Un martes " +
+                    "no se parece a un sábado."),
+                Lista("Las alertas",
+                    "Productos que se venden por debajo del costo: subió el proveedor y el precio se " +
+                    "quedó viejo. Cada venta de esos productos pierde plata.",
+                    "Deuda con más de 60 días: conviene llamar hoy.",
+                    "Caja abierta hace más de doce horas: casi siempre es un cierre que se olvidó.",
+                    "Productos agotados o bajo el mínimo: hay que reponer."),
+                Consejo(
+                    "Cada tarjeta y cada alerta se puede pulsar: lo lleva directo al módulo donde " +
+                    "se arregla lo que le está avisando.")
+            }
+        },
+        new()
+        {
             Titulo = "Punto de venta",
             Resumen = "Cobrar, imprimir y fiar",
             Icono = PackIconKind.CashRegister,
