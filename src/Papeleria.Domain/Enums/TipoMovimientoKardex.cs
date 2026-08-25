@@ -33,7 +33,10 @@ public enum TipoMovimientoKardex
     AnulacionCompra = 9,
 
     [Display(Name = "Saldo inicial")]
-    SaldoInicial = 10
+    SaldoInicial = 10,
+
+    [Display(Name = "Devolución de cliente")]
+    DevolucionVenta = 11
 }
 
 /// <summary>Indica si un tipo de movimiento suma o resta existencias.</summary>

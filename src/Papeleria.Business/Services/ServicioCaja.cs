@@ -364,6 +364,15 @@ public class ServicioCaja : IServicioCaja
     private static async Task<decimal> CalcularDevolucionesAsync(
         IUnidadDeTrabajo unidad, int cajaSesionId, CancellationToken ct)
     {
+        // Devoluciones parciales: la venta sigue en pie, así que su importe sigue
+        // sumando en VentasEfectivo. Lo reintegrado hay que descontarlo aparte.
+        var reintegrado = await unidad.Contexto.MovimientosCaja
+            .AsNoTracking()
+            .Where(m => m.CajaSesionId == cajaSesionId
+                        && m.Tipo == TipoMovimientoCaja.Devolucion
+                        && m.AfectaEfectivo)
+            .SumAsync(m => (double?)m.Monto, ct).ConfigureAwait(false) ?? 0;
+
         var anuladas = await unidad.Contexto.MovimientosCaja
             .AsNoTracking()
             .Where(m => m.CajaSesionId == cajaSesionId
@@ -379,12 +388,14 @@ public class ServicioCaja : IServicioCaja
             })
             .ToListAsync(ct).ConfigureAwait(false);
 
-        return anuladas.Sum(v => v.MetodoPago switch
+        var porAnulacion = anuladas.Sum(v => v.MetodoPago switch
         {
             MetodoPago.Efectivo => v.Total,
             MetodoPago.Mixto => Math.Min(Math.Max(v.MontoRecibido - v.Cambio, 0), v.Total),
             _ => 0m
         });
+
+        return Dinero.Redondear(porAnulacion + Dinero.Redondear(reintegrado));
     }
 
     public async Task<CajaSesion> CerrarAsync(

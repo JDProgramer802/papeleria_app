@@ -5,6 +5,8 @@ using Papeleria.App.Infrastructure;
 using Papeleria.Business.Services;
 using Papeleria.Business.Services.Catalogos;
 using Papeleria.Domain.Entities;
+using Papeleria.Business.Common;
+using Papeleria.Domain.Enums;
 using Papeleria.Domain.Exceptions;
 
 namespace Papeleria.App.ViewModels.Dialogos;
@@ -53,6 +55,21 @@ public partial class ProductoDialogoVistaModelo : VistaModeloBase
 
     public ObservableCollection<UnidadMedida> Unidades { get; }
 
+    public IReadOnlyList<OpcionEnum<TipoProducto>> TiposProducto { get; } =
+        Enumeraciones.Opciones<TipoProducto>();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EsServicio))]
+    [NotifyPropertyChangedFor(nameof(ManejaExistencias))]
+    [NotifyPropertyChangedFor(nameof(PuedeEditarStock))]
+    [NotifyPropertyChangedFor(nameof(TextoAyudaTipo))]
+    private TipoProducto _tipo = TipoProducto.Producto;
+
+    /// <summary>Unidades de venta que trae la presentación con la que se compra.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TextoPresentacion))]
+    private decimal _unidadesPorPresentacion = 1;
+
     [ObservableProperty] private string _codigo = string.Empty;
     [ObservableProperty] private string? _codigoBarrasTexto;
     [ObservableProperty] private string _nombre = string.Empty;
@@ -75,8 +92,22 @@ public partial class ProductoDialogoVistaModelo : VistaModeloBase
     [ObservableProperty]
     private byte[]? _imagenCodigoBarras;
 
+    public bool EsServicio => Tipo == TipoProducto.Servicio;
+
+    /// <summary>Un servicio no tiene existencias, así que su sección sobra.</summary>
+    public bool ManejaExistencias => Tipo == TipoProducto.Producto;
+
+    public string TextoAyudaTipo => EsServicio
+        ? "Las fotocopias, impresiones o el anillado se cobran igual, pero no descuentan existencias ni pasan por el kardex."
+        : "La mercancía descuenta existencias al venderse y deja rastro en el kardex.";
+
+    /// <summary>Explica la conversión con las cifras del propio formulario.</summary>
+    public string TextoPresentacion => UnidadesPorPresentacion > 1
+        ? $"Al comprar una presentación entrarán {UnidadesPorPresentacion:N0} unidades al inventario."
+        : "Se compra y se vende en la misma unidad.";
+
     /// <summary>El stock solo es editable al crear: después se mueve mediante el kardex.</summary>
-    public bool PuedeEditarStock => EsNuevo;
+    public bool PuedeEditarStock => EsNuevo && ManejaExistencias;
 
     public string TextoAyudaStock => EsNuevo
         ? "Cantidad con la que entra el producto. Queda registrada en el kardex como saldo inicial."
@@ -118,6 +149,8 @@ public partial class ProductoDialogoVistaModelo : VistaModeloBase
         Costo = _producto.Costo;
         PrecioVenta = _producto.PrecioVenta;
         PorcentajeIva = _producto.PorcentajeIva;
+        Tipo = _producto.Tipo;
+        UnidadesPorPresentacion = _producto.UnidadesPorPresentacion;
         StockActual = _producto.StockActual;
         StockMinimo = _producto.StockMinimo;
         StockMaximo = _producto.StockMaximo;
@@ -222,6 +255,8 @@ public partial class ProductoDialogoVistaModelo : VistaModeloBase
         _producto.Costo = Costo;
         _producto.PrecioVenta = PrecioVenta;
         _producto.PorcentajeIva = PorcentajeIva;
+        _producto.Tipo = Tipo;
+        _producto.UnidadesPorPresentacion = Math.Max(UnidadesPorPresentacion, 1);
         _producto.StockMinimo = StockMinimo;
         _producto.StockMaximo = StockMaximo;
         _producto.Ubicacion = Ubicacion;

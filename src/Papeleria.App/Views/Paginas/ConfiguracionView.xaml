@@ -9,6 +9,52 @@
              mc:Ignorable="d"
              d:DesignHeight="780" d:DesignWidth="1340">
 
+    <UserControl.Resources>
+        <!--
+            Navegación de ajustes en vertical, como cualquier panel de configuración:
+            la franja de pestañas horizontal ocupaba todo el ancho para cuatro
+            palabras y dejaba el formulario en una columna estrecha.
+        -->
+        <Style x:Key="SeccionAjustes" TargetType="TabItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Fondo" Background="Transparent"
+                                CornerRadius="8" Margin="8,2" Padding="12,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border x:Name="Marca" Grid.Column="0" Width="3" CornerRadius="2"
+                                        Background="Transparent" Margin="-6,2,0,2" />
+
+                                <ContentPresenter Grid.Column="1" ContentSource="Header"
+                                                  VerticalAlignment="Center" Margin="9,0,0,0" />
+                            </Grid>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Fondo" Property="Background"
+                                        Value="{DynamicResource MaterialDesignChipBackground}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Fondo" Property="Background"
+                                        Value="{DynamicResource MaterialDesign.Brush.Primary.Light}" />
+                                <Setter TargetName="Marca" Property="Background"
+                                        Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                                <Setter Property="TextElement.FontWeight" Value="SemiBold" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="{StaticResource MargenPagina}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -29,13 +75,15 @@
         </Border>
 
         <materialDesign:Card Grid.Row="2" Style="{StaticResource TarjetaBase}" Padding="0" Margin="0">
-            <TabControl Style="{StaticResource MaterialDesignFilledTabControl}"
-                        materialDesign:ColorZoneAssist.Mode="PrimaryLight">
+            <TabControl TabStripPlacement="Left"
+                        BorderThickness="0"
+                        Padding="0"
+                        ItemContainerStyle="{StaticResource SeccionAjustes}">
 
                 <!-- ══ Empresa ═════════════════════════════════════════════ -->
                 <TabItem>
                     <TabItem.Header>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" Width="184">
                             <materialDesign:PackIcon Kind="StoreOutline" VerticalAlignment="Center" />
                             <TextBlock Text="Empresa" Margin="8,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
@@ -44,12 +92,12 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <Grid Margin="20">
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="32" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="24" />
-                                <ColumnDefinition Width="260" />
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0" MaxWidth="640" HorizontalAlignment="Left">
+                            <StackPanel Grid.Column="0" Width="700">
                                 <TextBlock Text="Datos que aparecen en facturas, etiquetas y reportes"
                                            Style="{StaticResource TituloSeccion}" />
 
@@ -166,7 +214,7 @@
                             </StackPanel>
 
                             <!-- Logo y apariencia -->
-                            <StackPanel Grid.Column="2">
+                            <StackPanel Grid.Column="2" Width="280" HorizontalAlignment="Left">
                                 <TextBlock Text="Logotipo" Style="{StaticResource TituloSeccion}" />
 
                                 <Border Height="170" CornerRadius="8" Margin="0,0,0,10"
@@ -220,7 +268,7 @@
                                 <Button Style="{StaticResource BotonTexto}" HorizontalAlignment="Left"
                                         Margin="0,6,0,0" FontSize="11"
                                         Command="{Binding AbrirCarpetaLogsCommand}"
-                                        Content="VER REGISTRO DE ERRORES" />
+                                        Content="Ver registro de errores" />
                             </StackPanel>
                         </Grid>
                     </ScrollViewer>
@@ -229,7 +277,7 @@
                 <!-- ══ Numeración ══════════════════════════════════════════ -->
                 <TabItem>
                     <TabItem.Header>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" Width="184">
                             <materialDesign:PackIcon Kind="Numeric" VerticalAlignment="Center" />
                             <TextBlock Text="Numeración" Margin="8,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
@@ -297,7 +345,7 @@
                 <!-- ══ Actualizaciones ═════════════════════════════════════ -->
                 <TabItem>
                     <TabItem.Header>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" Width="184">
                             <materialDesign:PackIcon Kind="CloudDownloadOutline" VerticalAlignment="Center" />
                             <TextBlock Text="Actualizaciones" Margin="8,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
@@ -395,7 +443,7 @@
                 <!-- ══ Copias de seguridad ═════════════════════════════════ -->
                 <TabItem>
                     <TabItem.Header>
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal" Width="184">
                             <materialDesign:PackIcon Kind="DatabaseCogOutline" VerticalAlignment="Center" />
                             <TextBlock Text="Copias de seguridad" Margin="8,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>

@@ -46,7 +46,11 @@ public class ServicioInventario : IServicioInventario
     {
         await using var unidad = _fabrica.Crear();
 
-        var consulta = unidad.Contexto.Productos.AsNoTracking();
+        // Los servicios no tienen existencias: contarlos aquí llenaría el inventario
+        // de fotocopias que nunca se agotan ni se reponen.
+        var consulta = unidad.Contexto.Productos
+            .AsNoTracking()
+            .Where(p => p.Tipo == TipoProducto.Producto);
 
         var totales = await consulta
             .GroupBy(_ => 1)

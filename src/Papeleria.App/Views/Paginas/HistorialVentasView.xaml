@@ -567,6 +567,18 @@
                                     </StackPanel>
                                 </Button>
 
+                                <Button Style="{StaticResource BotonSecundario}" MinWidth="0" Margin="0,0,8,0"
+                                        Command="{Binding DevolverCommand}"
+                                        Visibility="{Binding PuedeDevolver, Converter={StaticResource BoolAVisible}}"
+                                        IsEnabled="{Binding VentaSeleccionada.EstaAnulada, Converter={StaticResource InvertirBool}}"
+                                        ToolTip="Devolver parte de la factura sin anularla">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="KeyboardReturn"
+                                                                 VerticalAlignment="Center" />
+                                        <TextBlock Text="Devolver" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+
                                 <Button Style="{StaticResource BotonSecundario}" MinWidth="0"
                                         Foreground="{StaticResource BrochaError}"
                                         Command="{Binding AnularVentaCommand}"

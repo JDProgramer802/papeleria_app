@@ -71,15 +71,14 @@
             <materialDesign:Card Grid.Row="0" Style="{StaticResource TarjetaBase}" Padding="16" Margin="0,0,0,12">
                 <StackPanel>
                     <Grid>
-                        <StackPanel>
-                            <ComboBox ItemsSource="{Binding Catalogo}"
-                                      SelectedItem="{Binding ReporteSeleccionado}"
-                                      DisplayMemberPath="Nombre"
-                                      Style="{StaticResource CampoSeleccion}"
-                                      Width="360" HorizontalAlignment="Left"
-                                      Margin="0"
-                                      materialDesign:HintAssist.Hint="Reporte"
-                                      materialDesign:HintAssist.IsFloating="True" />
+                        <!-- El reporte se elige en la lista de la izquierda; aquí solo su nombre. -->
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ReporteSeleccionado.Nombre}"
+                                       Style="{StaticResource TituloSeccion}" Margin="0,0,0,2" />
+                            <TextBlock Text="{Binding ReporteSeleccionado.Descripcion}"
+                                       Style="{StaticResource TextoTenue}" FontSize="12"
+                                       TextWrapping="Wrap" MaxWidth="520"
+                                       HorizontalAlignment="Left" />
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -136,23 +135,24 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <DatePicker Grid.Column="0" Width="140" Height="40"
+                        <DatePicker Grid.Column="0" Width="150"
+                                    Style="{StaticResource FiltroFecha}"
                                     SelectedDate="{Binding Desde}"
                                     IsEnabled="{Binding RequierePeriodo}"
-                                    materialDesign:HintAssist.Hint="Desde"
-                                    VerticalContentAlignment="Center" />
+                                    materialDesign:HintAssist.Hint="Desde" />
 
-                        <DatePicker Grid.Column="2" Width="140" Height="40"
+                        <DatePicker Grid.Column="2" Width="150"
+                                    Style="{StaticResource FiltroFecha}"
                                     SelectedDate="{Binding Hasta}"
                                     IsEnabled="{Binding RequierePeriodo}"
-                                    materialDesign:HintAssist.Hint="Hasta"
-                                    VerticalContentAlignment="Center" />
+                                    materialDesign:HintAssist.Hint="Hasta" />
 
-                        <ComboBox Grid.Column="4" Width="190" Height="40"
+                        <ComboBox Grid.Column="4" Width="200"
+                                  Style="{StaticResource FiltroSeleccion}"
+                                  materialDesign:HintAssist.Hint="Categoría"
                                   ItemsSource="{Binding Categorias}"
                                   SelectedValue="{Binding CategoriaId}"
                                   SelectedValuePath="Id" DisplayMemberPath="Nombre"
-                                  VerticalContentAlignment="Center"
                                   ToolTip="Restringir el reporte a una categoría" />
 
                         <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
@@ -187,12 +187,12 @@
                 <!-- Aviso de reporte recortado -->
                 <Border Background="{StaticResource BrochaAdvertenciaSuave}"
                         CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
-                        Visibility="{Binding Reporte.TieneAdvertencia, Converter={StaticResource BoolAVisible}}">
+                        Visibility="{Binding HayAdvertencia, Converter={StaticResource BoolAVisible}}">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="AlertOutline"
                                                  Foreground="{StaticResource BrochaAdvertencia}"
                                                  VerticalAlignment="Top" Margin="0,1,10,0" />
-                        <TextBlock Text="{Binding Reporte.Advertencia}"
+                        <TextBlock Text="{Binding TextoAdvertencia}"
                                    Foreground="{StaticResource BrochaAdvertencia}"
                                    TextWrapping="Wrap" FontSize="12.5" />
                     </StackPanel>
@@ -237,6 +237,19 @@
                             <Run Text="  " />
                             <Run Text="{Binding Reporte.Periodo, Mode=OneWay}" />
                         </TextBlock>
+                    </StackPanel>
+
+                    <!-- Todavía no se ha generado nada -->
+                    <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Visibility="{Binding SinGenerar, Converter={StaticResource BoolAVisible}}">
+                        <materialDesign:PackIcon Kind="ChartBoxOutline" Width="56" Height="56"
+                                                 Opacity="0.2" HorizontalAlignment="Center" />
+                        <TextBlock Text="Elija un informe y pulse Generar"
+                                   Style="{StaticResource TextoTenue}" Margin="0,12,0,0"
+                                   HorizontalAlignment="Center" FontSize="13" />
+                        <TextBlock Text="El resultado aparecerá aquí y podrá exportarlo o imprimirlo."
+                                   Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                   HorizontalAlignment="Center" Margin="0,4,0,0" />
                     </StackPanel>
 
                     <!-- Las columnas se generan solas porque cada reporte tiene su propia forma. -->

@@ -100,6 +100,10 @@
         <dialogos:AbonoDialogoView />
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vmDialogos:DevolucionDialogoVistaModelo}">
+        <dialogos:DevolucionDialogoView />
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vmDialogos:UsuarioDialogoVistaModelo}">
         <dialogos:UsuarioDialogoView />
     </DataTemplate>

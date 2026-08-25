@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Papeleria.Domain.Entities;
+using Papeleria.Domain.Enums;
 
 namespace Papeleria.Data.Configurations;
 
@@ -11,7 +12,13 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.ToTable("Productos");
         builder.HasKey(p => p.Id);
 
-        builder.Property(p => p.Codigo).IsRequired().HasMaxLength(40);
+                builder.Property(p => p.Tipo).HasConversion<int>().HasDefaultValue(TipoProducto.Producto);
+        builder.Property(p => p.UnidadesPorPresentacion).HasDefaultValue(1d);
+
+        // Los servicios se listan aparte de la mercancía en inventario y reportes.
+        builder.HasIndex(p => p.Tipo).HasDatabaseName("IX_Productos_Tipo");
+
+builder.Property(p => p.Codigo).IsRequired().HasMaxLength(40);
         builder.Property(p => p.CodigoBarras).HasMaxLength(60);
         builder.Property(p => p.Nombre).IsRequired().HasMaxLength(200);
         builder.Property(p => p.Descripcion).HasMaxLength(600);
@@ -24,6 +31,8 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.Ignore(p => p.UtilidadUnitaria);
         builder.Ignore(p => p.MargenPorcentaje);
         builder.Ignore(p => p.EstaAgotado);
+        builder.Ignore(p => p.ControlaExistencias);
+        builder.Ignore(p => p.PresentacionTexto);
         builder.Ignore(p => p.EstaBajoMinimo);
 
         builder.HasIndex(p => p.Codigo).IsUnique().HasDatabaseName("IX_Productos_Codigo");

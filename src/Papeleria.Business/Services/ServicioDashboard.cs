@@ -103,8 +103,10 @@ public class ServicioDashboard : IServicioDashboard
     private static async Task<TotalesInventario> ObtenerInventarioAsync(
         IUnidadDeTrabajo unidad, CancellationToken ct)
     {
+        // El valor del inventario y los agotados solo tienen sentido sobre mercancía.
         var datos = await unidad.Contexto.Productos
             .AsNoTracking()
+            .Where(p => p.Tipo == TipoProducto.Producto)
             .GroupBy(_ => 1)
             .Select(g => new
             {

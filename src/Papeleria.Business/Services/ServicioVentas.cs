@@ -337,7 +337,8 @@ public class ServicioVentas : IServicioVentas
 
                 var solicitado = grupo.Sum(l => l.Cantidad);
 
-                if (producto.StockActual < solicitado)
+                // Una fotocopia no se puede agotar: no hay existencia que comprobar.
+                if (producto.ControlaExistencias && producto.StockActual < solicitado)
                 {
                     faltantes.Add(
                         $"• {producto.Nombre}: disponible {producto.StockActual:N2}, solicitado {solicitado:N2}");

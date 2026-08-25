@@ -31,6 +31,8 @@ public class ServicioKardex : IServicioKardex
         TipoMovimientoKardex.AjustePositivo => 1,
         TipoMovimientoKardex.AnulacionVenta => 1,
         TipoMovimientoKardex.SaldoInicial => 1,
+        // Lo que el cliente devuelve vuelve a la estantería.
+        TipoMovimientoKardex.DevolucionVenta => 1,
 
         TipoMovimientoKardex.VentaSalida => -1,
         TipoMovimientoKardex.SalidaManual => -1,
@@ -53,6 +55,21 @@ public class ServicioKardex : IServicioKardex
         int usuarioId,
         CancellationToken ct = default)
     {
+        // Los servicios no tienen existencias que mover: registrarlos en el kardex
+        // llenaría el histórico de líneas sin sentido y descuadraría el inventario.
+        if (!producto.ControlaExistencias)
+        {
+            return new MovimientoKardex
+            {
+                ProductoId = producto.Id,
+                Tipo = tipo,
+                Cantidad = cantidad,
+                CostoUnitario = costoUnitario,
+                Motivo = motivo,
+                UsuarioId = usuarioId
+            };
+        }
+
         if (cantidad <= 0)
         {
             throw new NegocioException("La cantidad del movimiento debe ser mayor que cero.");

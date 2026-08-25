@@ -196,13 +196,30 @@ public class ServicioCompras : IServicioCompras
                     throw new NegocioException("Uno de los productos de la compra ya no existe.");
                 }
 
+                if (!producto.ControlaExistencias)
+                {
+                    throw new NegocioException(
+                        $"«{producto.Nombre}» es un servicio y no se compra a proveedores.");
+                }
+
+                // La caja de doce se compra como una y entra al inventario como doce.
+                // El dinero de la línea no cambia; lo que cambia es en qué unidad se
+                // guarda la existencia y, por tanto, el costo que le corresponde a cada una.
+                var unidades = ConvertirAUnidades(linea, producto);
+
+                // Costo neto por unidad: precio pactado menos el descuento de la línea.
+                // El IVA no se capitaliza al costo porque se declara aparte.
+                var costoNetoUnitario = unidades == 0
+                    ? Dinero.Redondear(linea.CostoUnitario)
+                    : Dinero.DividirSeguro(linea.BaseGravable, unidades);
+
                 unidad.Contexto.CompraDetalles.Add(new CompraDetalle
                 {
                     CompraId = compra.Id,
                     ProductoId = producto.Id,
                     DescripcionProducto = producto.Nombre,
-                    Cantidad = linea.Cantidad,
-                    CostoUnitario = Dinero.Redondear(linea.CostoUnitario),
+                    Cantidad = unidades,
+                    CostoUnitario = costoNetoUnitario,
                     PorcentajeDescuento = linea.PorcentajeDescuento,
                     PorcentajeIva = linea.PorcentajeIva,
                     ValorDescuento = linea.ValorDescuento,
@@ -211,17 +228,11 @@ public class ServicioCompras : IServicioCompras
                     Total = linea.Total
                 });
 
-                // Costo neto por unidad: precio pactado menos el descuento de la línea.
-                // El IVA no se capitaliza al costo porque se declara aparte.
-                var costoNetoUnitario = linea.Cantidad == 0
-                    ? Dinero.Redondear(linea.CostoUnitario)
-                    : Dinero.DividirSeguro(linea.BaseGravable, linea.Cantidad);
-
-                ActualizarCostoPromedio(producto, linea.Cantidad, costoNetoUnitario);
+                ActualizarCostoPromedio(producto, unidades, costoNetoUnitario);
 
                 await _kardex.RegistrarAsync(
                     unidad, producto, TipoMovimientoKardex.CompraEntrada,
-                    linea.Cantidad, costoNetoUnitario,
+                    unidades, costoNetoUnitario,
                     $"Compra a {proveedor.Nombre}", compra.Numero, usuarioId, token)
                     .ConfigureAwait(false);
             }
@@ -254,6 +265,20 @@ public class ServicioCompras : IServicioCompras
     /// Promedio ponderado: mezcla el inventario existente con la mercancía que entra.
     /// Si no había existencias, el costo nuevo reemplaza al anterior.
     /// </summary>
+    /// <summary>
+    /// Pasa la cantidad de la línea a unidades de venta. Sin presentación marcada, o
+    /// con un producto que se compra y se vende igual, la cantidad no cambia.
+    /// </summary>
+    private static decimal ConvertirAUnidades(LineaCompra linea, Producto producto)
+    {
+        if (!linea.PorPresentacion || producto.UnidadesPorPresentacion <= 1)
+        {
+            return linea.Cantidad;
+        }
+
+        return Dinero.Redondear(linea.Cantidad * producto.UnidadesPorPresentacion);
+    }
+
     private static void ActualizarCostoPromedio(Producto producto, decimal cantidadEntrante, decimal costoEntrante)
     {
         if (cantidadEntrante <= 0)

@@ -26,10 +26,31 @@ public partial class LineaCompraEditable : ObservableObject
 
     public decimal StockActual { get; init; }
 
-    [ObservableProperty] private decimal _cantidad = 1;
+    /// <summary>Unidades de venta que trae la presentación con la que se compra.</summary>
+    public decimal UnidadesPorPresentacion { get; init; } = 1;
+
+    /// <summary>El producto se compra en cajas o paquetes y se vende suelto.</summary>
+    public bool TienePresentacion => UnidadesPorPresentacion > 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UnidadesQueEntran))]
+    private bool _porPresentacion;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UnidadesQueEntran))]
+    private decimal _cantidad = 1;
+
     [ObservableProperty] private decimal _costoUnitario;
     [ObservableProperty] private decimal _porcentajeDescuento;
     [ObservableProperty] private decimal _porcentajeIva;
+
+    /// <summary>
+    /// Lo que realmente entrará al inventario. Se muestra en la fila para que el
+    /// encargado vea que dos cajas son veinticuatro unidades antes de guardar.
+    /// </summary>
+    public string UnidadesQueEntran => PorPresentacion && TienePresentacion
+        ? $"{Cantidad * UnidadesPorPresentacion:N0} und"
+        : $"{Cantidad:N0} und";
 
     public decimal Subtotal => Business.Common.Dinero.Redondear(Cantidad * CostoUnitario);
 
@@ -417,6 +438,12 @@ public partial class ComprasVistaModelo : PaginaVistaModelo, IRecibeParametro
         MensajeError = null;
     }
 
+    /// <summary>
+    /// Unidades por presentación de cada producto buscado. El DTO del punto de venta
+    /// no las trae, así que se consultan una sola vez por producto.
+    /// </summary>
+    private readonly Dictionary<int, decimal> _fichasPresentacion = new();
+
     private Task BuscarProductosAsync() => EjecutarAsync(async () =>
     {
         if (string.IsNullOrWhiteSpace(TextoBusquedaProducto) || TextoBusquedaProducto.Length < 2)
@@ -434,6 +461,12 @@ public partial class ComprasVistaModelo : PaginaVistaModelo, IRecibeParametro
         foreach (var producto in resultados)
         {
             ResultadosBusqueda.Add(producto);
+
+            if (!_fichasPresentacion.ContainsKey(producto.Id))
+            {
+                var ficha = await _productos.ObtenerAsync(producto.Id).ConfigureAwait(true);
+                _fichasPresentacion[producto.Id] = ficha?.UnidadesPorPresentacion ?? 1m;
+            }
         }
     }, "No se pudo buscar productos.");
 
@@ -455,6 +488,8 @@ public partial class ComprasVistaModelo : PaginaVistaModelo, IRecibeParametro
             return;
         }
 
+        var ficha = _fichasPresentacion.TryGetValue(producto.Id, out var unidades) ? unidades : 1m;
+
         var linea = new LineaCompraEditable
         {
             ProductoId = producto.Id,
@@ -462,6 +497,9 @@ public partial class ComprasVistaModelo : PaginaVistaModelo, IRecibeParametro
             Nombre = producto.Nombre,
             UnidadAbreviatura = producto.UnidadAbreviatura,
             StockActual = producto.StockActual,
+            UnidadesPorPresentacion = ficha,
+            // Si el producto se compra por caja, esa es la forma habitual de recibirlo.
+            PorPresentacion = ficha > 1,
             Cantidad = 1,
             CostoUnitario = producto.Costo,
             PorcentajeIva = producto.PorcentajeIva
@@ -514,6 +552,7 @@ public partial class ComprasVistaModelo : PaginaVistaModelo, IRecibeParametro
                 {
                     ProductoId = l.ProductoId,
                     Cantidad = l.Cantidad,
+                    PorPresentacion = l.PorPresentacion,
                     CostoUnitario = l.CostoUnitario,
                     PorcentajeDescuento = l.PorcentajeDescuento,
                     PorcentajeIva = l.PorcentajeIva,

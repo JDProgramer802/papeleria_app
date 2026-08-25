@@ -179,6 +179,8 @@ public class SembradorDatos
             (ClavesConfiguracion.FacturaPieDePagina, "¡Gracias por su compra!", "Mensaje al pie del recibo"),
             (ClavesConfiguracion.CompraPrefijo, "CMP-", "Prefijo del consecutivo de compras"),
             (ClavesConfiguracion.CompraConsecutivo, "0", "Último consecutivo de compra registrado"),
+            (ClavesConfiguracion.DevolucionPrefijo, "DEV-", "Prefijo del consecutivo de devoluciones"),
+            (ClavesConfiguracion.DevolucionConsecutivo, "0", "Último consecutivo de devolución registrado"),
 
             (ClavesConfiguracion.BackupCarpeta, "", "Carpeta destino de las copias de seguridad"),
             (ClavesConfiguracion.BackupAutomatico, "true", "Genera una copia automática al cerrar la aplicación"),

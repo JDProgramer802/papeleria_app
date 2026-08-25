@@ -338,6 +338,26 @@
                                             ElementStyle="{StaticResource CeldaNumerica}"
                                             HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
+                            <!--
+                                Comprar por caja: la cantidad se multiplica por las unidades
+                                de la presentación y el costo se reparte entre ellas.
+                            -->
+                            <DataGridTemplateColumn Header="Por caja" Width="90" CanUserSort="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding PorPresentacion, UpdateSourceTrigger=PropertyChanged}"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  Visibility="{Binding TienePresentacion, Converter={StaticResource BoolAVisible}}"
+                                                  ToolTip="La cantidad está en presentaciones de compra, no en unidades" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Entran" Width="85" IsReadOnly="True"
+                                                Binding="{Binding UnidadesQueEntran}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
+
                             <DataGridTextColumn Header="Costo unit." Width="115"
                                                 Binding="{Binding CostoUnitario, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}"
                                             ElementStyle="{StaticResource CeldaNumerica}"

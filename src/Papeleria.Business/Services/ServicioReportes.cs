@@ -110,7 +110,10 @@ public class ServicioReportes : IServicioReportes
     {
         await using var unidad = _fabrica.Crear();
 
-        var consulta = unidad.Contexto.Productos.AsNoTracking().Where(p => p.Activo);
+        // Solo mercancía: un servicio no tiene existencias que valorizar.
+        var consulta = unidad.Contexto.Productos
+            .AsNoTracking()
+            .Where(p => p.Activo && p.Tipo == TipoProducto.Producto);
 
         if (parametros.CategoriaId is > 0)
         {

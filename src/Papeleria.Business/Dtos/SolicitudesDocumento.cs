@@ -36,6 +36,13 @@ public abstract class LineaDocumentoBase
 /// <summary>Línea de una compra a proveedor.</summary>
 public class LineaCompra : LineaDocumentoBase
 {
+    /// <summary>
+    /// La cantidad viene en presentaciones de compra (cajas, paquetes) y no en
+    /// unidades sueltas. El servicio la convierte usando el factor del producto,
+    /// de modo que el inventario siempre queda en la unidad con la que se vende.
+    /// </summary>
+    public bool PorPresentacion { get; set; }
+
     private decimal _costoUnitario;
 
     public override decimal ValorUnitario

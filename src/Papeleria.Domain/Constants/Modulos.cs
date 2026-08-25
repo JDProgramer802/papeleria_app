@@ -70,6 +70,8 @@ public static class ClavesConfiguracion
     public const string FacturaPieDePagina = "factura.pie";
     public const string CompraPrefijo = "compra.prefijo";
     public const string CompraConsecutivo = "compra.consecutivo";
+    public const string DevolucionPrefijo = "devolucion.prefijo";
+    public const string DevolucionConsecutivo = "devolucion.consecutivo";
 
     public const string BackupCarpeta = "backup.carpeta";
     public const string BackupAutomatico = "backup.automatico";

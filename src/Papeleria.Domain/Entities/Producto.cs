@@ -1,4 +1,5 @@
 using Papeleria.Domain.Common;
+using Papeleria.Domain.Enums;
 
 namespace Papeleria.Domain.Entities;
 
@@ -35,6 +36,20 @@ public class Producto : EntidadBase, IActivable
     /// <summary>Porcentaje de IVA aplicado en la venta (0, 5 o 19 en Colombia).</summary>
     public decimal PorcentajeIva { get; set; }
 
+    /// <summary>
+    /// Distingue la mercancía de los servicios (fotocopias, impresiones, anillado).
+    /// Un servicio se cobra igual pero no descuenta existencias ni toca el kardex.
+    /// </summary>
+    public TipoProducto Tipo { get; set; } = TipoProducto.Producto;
+
+    /// <summary>
+    /// Unidades de venta que trae la presentación con la que se compra. La caja de
+    /// doce lápices se compra como una y se vende de a uno: aquí va el doce, para
+    /// que al recibir la compra el inventario suba en unidades y el costo se reparta.
+    /// En uno, se compra y se vende en la misma unidad.
+    /// </summary>
+    public decimal UnidadesPorPresentacion { get; set; } = 1;
+
     public decimal StockActual { get; set; }
 
     public decimal StockMinimo { get; set; }
@@ -62,7 +77,14 @@ public class Producto : EntidadBase, IActivable
     /// <summary>Margen porcentual sobre el precio de venta.</summary>
     public decimal MargenPorcentaje => PrecioVenta <= 0 ? 0 : Math.Round((PrecioVenta - Costo) / PrecioVenta * 100m, 2);
 
-    public bool EstaAgotado => StockActual <= 0;
+    /// <summary>Los servicios no manejan existencias, así que nunca se agotan.</summary>
+    public bool ControlaExistencias => Tipo == TipoProducto.Producto;
 
-    public bool EstaBajoMinimo => StockActual > 0 && StockActual <= StockMinimo;
+    public bool EstaAgotado => ControlaExistencias && StockActual <= 0;
+
+    public bool EstaBajoMinimo => ControlaExistencias && StockActual > 0 && StockActual <= StockMinimo;
+
+    /// <summary>Etiqueta de la presentación de compra: «Caja × 12».</summary>
+    public string PresentacionTexto =>
+        UnidadesPorPresentacion > 1 ? $"Presentación × {UnidadesPorPresentacion:N0}" : "Unidad";
 }

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Papeleria.App.Infrastructure;
+using Papeleria.App.ViewModels.Dialogos;
 using Papeleria.Business.Common;
 using Papeleria.Business.Dtos;
 using Papeleria.Business.Security;
@@ -30,6 +31,7 @@ public enum RangoRapido
 public partial class HistorialVentasVistaModelo : PaginaVistaModelo
 {
     private readonly IServicioVentas _ventas;
+    private readonly IServicioDevoluciones _devoluciones;
     private readonly IServicioClientes _clientes;
     private readonly IServicioDocumentos _documentos;
     private readonly IServicioReportes _reportes;
@@ -40,6 +42,7 @@ public partial class HistorialVentasVistaModelo : PaginaVistaModelo
 
     public HistorialVentasVistaModelo(
         IServicioVentas ventas,
+        IServicioDevoluciones devoluciones,
         IServicioClientes clientes,
         IServicioDocumentos documentos,
         IServicioReportes reportes,
@@ -49,6 +52,7 @@ public partial class HistorialVentasVistaModelo : PaginaVistaModelo
         IContextoSesion sesion)
     {
         _ventas = ventas;
+        _devoluciones = devoluciones;
         _clientes = clientes;
         _documentos = documentos;
         _reportes = reportes;
@@ -370,6 +374,86 @@ public partial class HistorialVentasVistaModelo : PaginaVistaModelo
 
         _archivos.AbrirConAplicacionPredeterminada(ruta);
     }, "No se pudo generar el comprobante de la factura.");
+
+    public bool PuedeDevolver => _sesion.Puede(Modulos.Ventas, AccionPermiso.Editar);
+
+    /// <summary>
+    /// Devuelve parte de la factura sin anularla. En temporada escolar devolver es
+    /// diario, y anular la factura entera para rehacerla rompe el consecutivo.
+    /// </summary>
+    [RelayCommand]
+    private async Task DevolverAsync()
+    {
+        if (VentaSeleccionada is null || !PuedeDevolver)
+        {
+            return;
+        }
+
+        if (VentaSeleccionada.EstaAnulada)
+        {
+            await _dialogos.InformarAsync(
+                "Factura anulada",
+                "La factura está anulada: su mercancía ya volvió completa al inventario.",
+                esError: true).ConfigureAwait(true);
+
+            return;
+        }
+
+        VentaDevolvibleDto devolvible;
+
+        try
+        {
+            devolvible = await _devoluciones
+                .PrepararAsync(VentaSeleccionada.Id)
+                .ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            await _dialogos.InformarAsync("No se pudo abrir la devolución", ex.Message, esError: true)
+                .ConfigureAwait(true);
+
+            return;
+        }
+
+        if (!devolvible.HayAlgoQueDevolver)
+        {
+            await _dialogos.InformarAsync(
+                "Nada por devolver",
+                "De esta factura ya se devolvió todo lo que se podía.").ConfigureAwait(true);
+
+            return;
+        }
+
+        DevolucionDialogoVistaModelo? dialogo = null;
+
+        dialogo = new DevolucionDialogoVistaModelo(
+            _dialogos,
+            async () =>
+            {
+                var devolucion = await _devoluciones.RegistrarAsync(new SolicitudDevolucion
+                {
+                    VentaId = devolvible.VentaId,
+                    Motivo = dialogo!.Motivo,
+                    Lineas = dialogo.ObtenerLineas()
+                }).ConfigureAwait(true);
+
+                _dialogos.Notificar(
+                    $"Devolución {devolucion.Numero} por {Formatos.Moneda(devolucion.Total)} registrada.");
+            },
+            devolvible);
+
+        if (await _dialogos.MostrarAsync(dialogo).ConfigureAwait(true) is not true)
+        {
+            return;
+        }
+
+        // La devolución mueve inventario y caja: ambos módulos deben enterarse.
+        WeakReferenceMessenger.Default.Send(new InventarioCambiadoMensaje());
+        WeakReferenceMessenger.Default.Send(new CajaCambiadaMensaje(true));
+
+        await BuscarAsync().ConfigureAwait(true);
+        await CargarDetalleAsync().ConfigureAwait(true);
+    }
 
     [RelayCommand]
     private async Task AnularVentaAsync()

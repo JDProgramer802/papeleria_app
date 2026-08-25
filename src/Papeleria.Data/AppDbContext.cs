@@ -31,6 +31,8 @@ public class AppDbContext : DbContext
     public DbSet<CajaSesion> CajaSesiones => Set<CajaSesion>();
     public DbSet<MovimientoCaja> MovimientosCaja => Set<MovimientoCaja>();
     public DbSet<AbonoCliente> AbonosCliente => Set<AbonoCliente>();
+    public DbSet<Devolucion> Devoluciones => Set<Devolucion>();
+    public DbSet<DevolucionDetalle> DevolucionDetalles => Set<DevolucionDetalle>();
     public DbSet<Configuracion> Configuraciones => Set<Configuracion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

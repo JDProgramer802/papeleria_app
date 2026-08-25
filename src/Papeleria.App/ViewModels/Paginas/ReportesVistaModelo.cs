@@ -56,6 +56,9 @@ public partial class ReportesVistaModelo : PaginaVistaModelo
     private DataView? _vistaPrevia;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HayAdvertencia))]
+    [NotifyPropertyChangedFor(nameof(TextoAdvertencia))]
+    [NotifyPropertyChangedFor(nameof(SinGenerar))]
     private ReporteTabular? _reporte;
 
     [ObservableProperty]
@@ -68,6 +71,17 @@ public partial class ReportesVistaModelo : PaginaVistaModelo
     public bool RequierePeriodo => ReporteSeleccionado?.RequierePeriodo ?? false;
 
     public bool HayResultado => Reporte is { TieneDatos: true };
+
+    /// <summary>
+    /// Sin reporte generado el enlace a Reporte.TieneAdvertencia falla y el aviso se
+    /// quedaba visible en blanco. Aquí la condición es explícita.
+    /// </summary>
+    public bool HayAdvertencia => Reporte is { TieneAdvertencia: true };
+
+    public string TextoAdvertencia => Reporte?.Advertencia ?? string.Empty;
+
+    /// <summary>Todavía no se ha generado nada: la vista previa muestra la invitación.</summary>
+    public bool SinGenerar => Reporte is null;
 
     public bool SinResultado => Reporte is { TieneDatos: false };
 

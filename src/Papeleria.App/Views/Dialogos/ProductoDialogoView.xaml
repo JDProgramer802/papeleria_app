@@ -23,6 +23,40 @@
 
                 <!-- ══ Datos del producto ═══════════════════════════════════ -->
                 <StackPanel Grid.Column="0">
+                    <!--
+                        El tipo va primero porque decide qué secciones tienen sentido:
+                        un servicio no lleva existencias ni presentación de compra.
+                    -->
+                    <TextBlock Text="Qué se está registrando" Style="{StaticResource TituloSeccion}" />
+
+                    <ComboBox Style="{StaticResource CampoSeleccion}"
+                              ItemsSource="{Binding TiposProducto}"
+                              SelectedValue="{Binding Tipo}"
+                              SelectedValuePath="Valor" DisplayMemberPath="Descripcion"
+                              materialDesign:HintAssist.Hint="Tipo"
+                              MaxWidth="280" HorizontalAlignment="Left" Margin="0,0,0,6" />
+
+                    <Border Background="{DynamicResource MaterialDesignChipBackground}"
+                            CornerRadius="8" Padding="12,9" Margin="0,0,0,16">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon VerticalAlignment="Top" Margin="0,1,10,0" Opacity="0.7">
+                                <materialDesign:PackIcon.Style>
+                                    <Style TargetType="materialDesign:PackIcon">
+                                        <Setter Property="Kind" Value="PackageVariantClosed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding EsServicio}" Value="True">
+                                                <Setter Property="Kind" Value="Printer" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </materialDesign:PackIcon.Style>
+                            </materialDesign:PackIcon>
+
+                            <TextBlock Text="{Binding TextoAyudaTipo}" TextWrapping="Wrap"
+                                       FontSize="11.5" Opacity="0.8" MaxWidth="420" />
+                        </StackPanel>
+                    </Border>
+
                     <TextBlock Text="Identificación" Style="{StaticResource TituloSeccion}" />
 
                     <Grid>
@@ -156,9 +190,24 @@
                         </Grid>
                     </Border>
 
-                    <TextBlock Text="Existencias" Style="{StaticResource TituloSeccion}" Margin="0,6,0,4" />
-                    <TextBlock Text="{Binding TextoAyudaStock}" Style="{StaticResource TextoTenue}"
-                               FontSize="11.5" TextWrapping="Wrap" Margin="0,0,0,10" />
+                    <!-- Presentación de compra: la caja de doce que se vende de a uno. -->
+                    <StackPanel Visibility="{Binding ManejaExistencias, Converter={StaticResource BoolAVisible}}">
+                        <TextBlock Text="Presentación de compra" Style="{StaticResource TituloSeccion}"
+                                   Margin="0,6,0,4" />
+                        <TextBlock Text="{Binding TextoPresentacion}" Style="{StaticResource TextoTenue}"
+                                   FontSize="11.5" TextWrapping="Wrap" Margin="0,0,0,10" />
+
+                        <TextBox Style="{StaticResource CampoNumerico}"
+                                 materialDesign:HintAssist.Hint="Unidades por presentación"
+                                 materialDesign:HintAssist.HelperText="Deje 1 si se compra y se vende igual"
+                                 Text="{Binding UnidadesPorPresentacion, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                 MaxWidth="280" HorizontalAlignment="Left" />
+                    </StackPanel>
+
+                    <StackPanel Visibility="{Binding ManejaExistencias, Converter={StaticResource BoolAVisible}}">
+                        <TextBlock Text="Existencias" Style="{StaticResource TituloSeccion}" Margin="0,6,0,4" />
+                        <TextBlock Text="{Binding TextoAyudaStock}" Style="{StaticResource TextoTenue}"
+                                   FontSize="11.5" TextWrapping="Wrap" Margin="0,0,0,10" />
 
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -181,7 +230,8 @@
                         <TextBox Grid.Column="4" Style="{StaticResource CampoNumerico}"
                                  materialDesign:HintAssist.Hint="Stock máximo"
                                  Text="{Binding StockMaximo, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" />
-                    </Grid>
+                        </Grid>
+                    </StackPanel>
 
                     <Grid>
                         <Grid.ColumnDefinitions>

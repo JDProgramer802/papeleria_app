@@ -1,4 +1,5 @@
 using Papeleria.Business.Common;
+using Papeleria.Domain.Enums;
 
 namespace Papeleria.Business.Dtos;
 
@@ -42,6 +43,11 @@ public class ProductoListadoDto
 
     public decimal PorcentajeIva { get; init; }
 
+    public TipoProducto Tipo { get; init; } = TipoProducto.Producto;
+
+    /// <summary>Unidades de venta que trae la presentación de compra.</summary>
+    public decimal UnidadesPorPresentacion { get; init; } = 1;
+
     public decimal StockActual { get; init; }
 
     public decimal StockMinimo { get; init; }
@@ -54,8 +60,10 @@ public class ProductoListadoDto
 
     public bool Activo { get; init; }
 
-    /// <summary>Valor del inventario de este producto a precio de costo.</summary>
-    public decimal ValorInventario => Dinero.Redondear(StockActual * Costo);
+    public bool EsServicio => Tipo == TipoProducto.Servicio;
+
+    /// <summary>Un servicio no acumula inventario que valorizar.</summary>
+    public decimal ValorInventario => EsServicio ? 0 : Dinero.Redondear(StockActual * Costo);
 
     public decimal UtilidadUnitaria => Dinero.Redondear(PrecioVenta - Costo);
 
@@ -68,6 +76,9 @@ public class ProductoListadoDto
     {
         get
         {
+            // Un servicio no se agota: siempre está disponible para cobrarse.
+            if (EsServicio) return EstadoStock.Normal;
+
             if (StockActual <= 0) return EstadoStock.Agotado;
             if (StockActual <= StockMinimo) return EstadoStock.Bajo;
             if (StockMaximo > 0 && StockActual > StockMaximo) return EstadoStock.Exceso;
@@ -107,9 +118,17 @@ public class ProductoPosDto
 
     public decimal StockActual { get; init; }
 
+    public TipoProducto Tipo { get; init; } = TipoProducto.Producto;
+
     public string? ImagenPath { get; init; }
 
-    public bool HayExistencias => StockActual > 0;
+    public bool EsServicio => Tipo == TipoProducto.Servicio;
+
+    /// <summary>Los servicios siempre se pueden cobrar: no dependen de existencias.</summary>
+    public bool HayExistencias => EsServicio || StockActual > 0;
+
+    /// <summary>Texto de existencias para el punto de venta.</summary>
+    public string ExistenciasTexto => EsServicio ? "Servicio" : $"{StockActual:N0} disp.";
 
     public decimal PrecioConIva => Dinero.Redondear(PrecioVenta * (1 + PorcentajeIva / 100m));
 }

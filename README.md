@@ -99,12 +99,13 @@ elige la vista. Los modelos de vista no conocen ningún tipo de WPF.
 |---|---|
 | **Dashboard** | Nueve indicadores, gráfico comparativo de 12 meses, productos más vendidos, movimientos recientes y alertas accionables. |
 | **Punto de venta** | Facturación con lector de código de barras, carrito editable, descuentos, diálogo de cobro con cambio e impresión del recibo. El cliente se busca escribiendo y se puede dar de alta uno nuevo sin salir de la venta. |
-| **Productos** | CRUD completo, búsqueda paginada, duplicado, generación de código de barras EAN-13 e impresión de etiquetas. El botón **Comprar** abre el formulario de compra con el artículo ya cargado, para reponer existencias sin salir del catálogo. |
+| **Productos** | CRUD completo, búsqueda paginada, duplicado, generación de código de barras EAN-13 e impresión de etiquetas. Distingue mercancía de **servicios** (fotocopias, impresiones, anillado), que se cobran sin descontar existencias, y permite declarar cuántas unidades trae la presentación de compra para comprar por caja y vender por unidad. El botón **Comprar** abre el formulario de compra con el artículo ya cargado. |
 | **Inventario** | Existencias con semáforo, entradas, salidas, ajustes por conteo y transferencias de ubicación. |
 | **Compras** | Historial y registro de compras: actualiza existencias, recalcula el costo promedio y escribe en el kardex. |
 | **Cartera** | Cuentas por cobrar de las ventas a crédito: quién debe y desde cuándo, cupo por cliente, estado de cuenta con las facturas fiadas y lo pendiente de cada una, registro y anulación de abonos, y reparto de la deuda por antigüedad. |
 | **Caja** | Apertura con base, ingresos, egresos, arqueo comparando esperado contra contado, cierre e historial de turnos. |
 | **Historial de ventas** | Registro de todas las facturas emitidas: rangos rápidos (hoy, ayer, semana, mes) o fechas a medida, búsqueda por número, cliente o método de pago, resumen del periodo con importe, ticket promedio y utilidad, detalle con los productos de cada factura, impresión de una factura suelta o del listado completo del periodo, anulación y exportación. |
+| **Devoluciones** | Devolución parcial de una factura desde el historial: se eligen los renglones y las cantidades, la mercancía vuelve al inventario, queda registrada en el kardex y el dinero sale del turno de caja. La factura no se anula ni se rehace. |
 | **Kardex** | Consulta filtrable del histórico de movimientos, con exportación. |
 | **Clientes / Proveedores** | Directorios con ficha e historial de documentos. |
 | **Catálogos** | Categorías, marcas y unidades de medida. |

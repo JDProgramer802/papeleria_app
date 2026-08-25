@@ -31,5 +31,8 @@ public enum TipoMovimientoCaja
     AnulacionVenta = 5,
 
     [Display(Name = "Cierre")]
-    Cierre = 6
+    Cierre = 6,
+
+    [Display(Name = "Devolución a cliente")]
+    Devolucion = 7
 }

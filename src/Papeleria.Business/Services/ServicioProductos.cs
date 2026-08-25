@@ -7,6 +7,7 @@ using Papeleria.Data.Repositories;
 using Papeleria.Domain.Common;
 using Papeleria.Domain.Constants;
 using Papeleria.Domain.Entities;
+using Papeleria.Domain.Enums;
 using Papeleria.Domain.Exceptions;
 
 namespace Papeleria.Business.Services;
@@ -69,6 +70,8 @@ public class ServicioProductos : IServicioProductos
             Costo = p.Costo,
             PrecioVenta = p.PrecioVenta,
             PorcentajeIva = p.PorcentajeIva,
+            Tipo = p.Tipo,
+            UnidadesPorPresentacion = p.UnidadesPorPresentacion,
             StockActual = p.StockActual,
             StockMinimo = p.StockMinimo,
             StockMaximo = p.StockMaximo,
@@ -183,6 +186,7 @@ public class ServicioProductos : IServicioProductos
             PrecioVenta = p.PrecioVenta,
             Costo = p.Costo,
             PorcentajeIva = p.PorcentajeIva,
+            Tipo = p.Tipo,
             StockActual = p.StockActual,
             ImagenPath = p.ImagenPath
         };
@@ -410,7 +414,8 @@ public class ServicioProductos : IServicioProductos
 
         return await unidad.Contexto.Productos
             .AsNoTracking()
-            .Where(p => p.Activo && p.StockActual > 0 && p.StockActual <= p.StockMinimo)
+            .Where(p => p.Activo && p.Tipo == TipoProducto.Producto
+                        && p.StockActual > 0 && p.StockActual <= p.StockMinimo)
             .OrderBy(p => p.StockActual)
             .Take(maximo)
             .Select(ProyeccionListado)
@@ -423,7 +428,7 @@ public class ServicioProductos : IServicioProductos
 
         return await unidad.Contexto.Productos
             .AsNoTracking()
-            .Where(p => p.Activo && p.StockActual <= 0)
+            .Where(p => p.Activo && p.Tipo == TipoProducto.Producto && p.StockActual <= 0)
             .OrderBy(p => p.Nombre)
             .Take(maximo)
             .Select(ProyeccionListado)
@@ -530,6 +535,9 @@ public class ServicioProductos : IServicioProductos
         destino.Costo = Dinero.Redondear(origen.Costo);
         destino.PrecioVenta = Dinero.Redondear(origen.PrecioVenta);
         destino.PorcentajeIva = origen.PorcentajeIva;
+        destino.Tipo = origen.Tipo;
+        // Menos de una unidad por presentación no significa nada.
+        destino.UnidadesPorPresentacion = Math.Max(origen.UnidadesPorPresentacion, 1);
         destino.StockActual = origen.StockActual;
         destino.StockMinimo = origen.StockMinimo;
         destino.StockMaximo = origen.StockMaximo;
