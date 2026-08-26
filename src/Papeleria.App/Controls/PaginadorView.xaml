@@ -8,59 +8,71 @@
              d:DataContext="{d:DesignInstance infra:Paginador}"
              mc:Ignorable="d">
 
-    <!-- Barra de paginación compartida por todas las grillas del sistema. -->
-    <Grid Margin="0,10,0,0">
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock Text="{Binding TextoRango}"
-                       Style="{StaticResource TextoTenue}"
-                       VerticalAlignment="Center" />
+    <!--
+        Barra de paginación compartida por todas las grillas del sistema. Va pegada
+        al pie de la tabla, separada por una raya, para que se lea como parte de ella
+        y no como un texto suelto flotando bajo la tarjeta.
+    -->
+    <Border BorderBrush="{DynamicResource MaterialDesignDivider}"
+            BorderThickness="0,1,0,0"
+            Padding="4,10,4,2" Margin="0,2,0,0">
+        <Grid>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{Binding TextoRango}"
+                           FontSize="12" FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
 
-            <TextBlock Text="·" Opacity="0.4" Margin="10,0" VerticalAlignment="Center" />
+                <TextBlock Text="·" Opacity="0.35" Margin="10,0" VerticalAlignment="Center" />
 
-            <TextBlock Text="Filas por página"
-                       Style="{StaticResource TextoTenue}"
-                       VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBlock Text="Filas por página"
+                           Style="{StaticResource TextoTenue}"
+                           VerticalAlignment="Center" Margin="0,0,8,0" />
 
-            <ComboBox ItemsSource="{Binding Tamanos}"
-                      SelectedItem="{Binding TamanoPagina}"
-                      Width="76" Height="30"
-                      VerticalContentAlignment="Center"
-                      ToolTip="Cantidad de registros por página" />
-        </StackPanel>
+                <ComboBox Style="{StaticResource SelectorCompacto}"
+                          ItemsSource="{Binding Tamanos}"
+                          SelectedItem="{Binding TamanoPagina}"
+                          Width="72"
+                          ToolTip="Cantidad de registros por página" />
+            </StackPanel>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button Style="{StaticResource BotonIconoAccion}"
-                    Command="{Binding PrimeraPaginaCommand}"
-                    ToolTip="Primera página">
-                <materialDesign:PackIcon Kind="PageFirst" Width="19" Height="19" />
-            </Button>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Style="{StaticResource BotonIconoAccion}"
+                        Command="{Binding PrimeraPaginaCommand}"
+                        ToolTip="Primera página">
+                    <materialDesign:PackIcon Kind="PageFirst" Width="19" Height="19" />
+                </Button>
 
-            <Button Style="{StaticResource BotonIconoAccion}"
-                    Command="{Binding PaginaAnteriorCommand}"
-                    ToolTip="Página anterior">
-                <materialDesign:PackIcon Kind="ChevronLeft" Width="19" Height="19" />
-            </Button>
+                <Button Style="{StaticResource BotonIconoAccion}"
+                        Command="{Binding PaginaAnteriorCommand}"
+                        ToolTip="Página anterior">
+                    <materialDesign:PackIcon Kind="ChevronLeft" Width="19" Height="19" />
+                </Button>
 
-            <Border Background="{DynamicResource MaterialDesignChipBackground}"
-                    CornerRadius="6" Padding="12,4" Margin="6,0" VerticalAlignment="Center">
-                <TextBlock VerticalAlignment="Center" FontSize="12">
-                    <Run Text="{Binding Pagina, Mode=OneWay}" FontWeight="SemiBold" />
-                    <Run Text="/" Foreground="Gray" />
-                    <Run Text="{Binding TotalPaginas, Mode=OneWay}" />
-                </TextBlock>
-            </Border>
+                <!-- El número de página se lee mejor con el total en tinta suave. -->
+                <Border Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                        BorderBrush="{DynamicResource MaterialDesignDivider}"
+                        BorderThickness="1" CornerRadius="6"
+                        Padding="12,4" Margin="6,0" VerticalAlignment="Center"
+                        MinWidth="62">
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="12">
+                        <Run Text="{Binding Pagina, Mode=OneWay}" FontWeight="SemiBold" />
+                        <Run Text="de" FontSize="11" />
+                        <Run Text="{Binding TotalPaginas, Mode=OneWay}" />
+                    </TextBlock>
+                </Border>
 
-            <Button Style="{StaticResource BotonIconoAccion}"
-                    Command="{Binding PaginaSiguienteCommand}"
-                    ToolTip="Página siguiente">
-                <materialDesign:PackIcon Kind="ChevronRight" Width="19" Height="19" />
-            </Button>
+                <Button Style="{StaticResource BotonIconoAccion}"
+                        Command="{Binding PaginaSiguienteCommand}"
+                        ToolTip="Página siguiente">
+                    <materialDesign:PackIcon Kind="ChevronRight" Width="19" Height="19" />
+                </Button>
 
-            <Button Style="{StaticResource BotonIconoAccion}"
-                    Command="{Binding UltimaPaginaCommand}"
-                    ToolTip="Última página">
-                <materialDesign:PackIcon Kind="PageLast" Width="19" Height="19" />
-            </Button>
-        </StackPanel>
-    </Grid>
+                <Button Style="{StaticResource BotonIconoAccion}"
+                        Command="{Binding UltimaPaginaCommand}"
+                        ToolTip="Última página">
+                    <materialDesign:PackIcon Kind="PageLast" Width="19" Height="19" />
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
 </UserControl>

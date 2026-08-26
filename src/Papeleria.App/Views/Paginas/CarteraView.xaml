@@ -100,7 +100,7 @@
                 <TextBox Grid.Column="0"
                          Style="{StaticResource CampoBusqueda}"
                          Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged, Delay=250}"
-                         materialDesign:HintAssist.Hint="Buscar por nombre, documento o teléfono"
+                         materialDesign:HintAssist.Hint="Buscar nombre, documento o teléfono"
                          materialDesign:TextFieldAssist.HasLeadingIcon="True"
                          materialDesign:TextFieldAssist.LeadingIcon="Magnify" />
 
@@ -166,11 +166,13 @@
                                                 ElementStyle="{StaticResource CeldaNumerica}"
                                                 HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
-                            <DataGridTemplateColumn Header="Antigüedad" Width="120" SortMemberPath="DiasDeMora">
+                            <DataGridTemplateColumn Header="Antigüedad" Width="120" SortMemberPath="DiasDeMora"
+                                                HeaderStyle="{StaticResource EncabezadoNumerico}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <!-- El color avisa a quién hay que llamar primero -->
-                                        <Border CornerRadius="10" Padding="8,3" HorizontalAlignment="Right">
+                                        <Border CornerRadius="10" Padding="8,3"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="Transparent" />
@@ -195,7 +197,8 @@
                                                 ElementStyle="{StaticResource CeldaNumerica}"
                                                 HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
-                            <DataGridTemplateColumn Header="Debe" Width="130" SortMemberPath="Saldo">
+                            <DataGridTemplateColumn Header="Debe" Width="130" SortMemberPath="Saldo"
+                                                HeaderStyle="{StaticResource EncabezadoNumerico}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Saldo, Converter={StaticResource Moneda}}"

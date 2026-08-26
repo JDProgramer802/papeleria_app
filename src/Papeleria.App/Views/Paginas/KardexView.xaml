@@ -165,40 +165,40 @@
                         </DataGridTemplateColumn>
 
                         <DataGridTextColumn Header="Entrada" Width="85"
-                                            Binding="{Binding Entrada, Converter={StaticResource Cantidad}}">
+                                            Binding="{Binding Entrada, Converter={StaticResource Cantidad}}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}">
                             <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource CeldaNumerica}">
                                     <Setter Property="Foreground" Value="{StaticResource BrochaExito}" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
                         <DataGridTextColumn Header="Salida" Width="85"
-                                            Binding="{Binding Salida, Converter={StaticResource Cantidad}}">
+                                            Binding="{Binding Salida, Converter={StaticResource Cantidad}}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}">
                             <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource CeldaNumerica}">
                                     <Setter Property="Foreground" Value="{StaticResource BrochaError}" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
                         <DataGridTextColumn Header="Stock ant." Width="95"
-                                            Binding="{Binding StockAnterior, Converter={StaticResource Cantidad}}">
+                                            Binding="{Binding StockAnterior, Converter={StaticResource Cantidad}}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}">
                             <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource CeldaNumerica}">
                                     <Setter Property="Opacity" Value="0.7" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
                         <DataGridTextColumn Header="Stock nuevo" Width="100"
-                                            Binding="{Binding StockNuevo, Converter={StaticResource Cantidad}}">
+                                            Binding="{Binding StockNuevo, Converter={StaticResource Cantidad}}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}">
                             <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource CeldaNumerica}">
                                     <Setter Property="FontWeight" Value="SemiBold" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>

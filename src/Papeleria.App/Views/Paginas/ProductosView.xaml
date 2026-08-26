@@ -184,7 +184,8 @@
 
                         <DataGridTextColumn Header="C. barras" Binding="{Binding CodigoBarras}" Width="130" />
 
-                        <DataGridTemplateColumn Header="Existencias" Width="120" SortMemberPath="StockActual">
+                        <DataGridTemplateColumn Header="Existencias" Width="120" SortMemberPath="StockActual"
+                                                HeaderStyle="{StaticResource EncabezadoNumerico}">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -208,10 +209,10 @@
                                             HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                         <DataGridTextColumn Header="P. venta" Width="105"
-                                            Binding="{Binding PrecioVenta, Converter={StaticResource Moneda}}">
+                                            Binding="{Binding PrecioVenta, Converter={StaticResource Moneda}}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}">
                             <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource CeldaNumerica}">
                                     <Setter Property="FontWeight" Value="SemiBold" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>

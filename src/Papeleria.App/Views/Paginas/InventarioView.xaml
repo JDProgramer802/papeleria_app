@@ -116,7 +116,7 @@
 
                     <TextBox Grid.Column="0" Style="{StaticResource CampoBusqueda}"
                              Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged, Delay=100}"
-                             materialDesign:HintAssist.Hint="Buscar producto por nombre, código o código de barras"
+                             materialDesign:HintAssist.Hint="Buscar producto por nombre o código"
                              materialDesign:TextFieldAssist.HasLeadingIcon="True"
                              materialDesign:TextFieldAssist.LeadingIcon="Magnify" />
 
@@ -212,10 +212,10 @@
                         <DataGridTextColumn Header="Ubicación" Binding="{Binding Ubicacion}" Width="120" />
 
                         <DataGridTextColumn Header="Existencias" Width="105"
-                                            Binding="{Binding StockActual, Converter={StaticResource Cantidad}}">
+                                            Binding="{Binding StockActual, Converter={StaticResource Cantidad}}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}">
                             <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource CeldaNumerica}">
                                     <Setter Property="FontWeight" Value="SemiBold" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
@@ -237,10 +237,10 @@
                                             HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                         <DataGridTextColumn Header="Valor" Width="115"
-                                            Binding="{Binding ValorInventario, Converter={StaticResource Moneda}}">
+                                            Binding="{Binding ValorInventario, Converter={StaticResource Moneda}}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}">
                             <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right" />
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource CeldaNumerica}">
                                     <Setter Property="FontWeight" Value="SemiBold" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>

@@ -211,12 +211,12 @@
                                    Margin="0" VerticalAlignment="Center" />
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <DatePicker Width="130" Height="34" SelectedDate="{Binding Desde}"
-                                        materialDesign:HintAssist.Hint="Desde"
-                                        VerticalContentAlignment="Center" Margin="0,0,8,0" />
-                            <DatePicker Width="130" Height="34" SelectedDate="{Binding Hasta}"
-                                        materialDesign:HintAssist.Hint="Hasta"
-                                        VerticalContentAlignment="Center" />
+                            <DatePicker Style="{StaticResource FiltroFecha}" Width="140"
+                                        SelectedDate="{Binding Desde}"
+                                        materialDesign:HintAssist.Hint="Desde" Margin="0,0,8,0" />
+                            <DatePicker Style="{StaticResource FiltroFecha}" Width="140"
+                                        SelectedDate="{Binding Hasta}"
+                                        materialDesign:HintAssist.Hint="Hasta" />
                         </StackPanel>
                     </Grid>
 
@@ -245,7 +245,8 @@
                                             ElementStyle="{StaticResource CeldaNumerica}"
                                             HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
-                            <DataGridTemplateColumn Header="Diferencia" Width="120">
+                            <DataGridTemplateColumn Header="Diferencia" Width="120"
+                                                HeaderStyle="{StaticResource EncabezadoNumerico}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -315,7 +316,8 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Monto" Width="110">
+                                <DataGridTemplateColumn Header="Monto" Width="110"
+                                                HeaderStyle="{StaticResource EncabezadoNumerico}">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Monto, Converter={StaticResource Moneda}}"

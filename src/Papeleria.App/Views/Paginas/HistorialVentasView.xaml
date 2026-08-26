@@ -219,7 +219,7 @@
 
                     <TextBox Grid.Column="0" Style="{StaticResource CampoBusqueda}"
                              Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged, Delay=250}"
-                             materialDesign:HintAssist.Hint="Buscar por número de factura, cliente o documento"
+                             materialDesign:HintAssist.Hint="Buscar factura, cliente o documento"
                              materialDesign:TextFieldAssist.HasLeadingIcon="True"
                              materialDesign:TextFieldAssist.LeadingIcon="Magnify" />
 
@@ -284,7 +284,7 @@
                                   ItemsSource="{Binding Ventas}"
                                   SelectedItem="{Binding VentaSeleccionada}">
                             <DataGrid.RowStyle>
-                                <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+                                <Style TargetType="DataGridRow" BasedOn="{StaticResource FilaGrilla}">
                                     <Style.Triggers>
                                         <!-- Las anuladas se atenúan para distinguirlas de un vistazo -->
                                         <DataTrigger Binding="{Binding EstaAnulada}" Value="True">
@@ -319,10 +319,10 @@
                                             HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                                 <DataGridTextColumn Header="Total" Width="120"
-                                                    Binding="{Binding Total, Converter={StaticResource Moneda}}">
+                                                    Binding="{Binding Total, Converter={StaticResource Moneda}}"
+                                                    HeaderStyle="{StaticResource EncabezadoNumerico}">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource CeldaNumerica}">
                                             <Setter Property="FontWeight" Value="SemiBold" />
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>

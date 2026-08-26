@@ -20,6 +20,24 @@
     <SolidColorBrush x:Key="BrochaErrorSuave" Color="#FFEBEE" />
     <SolidColorBrush x:Key="BrochaInformacionSuave" Color="#E3F2FD" />
 
+    <!--
+        Realce de la fila elegida: un filo del color del programa a la izquierda y el
+        resto teñido apenas.
+
+        Es una sola brocha, no un borde, y eso es a propósito. Un borde de 3 px ensancha
+        la fila y le saca a la tabla una barra de desplazamiento horizontal en cuanto se
+        elige algo. Pintado como degradado en unidades absolutas ocupa exactamente lo
+        mismo que antes. La tinta transparente además deja ver el papel de debajo, así
+        que sirve igual con el tema claro que con el oscuro sin perder contraste.
+    -->
+    <LinearGradientBrush x:Key="BrochaFilaSeleccionada"
+                         StartPoint="0,0" EndPoint="6,0"
+                         MappingMode="Absolute" SpreadMethod="Pad">
+        <GradientStop Color="#FF2196F3" Offset="0" />
+        <GradientStop Color="#FF2196F3" Offset="0.5" />
+        <GradientStop Color="#242196F3" Offset="0.5" />
+    </LinearGradientBrush>
+
     <!-- ══ Tipografía ════════════════════════════════════════════════════════ -->
     <Style x:Key="TituloPagina" TargetType="TextBlock"
            BasedOn="{StaticResource MaterialDesignHeadline5TextBlock}">
@@ -175,12 +193,27 @@
         <Setter Property="materialDesign:HintAssist.IsFloating" Value="True" />
     </Style>
 
+    <!--
+        Campo de búsqueda de las barras de filtro.
+
+        Sin alto fijo. Con 40 px la plantilla de Material recortaba por abajo la lupa
+        y el texto guía: se veía una lupa partida y una frase cortada por la mitad en
+        todas las vistas del programa. Se pide un mínimo cómodo y se deja que el
+        control mida lo que necesite.
+    -->
     <Style x:Key="CampoBusqueda" TargetType="TextBox"
            BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Height" Value="40" />
+        <!-- El rótulo se queda dentro como texto guía y desaparece al escribir: en
+             una barra de filtros no hay sitio para que suba a posarse en el borde. -->
+        <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
+        <!-- La lupa viene de serie: un campo de búsqueda se reconoce por ella. -->
+        <Setter Property="materialDesign:TextFieldAssist.HasLeadingIcon" Value="True" />
+        <Setter Property="materialDesign:TextFieldAssist.LeadingIcon" Value="Magnify" />
         <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True" />
-        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="6" />
+        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="8" />
         <Setter Property="materialDesign:TextFieldAssist.CharacterCounterVisibility" Value="Collapsed" />
     </Style>
 
@@ -194,17 +227,36 @@
         sin apretar el contenido. Actúa de texto guía y desaparece al elegir, igual
         que en el campo de búsqueda que va a su lado.
     -->
+    <!--
+        El rótulo de estos dos sí flota: al elegir un valor sube a posarse en el borde
+        en vez de esconderse. Sin eso, una barra con «01/07/2026» y «31/07/2026» no
+        dice cuál es el principio y cuál el final, ni «Cuadernos» dice si filtra por
+        categoría o por marca.
+    -->
     <Style x:Key="FiltroSeleccion" TargetType="ComboBox"
            BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
-        <Setter Property="Height" Value="40" />
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
-        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="6" />
+        <Setter Property="materialDesign:HintAssist.IsFloating" Value="True" />
+        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="8" />
     </Style>
 
     <Style x:Key="FiltroFecha" TargetType="DatePicker"
            BasedOn="{StaticResource MaterialDesignOutlinedDatePicker}">
-        <Setter Property="Height" Value="40" />
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="materialDesign:HintAssist.IsFloating" Value="True" />
+        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="8" />
+    </Style>
+
+    <!-- Selector menudo de las barras de pie, como el de filas por página. -->
+    <Style x:Key="SelectorCompacto" TargetType="ComboBox"
+           BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Padding" Value="8,0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
         <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="6" />
@@ -233,6 +285,65 @@
     </Style>
 
     <!-- ══ Grillas ═══════════════════════════════════════════════════════════ -->
+    <!--
+        Encabezado. Va sobre un fondo apenas teñido y con el texto en seminegrita
+        para que se despegue de los datos sin gritar, y con una sola raya por debajo.
+        Las rayitas verticales entre títulos se quitan: en una tabla de diez columnas
+        se convierten en una valla que estorba la lectura de izquierda a derecha.
+    -->
+    <Style x:Key="EncabezadoGrilla" TargetType="DataGridColumnHeader"
+           BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignTextFieldBoxBackground}" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="MinHeight" Value="42" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="SeparatorVisibility" Value="Collapsed" />
+    </Style>
+
+    <!--
+        Fila. El realce de fábrica era un gris opaco que se confundía con el del
+        ratón por encima. Ahora la elegida se tiñe del color del programa y saca un
+        filo a la izquierda, de modo que se sabe cuál es sin tener que compararlas.
+    -->
+    <Style x:Key="FilaGrilla" TargetType="DataGridRow"
+           BasedOn="{StaticResource MaterialDesignDataGridRow}">
+        <Setter Property="MinHeight" Value="46" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background"
+                        Value="{DynamicResource MaterialDesign.Brush.DataGrid.RowHoverBackground}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource BrochaFilaSeleccionada}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--
+        Celda. Sin marco de foco y sin fondo propio al seleccionar: el realce lo pinta
+        la fila entera, y si además lo pintara cada celda quedaría cortado por columnas.
+    -->
+    <Style x:Key="CeldaGrilla" TargetType="DataGridCell"
+           BasedOn="{StaticResource MaterialDesignDataGridCell}">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <Style x:Key="GrillaDatos" TargetType="DataGrid"
            BasedOn="{StaticResource MaterialDesignDataGrid}">
         <Setter Property="AutoGenerateColumns" Value="False" />
@@ -241,33 +352,52 @@
         <Setter Property="IsReadOnly" Value="True" />
         <Setter Property="SelectionMode" Value="Single" />
         <Setter Property="SelectionUnit" Value="FullRow" />
-        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+        <!-- Las rayas las pone cada fila por debajo; la rejilla no dibuja ninguna. -->
+        <Setter Property="GridLinesVisibility" Value="None" />
         <Setter Property="HeadersVisibility" Value="Column" />
-        <Setter Property="RowHeight" Value="42" />
-        <Setter Property="ColumnHeaderHeight" Value="44" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
         <Setter Property="EnableRowVirtualization" Value="True" />
         <Setter Property="EnableColumnVirtualization" Value="True" />
         <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True" />
         <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling" />
-        <Setter Property="materialDesign:DataGridAssist.CellPadding" Value="10,4" />
-        <Setter Property="materialDesign:DataGridAssist.ColumnHeaderPadding" Value="10,4" />
+        <Setter Property="materialDesign:DataGridAssist.CellPadding" Value="12,0" />
+        <Setter Property="materialDesign:DataGridAssist.ColumnHeaderPadding" Value="12,0" />
     </Style>
 
     <!--
         Columnas numéricas: la cifra y su rótulo se alinean por el mismo borde. Un
         encabezado a la izquierda sobre importes a la derecha rompe la lectura de
         la columna y obliga a buscar a qué corresponde cada número.
+
+        Las cifras salen además con dígitos de ancho fijo, para que las unidades, las
+        decenas y los millares caigan en la misma vertical de una fila a otra.
     -->
     <Style x:Key="CeldaNumerica" TargetType="TextBlock">
         <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
     </Style>
 
     <Style x:Key="EncabezadoNumerico" TargetType="DataGridColumnHeader"
-           BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+           BasedOn="{StaticResource EncabezadoGrilla}">
         <Setter Property="HorizontalContentAlignment" Value="Right" />
     </Style>
+
+    <!--
+        Los tres estilos anteriores se declaran también sin clave.
+
+        DataGrid ofrece ColumnHeaderStyle, RowStyle y CellStyle, pero solo los traslada
+        a sus partes cuando se fijan en el propio control; puestos en un estilo, unas
+        columnas los recogían y otras no, y la cabecera salía a medio pintar. Sin clave
+        alcanzan a todas las grillas del programa por igual.
+    -->
+    <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource EncabezadoGrilla}" />
+
+    <Style TargetType="DataGridRow" BasedOn="{StaticResource FilaGrilla}" />
+
+    <Style TargetType="DataGridCell" BasedOn="{StaticResource CeldaGrilla}" />
 
     <!-- Grilla editable usada en compras y en el carrito del punto de venta. -->
     <Style x:Key="GrillaEditable" TargetType="DataGrid"

@@ -274,7 +274,7 @@
                               ItemsSource="{Binding Permisos}"
                               RowHeight="40" CanUserSortColumns="False"
                               AlternationCount="2"
-                              AlternatingRowBackground="{DynamicResource MaterialDesignChipBackground}"
+                              AlternatingRowBackground="{DynamicResource MaterialDesignTextFieldBoxBackground}"
                               GridLinesVisibility="None">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Módulo" Binding="{Binding NombreModulo}"

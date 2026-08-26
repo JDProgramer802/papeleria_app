@@ -18,7 +18,11 @@
         <Style x:Key="FilaCatalogo" TargetType="ListBoxItem"
                BasedOn="{StaticResource MaterialDesignListBoxItem}">
             <Setter Property="Padding" Value="12,9" />
+            <Setter Property="MinHeight" Value="46" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <!-- La misma raya de las tablas: sin ella la lista se lee como texto suelto. -->
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
         </Style>
 
         <Style x:Key="AccionesFila" TargetType="StackPanel">

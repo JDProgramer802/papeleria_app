@@ -58,7 +58,7 @@
                 <StackPanel>
                     <TextBox x:Name="CampoBusqueda"
                              Style="{StaticResource CampoBusqueda}"
-                             Height="52" FontSize="16"
+                             MinHeight="56" FontSize="16"
                              Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged, Delay=150}"
                              materialDesign:HintAssist.Hint="Escanee el código de barras o escriba el nombre del producto"
                              materialDesign:TextFieldAssist.HasLeadingIcon="True"
@@ -163,7 +163,7 @@
                               SelectedItem="{Binding LineaSeleccionada}"
                               RowHeight="48">
                         <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+                            <Style TargetType="DataGridRow" BasedOn="{StaticResource FilaGrilla}">
                                 <Style.Triggers>
                                     <!-- Resalta las líneas que superan las existencias. -->
                                     <DataTrigger Binding="{Binding ExcedeStock}" Value="True">
@@ -233,10 +233,10 @@
                                             HeaderStyle="{StaticResource EncabezadoNumerico}" />
 
                             <DataGridTextColumn Header="Total" Width="120" IsReadOnly="True"
-                                                Binding="{Binding Total, Converter={StaticResource Moneda}}">
+                                                Binding="{Binding Total, Converter={StaticResource Moneda}}"
+                                                HeaderStyle="{StaticResource EncabezadoNumerico}">
                                 <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource CeldaNumerica}">
                                         <Setter Property="FontWeight" Value="Bold" />
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
