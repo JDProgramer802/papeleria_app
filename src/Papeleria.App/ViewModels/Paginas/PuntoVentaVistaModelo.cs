@@ -32,6 +32,16 @@ public partial class LineaCarrito : ObservableObject
     /// <summary>Existencias disponibles al agregar la línea; impide sobrepasarlas.</summary>
     public decimal StockDisponible { get; init; }
 
+    /// <summary>
+    /// La línea descuenta inventario. Una fotocopia o un anillado no: se cobran las
+    /// veces que haga falta sin que existan «unidades» que se acaben.
+    /// </summary>
+    public bool ControlaExistencias { get; init; } = true;
+
+    public string DisponibilidadTexto => ControlaExistencias
+        ? $"disponible {Formatos.Cantidad(StockDisponible)}"
+        : "servicio";
+
     [ObservableProperty] private decimal _cantidad = 1;
     [ObservableProperty] private decimal _precioUnitario;
     [ObservableProperty] private decimal _porcentajeDescuento;
@@ -47,7 +57,10 @@ public partial class LineaCarrito : ObservableObject
 
     public decimal Total => Dinero.Redondear(BaseGravable + ValorIva);
 
-    public bool ExcedeStock => Cantidad > StockDisponible;
+    public bool ExcedeStock => ControlaExistencias && Cantidad > StockDisponible;
+
+    /// <summary>Cabe una unidad más. Un servicio siempre admite otra.</summary>
+    public bool AdmiteUnaMas => !ControlaExistencias || Cantidad + 1 <= StockDisponible;
 
     partial void OnCantidadChanged(decimal value) => NotificarTotales();
     partial void OnPrecioUnitarioChanged(decimal value) => NotificarTotales();
@@ -402,7 +415,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
 
         if (existente is not null)
         {
-            if (existente.Cantidad + 1 > existente.StockDisponible)
+            if (!existente.AdmiteUnaMas)
             {
                 MensajeError = $"Solo hay {Formatos.Cantidad(existente.StockDisponible)} " +
                                $"unidades disponibles de «{producto.Nombre}».";
@@ -422,6 +435,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
                 UnidadAbreviatura = producto.UnidadAbreviatura,
                 CostoUnitario = producto.Costo,
                 StockDisponible = producto.StockActual,
+                ControlaExistencias = !producto.EsServicio,
                 Cantidad = 1,
                 PrecioUnitario = producto.PrecioVenta,
                 PorcentajeIva = producto.PorcentajeIva
@@ -445,7 +459,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
             return;
         }
 
-        if (objetivo.Cantidad + 1 > objetivo.StockDisponible)
+        if (!objetivo.AdmiteUnaMas)
         {
             MensajeError = $"Solo hay {Formatos.Cantidad(objetivo.StockDisponible)} " +
                            $"unidades disponibles de «{objetivo.Nombre}».";

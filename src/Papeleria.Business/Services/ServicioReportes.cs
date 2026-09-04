@@ -191,7 +191,11 @@ public class ServicioReportes : IServicioReportes
     {
         await using var unidad = _fabrica.Crear();
 
-        var consulta = unidad.Contexto.Productos.AsNoTracking().Where(p => p.Activo);
+        // Solo mercancía. Un servicio siempre está en cero y sin esta condición el
+        // informe de agotados salía encabezado por las fotocopias, con su cantidad
+        // «sugerida» de reposición y todo.
+        var consulta = unidad.Contexto.Productos.AsNoTracking()
+            .Where(p => p.Activo && p.Tipo == TipoProducto.Producto);
 
         consulta = tipo == TipoReporte.ProductosAgotados
             ? consulta.Where(p => p.StockActual <= 0)

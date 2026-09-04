@@ -269,7 +269,7 @@ public partial class ComprasVistaModelo : PaginaVistaModelo, IRecibeParametro
 
             // Si el código cambió entre pantallas, se busca por nombre y se confirma por id.
             var candidatos = await _productos
-                .BuscarParaVentaAsync(solicitud.Nombre, 25)
+                .BuscarParaCompraAsync(solicitud.Nombre, 25)
                 .ConfigureAwait(true);
 
             return candidatos.FirstOrDefault(p => p.Id == solicitud.ProductoId);
@@ -453,7 +453,7 @@ public partial class ComprasVistaModelo : PaginaVistaModelo, IRecibeParametro
         }
 
         var resultados = await _productos
-            .BuscarParaVentaAsync(TextoBusquedaProducto, 25)
+            .BuscarParaCompraAsync(TextoBusquedaProducto, 25)
             .ConfigureAwait(true);
 
         ResultadosBusqueda.Clear();
@@ -477,6 +477,16 @@ public partial class ComprasVistaModelo : PaginaVistaModelo, IRecibeParametro
         {
             return;
         }
+
+        // El lector puede leer el código de una fotocopia. Se avisa aquí y no al guardar,
+        // cuando ya se armó la factura entera y hay que deshacerla.
+        if (producto.EsServicio)
+        {
+            MensajeError = $"«{producto.Nombre}» es un servicio: no se compra a proveedores.";
+            return;
+        }
+
+        MensajeError = null;
 
         // Si el producto ya está en la compra, se acumula la cantidad.
         var existente = Lineas.FirstOrDefault(l => l.ProductoId == producto.Id);

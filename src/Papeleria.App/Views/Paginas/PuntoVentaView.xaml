@@ -120,11 +120,10 @@
 
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                             <StackPanel Margin="0,0,14,0">
+                                                <!-- Un servicio dice «Servicio», no «Disp. 0». -->
                                                 <TextBlock HorizontalAlignment="Right" FontSize="11"
-                                                           Style="{StaticResource TextoTenue}">
-                                                    <Run Text="Disp." />
-                                                    <Run Text="{Binding StockActual, Converter={StaticResource Cantidad}, Mode=OneWay}" />
-                                                </TextBlock>
+                                                           Style="{StaticResource TextoTenue}"
+                                                           Text="{Binding ExistenciasTexto, Mode=OneWay}" />
                                                 <TextBlock Text="AGOTADO" FontSize="10" FontWeight="Bold"
                                                            HorizontalAlignment="Right"
                                                            Foreground="{StaticResource BrochaError}"
@@ -181,8 +180,8 @@
                                             <TextBlock Text="{Binding Nombre}" TextTrimming="CharacterEllipsis" />
                                             <TextBlock Style="{StaticResource TextoTenue}" FontSize="11">
                                                 <Run Text="{Binding Codigo, Mode=OneWay}" />
-                                                <Run Text="· disponible" />
-                                                <Run Text="{Binding StockDisponible, Converter={StaticResource Cantidad}, Mode=OneWay}" />
+                                                <Run Text="·" />
+                                                <Run Text="{Binding DisponibilidadTexto, Mode=OneWay}" />
                                             </TextBlock>
                                         </StackPanel>
                                     </DataTemplate>

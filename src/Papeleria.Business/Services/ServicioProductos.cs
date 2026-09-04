@@ -108,13 +108,21 @@ public class ServicioProductos : IServicioProductos
         }
 
         // El semáforo es una propiedad calculada del DTO; aquí se traduce a condiciones SQL.
+        // Los servicios quedan siempre en verde, igual que en el DTO: una fotocopia está
+        // en cero toda su vida y no por eso hay que reponerla.
         consulta = filtro.Estado switch
         {
-            EstadoStock.Agotado => consulta.Where(p => p.StockActual <= 0),
-            EstadoStock.Bajo => consulta.Where(p => p.StockActual > 0 && p.StockActual <= p.StockMinimo),
+            EstadoStock.Agotado => consulta.Where(p =>
+                p.Tipo == TipoProducto.Producto && p.StockActual <= 0),
+            EstadoStock.Bajo => consulta.Where(p =>
+                p.Tipo == TipoProducto.Producto
+                && p.StockActual > 0 && p.StockActual <= p.StockMinimo),
             EstadoStock.Normal => consulta.Where(p =>
-                p.StockActual > p.StockMinimo && (p.StockMaximo <= 0 || p.StockActual <= p.StockMaximo)),
-            EstadoStock.Exceso => consulta.Where(p => p.StockMaximo > 0 && p.StockActual > p.StockMaximo),
+                p.Tipo == TipoProducto.Servicio ||
+                (p.StockActual > p.StockMinimo && (p.StockMaximo <= 0 || p.StockActual <= p.StockMaximo))),
+            EstadoStock.Exceso => consulta.Where(p =>
+                p.Tipo == TipoProducto.Producto
+                && p.StockMaximo > 0 && p.StockActual > p.StockMaximo),
             _ => consulta
         };
 
@@ -150,12 +158,25 @@ public class ServicioProductos : IServicioProductos
             .FirstOrDefaultAsync(p => p.Id == id, ct).ConfigureAwait(false);
     }
 
-    public async Task<List<ProductoPosDto>> BuscarParaVentaAsync(
-        string? texto, int maximo = 40, CancellationToken ct = default)
+    public Task<List<ProductoPosDto>> BuscarParaVentaAsync(
+        string? texto, int maximo = 40, CancellationToken ct = default) =>
+        BuscarRapidoAsync(texto, maximo, incluirServicios: true, ct);
+
+    public Task<List<ProductoPosDto>> BuscarParaCompraAsync(
+        string? texto, int maximo = 40, CancellationToken ct = default) =>
+        BuscarRapidoAsync(texto, maximo, incluirServicios: false, ct);
+
+    private async Task<List<ProductoPosDto>> BuscarRapidoAsync(
+        string? texto, int maximo, bool incluirServicios, CancellationToken ct)
     {
         await using var unidad = _fabrica.Crear();
 
         var consulta = unidad.Contexto.Productos.AsNoTracking().Where(p => p.Activo);
+
+        if (!incluirServicios)
+        {
+            consulta = consulta.Where(p => p.Tipo == TipoProducto.Producto);
+        }
 
         if (!string.IsNullOrWhiteSpace(texto))
         {
@@ -166,8 +187,11 @@ public class ServicioProductos : IServicioProductos
                 (p.CodigoBarras != null && EF.Functions.Like(p.CodigoBarras, $"%{termino}%")));
         }
 
+        // Lo agotado se va al final para no estorbar. Un servicio no tiene existencias
+        // y sin esta salvedad las fotocopias caían al fondo de la lista, que en una
+        // papelería es justo lo que más se cobra.
         return await consulta
-            .OrderByDescending(p => p.StockActual > 0)
+            .OrderByDescending(p => p.Tipo == TipoProducto.Servicio || p.StockActual > 0)
             .ThenBy(p => p.Nombre)
             .Take(maximo)
             .Select(ProyeccionPos)

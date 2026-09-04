@@ -424,6 +424,17 @@ public partial class ProductosVistaModelo : PaginaVistaModelo
             return;
         }
 
+        if (ProductoSeleccionado.EsServicio)
+        {
+            await _dialogos.InformarAsync(
+                "No se compra a proveedores",
+                $"«{ProductoSeleccionado.Nombre}» es un servicio. Lo que cuesta prestarlo " +
+                "se ajusta en su costo, dentro de la ficha del servicio.",
+                esError: true).ConfigureAwait(true);
+
+            return;
+        }
+
         if (!PuedeComprar)
         {
             await _dialogos.InformarAsync(

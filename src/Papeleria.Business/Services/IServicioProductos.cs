@@ -15,6 +15,12 @@ public interface IServicioProductos
     /// <summary>Búsqueda rápida para el punto de venta (código, código de barras o nombre).</summary>
     Task<List<ProductoPosDto>> BuscarParaVentaAsync(string? texto, int maximo = 40, CancellationToken ct = default);
 
+    /// <summary>
+    /// La misma búsqueda, pero sin servicios: a un proveedor se le compra mercancía, y
+    /// una fotocopia no se recibe en una factura de compra.
+    /// </summary>
+    Task<List<ProductoPosDto>> BuscarParaCompraAsync(string? texto, int maximo = 40, CancellationToken ct = default);
+
     /// <summary>Coincidencia exacta por código de barras o código interno, para el lector.</summary>
     Task<ProductoPosDto?> BuscarPorCodigoExactoAsync(string codigo, CancellationToken ct = default);
 
