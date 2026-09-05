@@ -449,9 +449,9 @@
                                     <!-- El distintivo imita el trazo: línea para ventas, bloque para compras. -->
                                     <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
                                         <Grid Width="18" Height="11" VerticalAlignment="Center">
-                                            <Border Height="2.5" CornerRadius="2" Background="#1565C0"
+                                            <Border Height="2.5" CornerRadius="2" Background="#0379EE"
                                                     VerticalAlignment="Center" />
-                                            <Ellipse Width="7" Height="7" Fill="#1565C0"
+                                            <Ellipse Width="7" Height="7" Fill="#0379EE"
                                                      Stroke="{DynamicResource MaterialDesignPaper}"
                                                      StrokeThickness="1.5"
                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />

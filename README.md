@@ -1,6 +1,6 @@
-# Sistema de Gestión de Papelería
+# PapelSoft
 
-Aplicación de escritorio para Windows que administra por completo una papelería:
+**Software de papelería.** Aplicación de escritorio para Windows que administra por completo el negocio:
 inventario, punto de venta, compras, caja, kardex, terceros, reportes y respaldos.
 Funciona **100 % sin conexión a Internet** sobre una base de datos SQLite local.
 

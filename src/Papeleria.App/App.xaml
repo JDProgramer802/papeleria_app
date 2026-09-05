@@ -5,10 +5,14 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme BaseTheme="Light"
-                                             PrimaryColor="Blue"
-                                             SecondaryColor="Amber"
-                                             ColorAdjustment="{materialDesign:ColorAdjustment}" />
+                <!--
+                    Los colores salen del logotipo de PapelSoft: el azul del nombre y
+                    el verde agua de la goma de borrar. Con BundledTheme solo se podía
+                    elegir de la lista de Material y el azul quedaba parecido, no igual.
+                -->
+                <materialDesign:CustomColorTheme BaseTheme="Light"
+                                                 PrimaryColor="#0379EE"
+                                                 SecondaryColor="#01CED1" />
                 <!--
                     MaterialDesignThemes 5.x publica dos juegos de estilos. Se usa el de
                     Material Design 2 porque es el que define los nombres clásicos

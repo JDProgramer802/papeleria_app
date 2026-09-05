@@ -14,7 +14,7 @@
     <SolidColorBrush x:Key="BrochaExito" Color="#2E7D32" />
     <SolidColorBrush x:Key="BrochaAdvertencia" Color="#EF6C00" />
     <SolidColorBrush x:Key="BrochaError" Color="#C62828" />
-    <SolidColorBrush x:Key="BrochaInformacion" Color="#1565C0" />
+    <SolidColorBrush x:Key="BrochaInformacion" Color="#0B3F9E" />
     <SolidColorBrush x:Key="BrochaExitoSuave" Color="#E8F5E9" />
     <SolidColorBrush x:Key="BrochaAdvertenciaSuave" Color="#FFF3E0" />
     <SolidColorBrush x:Key="BrochaErrorSuave" Color="#FFEBEE" />
@@ -29,13 +29,13 @@
         color se reserva para el dinero, para lo que va bien y para lo que va mal.
     -->
     <!-- Tinte del módulo abierto en el menú: transparente, sirve en claro y en oscuro. -->
-    <SolidColorBrush x:Key="BrochaMenuActivo" Color="#1F2196F3" />
+    <SolidColorBrush x:Key="BrochaMenuActivo" Color="#1F0379EE" />
 
     <SolidColorBrush x:Key="AcentoNeutroFondo" Color="#EEF1F5" />
     <SolidColorBrush x:Key="AcentoNeutroTinta" Color="#5A6472" />
 
-    <SolidColorBrush x:Key="AcentoPrincipalFondo" Color="#E3F0FC" />
-    <SolidColorBrush x:Key="AcentoPrincipalTinta" Color="#1565C0" />
+    <SolidColorBrush x:Key="AcentoPrincipalFondo" Color="#E1EFFE" />
+    <SolidColorBrush x:Key="AcentoPrincipalTinta" Color="#0B3F9E" />
 
     <SolidColorBrush x:Key="AcentoExitoFondo" Color="#E6F4EA" />
     <SolidColorBrush x:Key="AcentoExitoTinta" Color="#256B36" />
@@ -59,9 +59,9 @@
     <LinearGradientBrush x:Key="BrochaFilaSeleccionada"
                          StartPoint="0,0" EndPoint="6,0"
                          MappingMode="Absolute" SpreadMethod="Pad">
-        <GradientStop Color="#FF2196F3" Offset="0" />
-        <GradientStop Color="#FF2196F3" Offset="0.5" />
-        <GradientStop Color="#242196F3" Offset="0.5" />
+        <GradientStop Color="#FF0379EE" Offset="0" />
+        <GradientStop Color="#FF0379EE" Offset="0.5" />
+        <GradientStop Color="#240379EE" Offset="0.5" />
     </LinearGradientBrush>
 
     <!-- ══ Tipografía ════════════════════════════════════════════════════════ -->

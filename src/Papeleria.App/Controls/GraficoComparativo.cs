@@ -65,7 +65,7 @@ public class GraficoComparativo : Decorator
 
     public static readonly DependencyProperty ColorLineaProperty = DependencyProperty.Register(
         nameof(ColorLinea), typeof(Brush), typeof(GraficoComparativo),
-        new PropertyMetadata(CrearBrocha("#1565C0"), AlCambiarDatos));
+        new PropertyMetadata(CrearBrocha("#0379EE"), AlCambiarDatos));
 
     /// <summary>
     /// Permite apagar la animación de entrada. El banco de pruebas la desactiva para

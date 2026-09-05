@@ -10,10 +10,12 @@
     <AssemblyName>Papeleria</AssemblyName>
     <ApplicationIcon>Resources\Images\app.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>1.7.0</Version>
-    <AssemblyVersion>1.7.0.0</AssemblyVersion>
-    <FileVersion>1.7.0.0</FileVersion>
-    <Product>Sistema de Gestión de Papelería</Product>
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Product>PapelSoft</Product>
+    <AssemblyTitle>PapelSoft</AssemblyTitle>
+    <Description>Software de papelería: punto de venta, inventario, caja y cartera.</Description>
     <Company>Papelería</Company>
     <Copyright>© 2026</Copyright>
     <SatelliteResourceLanguages>es;en</SatelliteResourceLanguages>
@@ -23,6 +25,12 @@
   <ItemGroup>
     <!-- Se incrusta además como recurso para poder asignarlo a las ventanas. -->
     <Resource Include="Resources\Images\app.ico" />
+
+    <!-- Marca de PapelSoft: el logotipo completo para el acceso y la pantalla de
+         carga, y la marca sola para la cabecera del menú lateral. -->
+    <Resource Include="Resources\Images\logo.png" />
+    <Resource Include="Resources\Images\marca.png" />
+    <Resource Include="Resources\Images\logo-completo.png" />
   </ItemGroup>
 
   <ItemGroup>

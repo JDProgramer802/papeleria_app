@@ -97,7 +97,7 @@ public partial class App : Application
                 "El sistema ya está abierto." + Environment.NewLine + Environment.NewLine +
                 "Utilice la ventana que ya está en marcha. Trabajar con dos copias a la vez " +
                 "puede duplicar números de factura y descuadrar la caja.",
-                "Sistema de Gestión de Papelería",
+                "PapelSoft",
                 MessageBoxButton.OK, MessageBoxImage.Information);
 
             Shutdown();
@@ -300,7 +300,7 @@ public partial class App : Application
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
             .CreateLogger();
 
-        Log.Information("=== Sistema de Gestión de Papelería iniciado ===");
+        Log.Information("=== PapelSoft iniciado ===");
     }
 
     /// <summary>

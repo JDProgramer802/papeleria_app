@@ -8,7 +8,7 @@
         xmlns:infra="clr-namespace:Papeleria.App.Infrastructure"
         d:DataContext="{d:DesignInstance vm:MainVistaModelo}"
         mc:Ignorable="d"
-        Title="Sistema de Gestión de Papelería"
+        Title="PapelSoft"
         Height="820" Width="1440"
         MinHeight="680" MinWidth="1120"
         WindowStartupLocation="CenterScreen"
@@ -55,15 +55,17 @@
                             <Grid Width="{Binding MenuColapsado, Converter={StaticResource MenuColapsadoATamanoLogo}}"
                                   Height="{Binding MenuColapsado, Converter={StaticResource MenuColapsadoATamanoLogo}}"
                                   ToolTip="{Binding NombreEmpresa}">
-                                <!-- Marca por defecto mientras no se cargue un logotipo -->
-                                <Border CornerRadius="10"
-                                        Background="{DynamicResource MaterialDesign.Brush.Primary}"
+                                <!--
+                                    Marca de PapelSoft mientras el negocio no cargue su
+                                    propio logotipo. Va sobre blanco: el monitor de la
+                                    marca es azul marino y sobre el azul del programa se
+                                    perdería.
+                                -->
+                                <Border CornerRadius="10" Background="White" Padding="3"
                                         Visibility="{Binding TieneLogo, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
-                                    <materialDesign:PackIcon Kind="BookOpenPageVariant"
-                                                             Width="22" Height="22"
-                                                             Foreground="White"
-                                                             HorizontalAlignment="Center"
-                                                             VerticalAlignment="Center" />
+                                    <Image Source="pack://application:,,,/Papeleria;component/Resources/Images/marca.png"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality" />
                                 </Border>
 
                                 <!-- Logotipo cargado en Configuración → Empresa.
