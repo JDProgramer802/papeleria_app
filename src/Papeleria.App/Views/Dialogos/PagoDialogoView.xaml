@@ -140,9 +140,18 @@
             </Border>
         </StackPanel>
 
-        <CheckBox Grid.Row="3" Margin="0,10,0,0"
-                  Content="Imprimir factura al finalizar"
-                  IsChecked="{Binding ImprimirFactura}" />
+        <StackPanel Grid.Row="3">
+            <!-- Referencia del pago electrónico, para poder cuadrar contra el extracto. -->
+            <TextBox Style="{StaticResource CampoTexto}" Margin="0,14,0,0"
+                     Text="{Binding ReferenciaPago, UpdateSourceTrigger=PropertyChanged}"
+                     MaxLength="60"
+                     materialDesign:HintAssist.Hint="{Binding EtiquetaReferencia}"
+                     Visibility="{Binding AdmiteReferencia, Converter={StaticResource BoolAVisible}}" />
+
+            <CheckBox Margin="0,10,0,0"
+                      Content="Imprimir factura al finalizar"
+                      IsChecked="{Binding ImprimirFactura}" />
+        </StackPanel>
 
         <!-- Error -->
         <Border Grid.Row="4" Margin="0,14,0,0"

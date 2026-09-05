@@ -117,7 +117,8 @@ public partial class AbonoDialogoVistaModelo : DialogoFormularioBase
 
         MetodosPago = new ObservableCollection<OpcionEnum<MetodoPago>>(
             Enumeraciones.Opciones<MetodoPago>()
-                .Where(o => o.Valor is MetodoPago.Efectivo or MetodoPago.Tarjeta or MetodoPago.Transferencia));
+                .Where(o => o.Valor is MetodoPago.Efectivo or MetodoPago.Tarjeta
+                    or MetodoPago.Transferencia or MetodoPago.Nequi or MetodoPago.Daviplata));
     }
 
     public string Cliente { get; }

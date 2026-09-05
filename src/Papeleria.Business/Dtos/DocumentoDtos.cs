@@ -78,6 +78,8 @@ public class VentaResumenDto
         MetodoPago.Transferencia => "Transferencia",
         MetodoPago.Credito => "Crédito",
         MetodoPago.Mixto => "Mixto",
+        MetodoPago.Nequi => "Nequi",
+        MetodoPago.Daviplata => "Daviplata",
         _ => MetodoPago.ToString()
     };
 

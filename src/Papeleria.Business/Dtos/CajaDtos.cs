@@ -22,6 +22,32 @@ public class ArqueoCajaDto
 
     public decimal VentasCredito { get; init; }
 
+    /// <summary>Cobrado por billeteras digitales. No entra al cajón, pero hay que cuadrarlo.</summary>
+    public decimal VentasNequi { get; init; }
+
+    public decimal VentasDaviplata { get; init; }
+
+    public bool HayBilleteras => VentasNequi > 0 || VentasDaviplata > 0;
+
+    /// <summary>De qué se compone «otros medios», para no tener que abrir el reporte.</summary>
+    public string DesgloseOtrosMedios
+    {
+        get
+        {
+            var partes = new List<string>();
+
+            if (VentasTarjeta > 0) partes.Add($"Tarjeta {Formatos.Moneda(VentasTarjeta)}");
+            if (VentasTransferencia > 0) partes.Add($"Transferencia {Formatos.Moneda(VentasTransferencia)}");
+            if (VentasNequi > 0) partes.Add($"Nequi {Formatos.Moneda(VentasNequi)}");
+            if (VentasDaviplata > 0) partes.Add($"Daviplata {Formatos.Moneda(VentasDaviplata)}");
+            if (VentasCredito > 0) partes.Add($"Crédito {Formatos.Moneda(VentasCredito)}");
+
+            return partes.Count == 0
+                ? "Todo se cobró en efectivo"
+                : string.Join(Environment.NewLine, partes);
+        }
+    }
+
     public decimal Ingresos { get; init; }
 
     public decimal Egresos { get; init; }
@@ -35,9 +61,11 @@ public class ArqueoCajaDto
 
     /// <summary>Total facturado en la sesión, con independencia del medio de pago.</summary>
     public decimal TotalVentas => Dinero.Redondear(
-        VentasEfectivo + VentasTarjeta + VentasTransferencia + VentasCredito);
+        VentasEfectivo + VentasTarjeta + VentasTransferencia + VentasCredito +
+        VentasNequi + VentasDaviplata);
 
-    public decimal VentasOtrosMedios => Dinero.Redondear(VentasTarjeta + VentasTransferencia + VentasCredito);
+    public decimal VentasOtrosMedios => Dinero.Redondear(
+        VentasTarjeta + VentasTransferencia + VentasCredito + VentasNequi + VentasDaviplata);
 
     /// <summary>
     /// Efectivo teórico en el cajón: base + ventas en efectivo + ingresos − egresos − devoluciones.

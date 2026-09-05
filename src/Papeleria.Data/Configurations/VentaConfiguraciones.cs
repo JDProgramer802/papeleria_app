@@ -16,6 +16,7 @@ public class VentaConfiguration : IEntityTypeConfiguration<Venta>
         builder.Property(v => v.Estado).HasConversion<int>();
         builder.Property(v => v.MotivoAnulacion).HasMaxLength(400);
         builder.Property(v => v.Observaciones).HasMaxLength(600);
+        builder.Property(v => v.ReferenciaPago).HasMaxLength(60);
 
         builder.Ignore(v => v.Utilidad);
 

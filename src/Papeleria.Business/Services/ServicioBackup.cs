@@ -37,6 +37,15 @@ public class ServicioBackup : IServicioBackup
             : configurada;
     }
 
+    public EstadoRespaldoDto ObtenerEstado() => new()
+    {
+        UltimaCopia = _configuracion.ObtenerFecha(ClavesConfiguracion.BackupUltimaFecha),
+        Carpeta = ObtenerCarpetaDestino(),
+        Automatico = _configuracion.ObtenerBooleano(ClavesConfiguracion.BackupAutomatico, true),
+        FrecuenciaDias = Math.Max(
+            _configuracion.ObtenerEntero(ClavesConfiguracion.BackupFrecuenciaDias, 1), 1)
+    };
+
     public async Task<string> CrearAsync(string? carpetaDestino = null, CancellationToken ct = default)
     {
         var carpeta = string.IsNullOrWhiteSpace(carpetaDestino) ? ObtenerCarpetaDestino() : carpetaDestino;
@@ -76,6 +85,22 @@ public class ServicioBackup : IServicioBackup
         catch (Exception ex)
         {
             throw new NegocioException($"No se pudo crear la copia de seguridad. {ex.Message}", ex);
+        }
+
+        // Una copia que no se puede abrir es peor que ninguna: da tranquilidad falsa.
+        // Se comprueba aquí mismo y, si salió mal, se borra y se avisa en el momento,
+        // no el día que haga falta restaurarla.
+        try
+        {
+            await VerificarQueEsBaseDeDatosAsync(destino, ct).ConfigureAwait(false);
+        }
+        catch (NegocioException)
+        {
+            TryEliminar(destino);
+
+            throw new NegocioException(
+                $"La copia se escribió en «{carpeta}» pero quedó dañada y se descartó. " +
+                "Revise que el destino tenga espacio y siga conectado.");
         }
 
         await _configuracion.GuardarAsync(
@@ -143,6 +168,22 @@ public class ServicioBackup : IServicioBackup
     }
 
     /// <summary>Comprueba la cabecera del archivo para no restaurar algo que no sea SQLite.</summary>
+    private static void TryEliminar(string archivo)
+    {
+        try
+        {
+            if (File.Exists(archivo))
+            {
+                File.Delete(archivo);
+            }
+        }
+        catch
+        {
+            // Si el archivo dañado no se deja borrar, tampoco pasa nada: no se anota
+            // como copia buena y el aviso de respaldo atrasado seguirá encendido.
+        }
+    }
+
     private static async Task VerificarQueEsBaseDeDatosAsync(string archivo, CancellationToken ct)
     {
         const string cabeceraEsperada = "SQLite format 3";

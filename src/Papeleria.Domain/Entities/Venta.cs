@@ -38,6 +38,12 @@ public class Venta : EntidadBase
 
     public decimal Cambio { get; set; }
 
+    /// <summary>
+    /// Número de aprobación, referencia de la transferencia o los últimos dígitos del
+    /// teléfono de Nequi. Sin esto, cuadrar el día contra el extracto es adivinar.
+    /// </summary>
+    public string? ReferenciaPago { get; set; }
+
     public EstadoVenta Estado { get; set; } = EstadoVenta.Completada;
 
     public DateTime? FechaAnulacion { get; set; }

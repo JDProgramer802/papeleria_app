@@ -186,7 +186,8 @@
                         </Button>
                     </StackPanel>
 
-                    <StackPanel VerticalAlignment="Center" Margin="48,0,48,0">
+                    <StackPanel VerticalAlignment="Center" Margin="48,0,48,0"
+                                Visibility="{Binding ExigiendoCambioContrasena, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
                         <TextBlock Text="Bienvenido"
                                    FontSize="30" FontWeight="Bold" />
                         <TextBlock Text="Ingrese sus credenciales para continuar"
@@ -328,6 +329,74 @@
                                            FontSize="11.5" />
                             </StackPanel>
                         </Border>
+                    </StackPanel>
+
+                    <!--
+                        Segundo paso, solo la primera vez: quien entra con la contraseña
+                        de fábrica no llega al programa hasta ponerle una suya. Ocupa el
+                        mismo sitio que el formulario de acceso, que queda oculto.
+                    -->
+                    <StackPanel VerticalAlignment="Center" Margin="48,0,48,0"
+                                Visibility="{Binding ExigiendoCambioContrasena, Converter={StaticResource BoolAVisible}}">
+                        <TextBlock Text="Póngale su contraseña"
+                                   FontSize="27" FontWeight="Bold" TextWrapping="Wrap" />
+                        <TextBlock Style="{StaticResource SubtituloPagina}"
+                                   FontSize="13" TextWrapping="Wrap" LineHeight="19"
+                                   Margin="0,6,0,24"
+                                   Text="Entró con la contraseña que trae el programa de fábrica. Esa la conoce cualquiera que lo haya visto, así que elija una propia antes de seguir." />
+
+                        <PasswordBox x:Name="CampoContrasenaNueva"
+                                     Style="{StaticResource CampoAccesoContrasena}"
+                                     Margin="0,0,0,16"
+                                     PasswordChanged="ContrasenaNuevaCambiada"
+                                     materialDesign:HintAssist.Hint="Contraseña nueva"
+                                     materialDesign:TextFieldAssist.LeadingIcon="LockOutline" />
+
+                        <PasswordBox x:Name="CampoContrasenaRepetida"
+                                     Style="{StaticResource CampoAccesoContrasena}"
+                                     Margin="0,0,0,6"
+                                     PasswordChanged="ContrasenaRepetidaCambiada"
+                                     materialDesign:HintAssist.Hint="Repítala"
+                                     materialDesign:TextFieldAssist.LeadingIcon="LockCheckOutline" />
+
+                        <TextBlock Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                   TextWrapping="Wrap" Margin="0,0,0,18"
+                                   Text="Mínimo 6 caracteres, con letras y números. Anótela en algún lado: no hay forma de recuperarla." />
+
+                        <Border Background="{StaticResource BrochaErrorSuave}"
+                                CornerRadius="8" Padding="13,10" Margin="0,0,0,16"
+                                Visibility="{Binding MensajeError, Converter={StaticResource TextoAVisible}}">
+                            <TextBlock Text="{Binding MensajeError}"
+                                       Foreground="{StaticResource BrochaError}"
+                                       TextWrapping="Wrap" MaxWidth="290" FontSize="12.5" />
+                        </Border>
+
+                        <Button Height="50" FontSize="14"
+                                Command="{Binding ConfirmarContrasenaNuevaCommand}"
+                                IsDefault="True"
+                                materialDesign:ButtonAssist.CornerRadius="8"
+                                Style="{StaticResource MaterialDesignRaisedButton}">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal"
+                                            Visibility="{Binding EstaCargando, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+                                    <materialDesign:PackIcon Kind="LockCheckOutline"
+                                                             Width="21" Height="21"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0" />
+                                    <TextBlock Text="GUARDAR Y ENTRAR" VerticalAlignment="Center"
+                                               FontWeight="SemiBold" />
+                                </StackPanel>
+
+                                <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                             IsIndeterminate="True" Width="22" Height="22"
+                                             Foreground="White"
+                                             Visibility="{Binding EstaCargando, Converter={StaticResource BoolAVisible}}" />
+                            </Grid>
+                        </Button>
+
+                        <Button Style="{StaticResource BotonTexto}" Margin="0,10,0,0"
+                                HorizontalAlignment="Center"
+                                Command="{Binding CancelarCambioContrasenaCommand}"
+                                Content="Volver" />
                     </StackPanel>
                 </Grid>
             </Grid>

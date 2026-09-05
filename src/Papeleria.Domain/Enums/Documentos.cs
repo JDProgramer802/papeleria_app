@@ -18,7 +18,15 @@ public enum MetodoPago
     Credito = 4,
 
     [Display(Name = "Mixto")]
-    Mixto = 5
+    Mixto = 5,
+
+    // Billeteras digitales. Van aparte de «Transferencia» porque al cerrar el día hay
+    // que saber cuánto entró a cada teléfono, y no entran al cajón.
+    [Display(Name = "Nequi")]
+    Nequi = 6,
+
+    [Display(Name = "Daviplata")]
+    Daviplata = 7
 }
 
 /// <summary>Estado de una factura de venta. Las ventas nunca se eliminan, solo se anulan.</summary>

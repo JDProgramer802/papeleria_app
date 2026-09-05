@@ -21,6 +21,46 @@ public class ArchivoBackupDto
 }
 
 /// <summary>
+/// Estado de los respaldos, para poder avisar a tiempo.
+///
+/// La copia automática se hace sola y en silencio. Si el destino es una memoria que
+/// hoy no está conectada, falla, queda anotado en el registro y nadie se entera hasta
+/// el día que hace falta. Con esto el panel puede decirlo en voz alta.
+/// </summary>
+public class EstadoRespaldoDto
+{
+    public DateTime? UltimaCopia { get; init; }
+
+    public required string Carpeta { get; init; }
+
+    public bool Automatico { get; init; }
+
+    /// <summary>Cada cuántos días debería hacerse una copia.</summary>
+    public int FrecuenciaDias { get; init; }
+
+    public bool NuncaSeHaHecho => UltimaCopia is null;
+
+    public int DiasDesdeLaUltima => UltimaCopia is { } fecha
+        ? Math.Max((int)(DateTime.Now.Date - fecha.Date).TotalDays, 0)
+        : int.MaxValue;
+
+    /// <summary>
+    /// Se da por atrasada al doblar la frecuencia pactada: un día de retraso puede ser
+    /// que el computador estuviera apagado; el doble ya es que algo no está funcionando.
+    /// </summary>
+    public bool Atrasado => NuncaSeHaHecho || DiasDesdeLaUltima > Math.Max(FrecuenciaDias, 1) * 2;
+
+    public string Resumen => UltimaCopia is { } fecha
+        ? DiasDesdeLaUltima switch
+        {
+            0 => $"Última copia hoy a las {fecha:HH:mm}",
+            1 => "Última copia ayer",
+            _ => $"Última copia hace {DiasDesdeLaUltima} días"
+        }
+        : "Todavía no se ha hecho ninguna copia";
+}
+
+/// <summary>
 /// Copias de seguridad de la base de datos SQLite. Usa la API de respaldo en línea
 /// del motor, por lo que puede ejecutarse con la aplicación abierta.
 /// </summary>
@@ -28,6 +68,9 @@ public interface IServicioBackup
 {
     /// <summary>Carpeta configurada para las copias; si no hay ninguna, la de la aplicación.</summary>
     string ObtenerCarpetaDestino();
+
+    /// <summary>Cuándo se hizo la última copia y si ya se pasó de la cuenta.</summary>
+    EstadoRespaldoDto ObtenerEstado();
 
     Task<string> CrearAsync(string? carpetaDestino = null, CancellationToken ct = default);
 

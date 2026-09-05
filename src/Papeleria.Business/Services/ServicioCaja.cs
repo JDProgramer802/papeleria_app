@@ -289,6 +289,7 @@ public class ServicioCaja : IServicioCaja
             .ToListAsync(ct).ConfigureAwait(false);
 
         decimal efectivo = 0, tarjeta = 0, transferencia = 0, credito = 0;
+        decimal nequi = 0, daviplata = 0;
 
         foreach (var venta in ventas)
         {
@@ -308,6 +309,14 @@ public class ServicioCaja : IServicioCaja
 
                 case MetodoPago.Credito:
                     credito += venta.Total;
+                    break;
+
+                case MetodoPago.Nequi:
+                    nequi += venta.Total;
+                    break;
+
+                case MetodoPago.Daviplata:
+                    daviplata += venta.Total;
                     break;
 
                 case MetodoPago.Mixto:
@@ -343,6 +352,8 @@ public class ServicioCaja : IServicioCaja
             VentasEfectivo = Dinero.Redondear(efectivo),
             VentasTarjeta = Dinero.Redondear(tarjeta),
             VentasTransferencia = Dinero.Redondear(transferencia),
+            VentasNequi = Dinero.Redondear(nequi),
+            VentasDaviplata = Dinero.Redondear(daviplata),
             VentasCredito = Dinero.Redondear(credito),
             Ingresos = Dinero.Redondear(ingresos),
             Egresos = Dinero.Redondear(egresos),

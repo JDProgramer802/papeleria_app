@@ -60,9 +60,31 @@ public partial class LoginWindow : Window
     /// </summary>
     private void AlCambiarPropiedadDelModelo(object? remitente, System.ComponentModel.PropertyChangedEventArgs argumentos)
     {
-        if (argumentos.PropertyName != nameof(LoginVistaModelo.Contrasena) ||
-            _sincronizando ||
-            DataContext is not LoginVistaModelo modelo)
+        if (DataContext is not LoginVistaModelo modelo)
+        {
+            return;
+        }
+
+        // Al entrar o salir del cambio obligatorio se vacían los campos enmascarados
+        // y el foco va donde toca escribir.
+        if (argumentos.PropertyName == nameof(LoginVistaModelo.ExigiendoCambioContrasena))
+        {
+            CampoContrasenaNueva.Password = string.Empty;
+            CampoContrasenaRepetida.Password = string.Empty;
+
+            if (modelo.ExigiendoCambioContrasena)
+            {
+                Dispatcher.BeginInvoke(new Action(() => CampoContrasenaNueva.Focus()));
+            }
+            else
+            {
+                Dispatcher.BeginInvoke(new Action(() => CampoContrasena.Focus()));
+            }
+
+            return;
+        }
+
+        if (argumentos.PropertyName != nameof(LoginVistaModelo.Contrasena) || _sincronizando)
         {
             return;
         }
@@ -89,6 +111,26 @@ public partial class LoginWindow : Window
         _sincronizando = true;
         modelo.Contrasena = CampoContrasena.Password;
         _sincronizando = false;
+    }
+
+    /// <summary>
+    /// Los dos campos del cambio obligatorio de contraseña. Como el resto de
+    /// <c>PasswordBox</c>, no se enlazan: se trasladan a mano al modelo de vista.
+    /// </summary>
+    private void ContrasenaNuevaCambiada(object remitente, RoutedEventArgs argumentos)
+    {
+        if (DataContext is LoginVistaModelo modelo)
+        {
+            modelo.ContrasenaNueva = CampoContrasenaNueva.Password;
+        }
+    }
+
+    private void ContrasenaRepetidaCambiada(object remitente, RoutedEventArgs argumentos)
+    {
+        if (DataContext is LoginVistaModelo modelo)
+        {
+            modelo.ContrasenaRepetida = CampoContrasenaRepetida.Password;
+        }
     }
 
     /// <summary>

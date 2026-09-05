@@ -71,6 +71,11 @@ public class VentaDetalladaDto
 
     public decimal Cambio { get; init; }
 
+    /// <summary>Aprobación del datáfono, referencia de la transferencia o del Nequi.</summary>
+    public string? ReferenciaPago { get; init; }
+
+    public bool TieneReferenciaPago => !string.IsNullOrWhiteSpace(ReferenciaPago);
+
     public EstadoVenta Estado { get; init; }
 
     public DateTime? FechaAnulacion { get; init; }

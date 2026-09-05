@@ -95,7 +95,7 @@
                                        FontWeight="SemiBold" FontSize="15" />
                         </StackPanel>
 
-                        <StackPanel>
+                        <StackPanel ToolTip="{Binding Arqueo.DesgloseOtrosMedios}">
                             <TextBlock Text="Otros medios" Style="{StaticResource EtiquetaCampo}" />
                             <TextBlock Text="{Binding Arqueo.VentasOtrosMedios, Converter={StaticResource Moneda}}"
                                        FontWeight="SemiBold" FontSize="15" />

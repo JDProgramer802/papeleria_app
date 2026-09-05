@@ -457,6 +457,46 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
+                            <!--
+                                Lo primero que se ve: cuándo fue la última copia. La copia
+                                automática falla en silencio si el destino no está conectado,
+                                y sin este letrero nadie se entera hasta que ya es tarde.
+                            -->
+                            <Border CornerRadius="8" Padding="12,10" Margin="0,0,0,16">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{StaticResource BrochaExitoSuave}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding EstadoRespaldo.Atrasado}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource BrochaErrorSuave}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Width="22" Height="22"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0">
+                                        <materialDesign:PackIcon.Style>
+                                            <Style TargetType="materialDesign:PackIcon">
+                                                <Setter Property="Kind" Value="DatabaseCheckOutline" />
+                                                <Setter Property="Foreground" Value="{StaticResource BrochaExito}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding EstadoRespaldo.Atrasado}" Value="True">
+                                                        <Setter Property="Kind" Value="DatabaseOffOutline" />
+                                                        <Setter Property="Foreground" Value="{StaticResource BrochaError}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </materialDesign:PackIcon.Style>
+                                    </materialDesign:PackIcon>
+
+                                    <TextBlock Text="{Binding EstadoRespaldo.Resumen}"
+                                               FontSize="12.5" FontWeight="SemiBold"
+                                               TextWrapping="Wrap" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+
                             <TextBlock Text="Configuración" Style="{StaticResource TituloSeccion}" />
 
                             <TextBox Style="{StaticResource CampoTexto}"
@@ -511,6 +551,21 @@
                                                VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
+
+                            <Button Style="{StaticResource BotonSecundario}" HorizontalAlignment="Left"
+                                    Margin="0,10,0,0"
+                                    Command="{Binding CopiarRespaldoAfueraCommand}"
+                                    ToolTip="Guarda una copia en una memoria USB o disco externo, sin cambiar la carpeta configurada">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ContentDuplicate" VerticalAlignment="Center" />
+                                    <TextBlock Text="Copiar a una memoria" Margin="8,0,0,0"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <TextBlock Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                       TextWrapping="Wrap" Margin="0,10,0,0"
+                                       Text="Una copia guardada en el mismo computador se pierde junto con él. Llévese una a una memoria de vez en cuando." />
                         </StackPanel>
 
                         <Grid Grid.Column="2">

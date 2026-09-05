@@ -550,6 +550,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
                 MontoRecibido = dialogoPago.MetodoPago is MetodoPago.Efectivo or MetodoPago.Mixto
                     ? dialogoPago.MontoRecibido
                     : Total,
+                ReferenciaPago = dialogoPago.ReferenciaPago,
                 Observaciones = Observaciones,
                 Lineas = Carrito.Select(l => new LineaVenta
                 {

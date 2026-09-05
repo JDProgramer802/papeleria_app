@@ -59,6 +59,8 @@ public partial class PagoDialogoVistaModelo : VistaModeloBase
     [NotifyPropertyChangedFor(nameof(PuedeFiar))]
     [NotifyPropertyChangedFor(nameof(AvisoCredito))]
     [NotifyPropertyChangedFor(nameof(TieneAvisoCredito))]
+    [NotifyPropertyChangedFor(nameof(AdmiteReferencia))]
+    [NotifyPropertyChangedFor(nameof(EtiquetaReferencia))]
     private MetodoPago _metodoPago = MetodoPago.Efectivo;
 
     [ObservableProperty]
@@ -70,7 +72,26 @@ public partial class PagoDialogoVistaModelo : VistaModeloBase
     [ObservableProperty]
     private bool _imprimirFactura = true;
 
+    /// <summary>Aprobación del datáfono, referencia de la transferencia o teléfono de Nequi.</summary>
+    [ObservableProperty]
+    private string? _referenciaPago;
+
     public bool RequiereEfectivo => MetodoPago is MetodoPago.Efectivo or MetodoPago.Mixto;
+
+    /// <summary>
+    /// Los pagos que llegan a una cuenta piden referencia. No es obligatoria —a veces no
+    /// alcanza el tiempo en el mostrador— pero sin ella cuadrar el extracto es adivinar.
+    /// </summary>
+    public bool AdmiteReferencia => MetodoPago is
+        MetodoPago.Tarjeta or MetodoPago.Transferencia or MetodoPago.Nequi or MetodoPago.Daviplata;
+
+    public string EtiquetaReferencia => MetodoPago switch
+    {
+        MetodoPago.Tarjeta => "Número de aprobación (opcional)",
+        MetodoPago.Nequi => "Teléfono o referencia de Nequi (opcional)",
+        MetodoPago.Daviplata => "Teléfono o referencia de Daviplata (opcional)",
+        _ => "Referencia de la transferencia (opcional)"
+    };
 
     public bool EsCredito => MetodoPago == MetodoPago.Credito;
 

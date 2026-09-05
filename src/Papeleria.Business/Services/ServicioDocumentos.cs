@@ -148,6 +148,13 @@ public class ServicioDocumentos : IServicioDocumentos
 
                     columna.Item().PaddingTop(3).Text($"Forma de pago: {venta.MetodoPago.Descripcion()}");
 
+                    // La referencia también va impresa: es la que el cliente reclama
+                    // cuando dice que ya pagó y hay que buscar el movimiento.
+                    if (venta.TieneReferenciaPago)
+                    {
+                        columna.Item().Text($"Ref.: {venta.ReferenciaPago}");
+                    }
+
                     if (venta.MetodoPago is MetodoPago.Efectivo or MetodoPago.Mixto)
                     {
                         AgregarTotalRecibo(columna, "Recibido", venta.MontoRecibido);
@@ -738,6 +745,20 @@ public class ServicioDocumentos : IServicioDocumentos
                             FilaTotalCarta(resumen, "Ventas en efectivo", arqueo.VentasEfectivo);
                             FilaTotalCarta(resumen, "Ventas con tarjeta", arqueo.VentasTarjeta);
                             FilaTotalCarta(resumen, "Ventas por transferencia", arqueo.VentasTransferencia);
+
+                            // Las billeteras solo se listan si hubo: en un negocio que no
+                            // las usa, dos renglones en cero solo estorban el arqueo.
+                            if (arqueo.VentasNequi > 0)
+                            {
+                                FilaTotalCarta(resumen, "Ventas por Nequi", arqueo.VentasNequi);
+                            }
+
+                            if (arqueo.VentasDaviplata > 0)
+                            {
+                                FilaTotalCarta(resumen, "Ventas por Daviplata", arqueo.VentasDaviplata);
+                            }
+
+                            FilaTotalCarta(resumen, "Ventas a crédito", arqueo.VentasCredito);
                             FilaTotalCarta(resumen, "Otros ingresos", arqueo.Ingresos);
                             FilaTotalCarta(resumen, "Egresos", -arqueo.Egresos);
 

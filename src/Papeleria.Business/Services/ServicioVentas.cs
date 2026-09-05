@@ -264,6 +264,7 @@ public class ServicioVentas : IServicioVentas
                 MetodoPago = v.MetodoPago,
                 MontoRecibido = v.MontoRecibido,
                 Cambio = v.Cambio,
+                ReferenciaPago = v.ReferenciaPago,
                 Estado = v.Estado,
                 FechaAnulacion = v.FechaAnulacion,
                 MotivoAnulacion = v.MotivoAnulacion,
@@ -371,6 +372,9 @@ public class ServicioVentas : IServicioVentas
                 MetodoPago = solicitud.MetodoPago,
                 MontoRecibido = Dinero.Redondear(solicitud.MontoRecibido),
                 Cambio = solicitud.Cambio,
+                ReferenciaPago = string.IsNullOrWhiteSpace(solicitud.ReferenciaPago)
+                    ? null
+                    : solicitud.ReferenciaPago.Trim(),
                 Estado = EstadoVenta.Completada,
                 Observaciones = Texto.NormalizarOpcional(solicitud.Observaciones)
             };

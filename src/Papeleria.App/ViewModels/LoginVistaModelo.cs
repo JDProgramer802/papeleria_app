@@ -31,6 +31,22 @@ public partial class LoginVistaModelo : VistaModeloBase
     /// <summary>La ventana escucha este evento para cerrarse con resultado afirmativo.</summary>
     public event EventHandler? AutenticacionCorrecta;
 
+    /// <summary>
+    /// Segundo paso obligatorio: quien entra con la contraseña de fábrica tiene que
+    /// ponerle una propia antes de llegar al programa.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ConfirmarContrasenaNuevaCommand))]
+    private bool _exigiendoCambioContrasena;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ConfirmarContrasenaNuevaCommand))]
+    private string _contrasenaNueva = string.Empty;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ConfirmarContrasenaNuevaCommand))]
+    private string _contrasenaRepetida = string.Empty;
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(IniciarSesionCommand))]
     private string _nombreUsuario = string.Empty;
@@ -121,6 +137,72 @@ public partial class LoginVistaModelo : VistaModeloBase
         !string.IsNullOrWhiteSpace(Contrasena) &&
         !EstaCargando;
 
+    private bool PuedeConfirmarContrasenaNueva() =>
+        ExigiendoCambioContrasena &&
+        !string.IsNullOrWhiteSpace(ContrasenaNueva) &&
+        !string.IsNullOrWhiteSpace(ContrasenaRepetida) &&
+        !EstaCargando;
+
+    /// <summary>Guarda la contraseña propia y recién ahí deja entrar.</summary>
+    [RelayCommand(CanExecute = nameof(PuedeConfirmarContrasenaNueva))]
+    private async Task ConfirmarContrasenaNuevaAsync()
+    {
+        MensajeError = null;
+
+        if (!string.Equals(ContrasenaNueva, ContrasenaRepetida, StringComparison.Ordinal))
+        {
+            MensajeError = "Las dos contraseñas no coinciden.";
+            return;
+        }
+
+        EstaCargando = true;
+        ConfirmarContrasenaNuevaCommand.NotifyCanExecuteChanged();
+
+        try
+        {
+            await _autenticacion.CambiarContrasenaAsync(
+                _sesion.UsuarioIdRequerido,
+                SembradorDatos.ContrasenaAdministradorPorDefecto,
+                ContrasenaNueva).ConfigureAwait(true);
+
+            LimpiarCambioContrasena();
+
+            AutenticacionCorrecta?.Invoke(this, EventArgs.Empty);
+        }
+        catch (NegocioException ex)
+        {
+            MensajeError = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Error inesperado al cambiar la contraseña de fábrica");
+            MensajeError = "No se pudo guardar la contraseña. Revise el registro de errores.";
+        }
+        finally
+        {
+            EstaCargando = false;
+            ConfirmarContrasenaNuevaCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    /// <summary>Volver atrás cierra la sesión a medio abrir: nadie entra sin cambiarla.</summary>
+    [RelayCommand]
+    private void CancelarCambioContrasena()
+    {
+        _sesion.Cerrar();
+        LimpiarCambioContrasena();
+
+        MensajeError = null;
+        MostrarAvisoContrasenaPorDefecto = true;
+    }
+
+    private void LimpiarCambioContrasena()
+    {
+        ExigiendoCambioContrasena = false;
+        ContrasenaNueva = string.Empty;
+        ContrasenaRepetida = string.Empty;
+    }
+
     [RelayCommand(CanExecute = nameof(PuedeIniciarSesion))]
     private async Task IniciarSesionAsync()
     {
@@ -140,9 +222,21 @@ public partial class LoginVistaModelo : VistaModeloBase
                 .GuardarPreferenciaUsuarioAsync(usuario.NombreUsuario, RecordarUsuario)
                 .ConfigureAwait(true);
 
+            var esDeFabrica = string.Equals(
+                Contrasena, SembradorDatos.ContrasenaAdministradorPorDefecto, StringComparison.Ordinal);
+
             // La contraseña deja de estar en memoria en cuanto se valida.
             Contrasena = string.Empty;
             MostrarContrasena = false;
+
+            // Con la contraseña de fábrica no se entra: la conoce cualquiera que haya
+            // visto el programa, y de nada sirve todo lo demás si la puerta está abierta.
+            if (esDeFabrica)
+            {
+                ExigiendoCambioContrasena = true;
+                MostrarAvisoContrasenaPorDefecto = false;
+                return;
+            }
 
             AutenticacionCorrecta?.Invoke(this, EventArgs.Empty);
         }

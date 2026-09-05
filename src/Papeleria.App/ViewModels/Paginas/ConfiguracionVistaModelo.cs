@@ -90,6 +90,9 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
     [ObservableProperty] private int _frecuenciaRespaldoDias = 1;
     [ObservableProperty] private int _retencionRespaldos = 30;
     [ObservableProperty] private ArchivoBackupDto? _respaldoSeleccionado;
+
+    /// <summary>Cuándo fue la última copia y si ya se pasó de la cuenta.</summary>
+    [ObservableProperty] private EstadoRespaldoDto? _estadoRespaldo;
     [ObservableProperty] private bool _temaOscuro;
 
     // ── Actualizaciones ─────────────────────────────────────────────────────
@@ -140,6 +143,7 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
         RespaldoAutomatico = _configuracion.ObtenerBooleano(ClavesConfiguracion.BackupAutomatico, true);
         FrecuenciaRespaldoDias = _configuracion.ObtenerEntero(ClavesConfiguracion.BackupFrecuenciaDias, 1);
         RetencionRespaldos = _configuracion.ObtenerEntero(ClavesConfiguracion.BackupRetencion, 30);
+        EstadoRespaldo = _respaldo.ObtenerEstado();
 
         TemaOscuro = _tema.EsOscuro;
 
@@ -368,8 +372,39 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
         var ruta = await _respaldo.CrearAsync(CarpetaRespaldos).ConfigureAwait(true);
 
         _dialogos.Notificar($"Copia creada: {Path.GetFileName(ruta)}");
+
+        EstadoRespaldo = _respaldo.ObtenerEstado();
         await CargarRespaldosAsync().ConfigureAwait(true);
     }, "No se pudo crear la copia de seguridad.");
+
+    /// <summary>
+    /// Copia suelta a donde diga el usuario, normalmente una memoria USB, sin tocar la
+    /// carpeta configurada. Una copia guardada en el mismo disco que la base no sirve
+    /// de nada el día que ese disco se dañe.
+    /// </summary>
+    [RelayCommand]
+    private Task CopiarRespaldoAfueraAsync() => EjecutarAsync(async () =>
+    {
+        var carpeta = _archivos.SeleccionarCarpeta(
+            "Elija la memoria o el disco donde guardar la copia", CarpetaRespaldos);
+
+        if (string.IsNullOrWhiteSpace(carpeta))
+        {
+            return;
+        }
+
+        var ruta = await _respaldo.CrearAsync(carpeta).ConfigureAwait(true);
+
+        EstadoRespaldo = _respaldo.ObtenerEstado();
+
+        await _dialogos.InformarAsync(
+            "Copia guardada",
+            $"La información quedó copiada y comprobada en:\n{ruta}\n\n" +
+            "Guarde esa memoria en otro sitio: una copia que vive en el mismo " +
+            "computador se pierde junto con él.").ConfigureAwait(true);
+
+        await CargarRespaldosAsync().ConfigureAwait(true);
+    }, "No se pudo copiar la información al destino elegido.");
 
     [RelayCommand]
     private async Task RestaurarRespaldoAsync()

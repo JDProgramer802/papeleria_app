@@ -30,6 +30,7 @@ public class ServicioDashboard : IServicioDashboard
     private readonly IServicioKardex _kardex;
     private readonly IServicioCartera _cartera;
     private readonly IServicioCaja _caja;
+    private readonly IServicioBackup _respaldo;
     private readonly IContextoSesion _sesion;
 
     public ServicioDashboard(
@@ -38,6 +39,7 @@ public class ServicioDashboard : IServicioDashboard
         IServicioKardex kardex,
         IServicioCartera cartera,
         IServicioCaja caja,
+        IServicioBackup respaldo,
         IContextoSesion sesion)
     {
         _fabrica = fabrica;
@@ -45,6 +47,7 @@ public class ServicioDashboard : IServicioDashboard
         _kardex = kardex;
         _cartera = cartera;
         _caja = caja;
+        _respaldo = respaldo;
         _sesion = sesion;
     }
 
@@ -125,9 +128,12 @@ public class ServicioDashboard : IServicioDashboard
 
         var bajoCosto = await ContarBajoCostoAsync(unidad, ct).ConfigureAwait(false);
 
+        // El estado del respaldo se lee de la configuración, no de la base de negocio.
+        var respaldo = _respaldo.ObtenerEstado();
+
         var alertas = ConstruirAlertas(
             inventario, cajaAbierta, ventasMes.Cantidad, cartera, turno?.FechaApertura,
-            bajoCosto, puedeVerCartera);
+            bajoCosto, puedeVerCartera, respaldo);
 
         return new ResumenDashboardDto
         {
@@ -348,9 +354,29 @@ public class ServicioDashboard : IServicioDashboard
         ResumenCarteraDto cartera,
         DateTime? cajaDesde,
         int productosBajoCosto,
-        bool puedeVerCartera)
+        bool puedeVerCartera,
+        EstadoRespaldoDto respaldo)
     {
         var alertas = new List<AlertaDto>();
+
+        // Lo primero de todo. Perder una venta se aguanta; perder la base de datos, no.
+        // La copia automática falla en silencio si el destino no está disponible, así
+        // que este aviso es la única forma de enterarse antes de que sea tarde.
+        if (respaldo.Atrasado)
+        {
+            alertas.Add(new AlertaDto
+            {
+                Nivel = NivelAlerta.Critica,
+                Titulo = respaldo.NuncaSeHaHecho
+                    ? "Nunca se ha respaldado la información"
+                    : $"La última copia de seguridad es de hace {respaldo.DiasDesdeLaUltima} días",
+                Detalle = respaldo.Automatico
+                    ? $"La copia automática no está llegando a «{respaldo.Carpeta}». " +
+                      "Puede que la memoria esté desconectada."
+                    : "Las copias automáticas están apagadas. Si se daña el disco, no hay de dónde volver.",
+                ModuloDestino = Domain.Constants.Modulos.Configuracion
+            });
+        }
 
         // Vender por debajo del costo es la pérdida más silenciosa que hay.
         if (productosBajoCosto > 0)

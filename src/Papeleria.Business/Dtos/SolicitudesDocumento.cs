@@ -115,6 +115,9 @@ public class SolicitudVenta
     /// <summary>Dinero entregado por el cliente; en pagos electrónicos coincide con el total.</summary>
     public decimal MontoRecibido { get; set; }
 
+    /// <summary>Referencia del pago electrónico: aprobación, transferencia o Nequi.</summary>
+    public string? ReferenciaPago { get; set; }
+
     public string? Observaciones { get; set; }
 
     public List<LineaVenta> Lineas { get; set; } = new();
