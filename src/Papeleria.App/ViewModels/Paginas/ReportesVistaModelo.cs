@@ -51,6 +51,8 @@ public partial class ReportesVistaModelo : PaginaVistaModelo
 
     public ObservableCollection<Categoria> Categorias { get; } = new();
 
+    public ObservableCollection<Cajero> Cajeros { get; } = new();
+
     /// <summary>Tabla de vista previa construida a partir del reporte generado.</summary>
     [ObservableProperty]
     private DataView? _vistaPrevia;
@@ -67,8 +69,12 @@ public partial class ReportesVistaModelo : PaginaVistaModelo
     [ObservableProperty] private DateTime _desde = DateTime.Today.AddDays(-30);
     [ObservableProperty] private DateTime _hasta = DateTime.Today;
     [ObservableProperty] private int? _categoriaId;
+    [ObservableProperty] private int? _usuarioId;
 
     public bool RequierePeriodo => ReporteSeleccionado?.RequierePeriodo ?? false;
+
+    /// <summary>Solo unos pocos informes distinguen quién hizo el movimiento.</summary>
+    public bool AdmiteCajero => ReporteSeleccionado?.AdmiteCajero ?? false;
 
     public bool HayResultado => Reporte is { TieneDatos: true };
 
@@ -88,6 +94,15 @@ public partial class ReportesVistaModelo : PaginaVistaModelo
     partial void OnReporteSeleccionadoChanged(DefinicionReporte? value)
     {
         OnPropertyChanged(nameof(RequierePeriodo));
+        OnPropertyChanged(nameof(AdmiteCajero));
+
+        // El filtro de cajero se limpia al cambiar de informe: quedaba puesto de forma
+        // invisible en los reportes que no lo admiten y luego reaparecía filtrando.
+        if (!AdmiteCajero)
+        {
+            UsuarioId = null;
+        }
+
         Reporte = null;
         VistaPrevia = null;
         OnPropertyChanged(nameof(HayResultado));
@@ -97,6 +112,7 @@ public partial class ReportesVistaModelo : PaginaVistaModelo
     public override async Task CargarAsync()
     {
         await CargarCategoriasAsync().ConfigureAwait(true);
+        await CargarCajerosAsync().ConfigureAwait(true);
 
         if (Reporte is null)
         {
@@ -122,6 +138,24 @@ public partial class ReportesVistaModelo : PaginaVistaModelo
         }
     }, "No se pudieron cargar las categorías.");
 
+    private Task CargarCajerosAsync() => EjecutarAsync(async () =>
+    {
+        if (Cajeros.Count > 0)
+        {
+            return;
+        }
+
+        var cajeros = await _reportes.ListarCajerosAsync().ConfigureAwait(true);
+
+        Cajeros.Clear();
+        Cajeros.Add(new Cajero(0, "Todos los cajeros"));
+
+        foreach (var cajero in cajeros)
+        {
+            Cajeros.Add(cajero);
+        }
+    }, "No se pudo cargar la lista de cajeros.");
+
     [RelayCommand]
     private Task GenerarAsync() => EjecutarAsync(async () =>
     {
@@ -141,7 +175,8 @@ public partial class ReportesVistaModelo : PaginaVistaModelo
             Tipo = ReporteSeleccionado.Tipo,
             Desde = Desde,
             Hasta = Hasta,
-            CategoriaId = CategoriaId
+            CategoriaId = CategoriaId,
+            UsuarioId = AdmiteCajero ? UsuarioId : null
         }).ConfigureAwait(true);
 
         Reporte = reporte;

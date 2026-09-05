@@ -354,14 +354,19 @@ public static class ContenidoManual
             Bloques = new[]
             {
                 Parrafo(
-                    "Doce informes con vista previa. Elija uno en la lista, ajuste el periodo y pulse GENERAR."),
+                    "Trece informes con vista previa. Elija uno en la lista, ajuste el periodo y pulse GENERAR."),
                 Lista("Los que más se usan",
                     "Ventas: todas las facturas del periodo con su medio de pago.",
                     "Ganancias por producto: qué le deja dinero de verdad y qué no.",
                     "Inventario valorizado: cuánta plata tiene quieta en la estantería.",
                     "Productos con poco stock: qué hay que pedir.",
                     "Cartera por cobrar: quién le debe, ordenado por antigüedad.",
-                    "Caja: los turnos con sus arqueos y diferencias."),
+                    "Caja: los turnos con sus arqueos y diferencias.",
+                    "Ventas por cajero: cuánto vendió cada quien y de quién es la caja corta."),
+                Parrafo(
+                    "El desplegable «Cajero» aparece activo en los informes que distinguen quién hizo " +
+                    "el movimiento —Ventas, Caja, Kardex y Ventas por cajero— y deja ver el periodo de " +
+                    "un solo operador. En los demás sale apagado porque no aplica."),
                 Parrafo(
                     "Todo informe se exporta a Excel, PDF o CSV, o se manda directo a la impresora."),
                 Aviso(

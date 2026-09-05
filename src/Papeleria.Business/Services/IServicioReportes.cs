@@ -16,7 +16,8 @@ public enum TipoReporte
     Proveedores = 8,
     Caja = 9,
     Kardex = 10,
-    Cartera = 11
+    Cartera = 11,
+    VentasPorCajero = 12
 }
 
 /// <summary>Metadatos de un reporte, usados para poblar el selector de la interfaz.</summary>
@@ -25,7 +26,11 @@ public record DefinicionReporte(
     string Nombre,
     string Descripcion,
     string Icono,
-    bool RequierePeriodo);
+    bool RequierePeriodo,
+    bool AdmiteCajero = false);
+
+/// <summary>Operador que se puede elegir como filtro en los informes.</summary>
+public record Cajero(int Id, string Nombre);
 
 /// <summary>Criterios con los que se genera un reporte.</summary>
 public class ParametrosReporte
@@ -57,4 +62,10 @@ public interface IServicioReportes
     IReadOnlyList<DefinicionReporte> Catalogo { get; }
 
     Task<ReporteTabular> GenerarAsync(ParametrosReporte parametros, CancellationToken ct = default);
+
+    /// <summary>
+    /// Operadores para el filtro «cajero». Va aquí y no en el servicio de usuarios
+    /// porque quien consulta informes no tiene por qué poder administrar usuarios.
+    /// </summary>
+    Task<IReadOnlyList<Cajero>> ListarCajerosAsync(CancellationToken ct = default);
 }

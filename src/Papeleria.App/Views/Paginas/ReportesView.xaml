@@ -122,56 +122,56 @@
 
                     <Separator Style="{StaticResource SeparadorHorizontal}" />
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="16" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <DatePicker Grid.Column="0" Width="150"
-                                    Style="{StaticResource FiltroFecha}"
-                                    SelectedDate="{Binding Desde}"
-                                    IsEnabled="{Binding RequierePeriodo}"
-                                    materialDesign:HintAssist.Hint="Desde" />
-
-                        <DatePicker Grid.Column="2" Width="150"
-                                    Style="{StaticResource FiltroFecha}"
-                                    SelectedDate="{Binding Hasta}"
-                                    IsEnabled="{Binding RequierePeriodo}"
-                                    materialDesign:HintAssist.Hint="Hasta" />
-
-                        <ComboBox Grid.Column="4" Width="200"
-                                  Style="{StaticResource FiltroSeleccion}"
-                                  materialDesign:HintAssist.Hint="Categoría"
-                                  ItemsSource="{Binding Categorias}"
-                                  SelectedValue="{Binding CategoriaId}"
-                                  SelectedValuePath="Id" DisplayMemberPath="Nombre"
-                                  ToolTip="Restringir el reporte a una categoría" />
-
-                        <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Style="{StaticResource BotonTexto}" FontSize="11"
-                                    Command="{Binding PeriodoMesActualCommand}" Content="Mes actual" />
-                            <Button Style="{StaticResource BotonTexto}" FontSize="11"
-                                    Command="{Binding PeriodoMesAnteriorCommand}" Content="Mes anterior" />
-                            <Button Style="{StaticResource BotonTexto}" FontSize="11"
-                                    Command="{Binding PeriodoAnioActualCommand}" Content="Año actual" />
-                        </StackPanel>
-
-                        <Button Grid.Column="8" Style="{StaticResource BotonPrincipal}"
-                                Command="{Binding GenerarCommand}" VerticalAlignment="Center">
+                    <DockPanel LastChildFill="True">
+                        <Button DockPanel.Dock="Right" Style="{StaticResource BotonPrincipal}"
+                                Command="{Binding GenerarCommand}"
+                                VerticalAlignment="Center" Margin="16,0,0,0">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="PlayOutline" VerticalAlignment="Center" />
                                 <TextBlock Text="GENERAR" Margin="8,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                    </Grid>
+
+                        <WrapPanel>
+                            <DatePicker Width="140" Margin="0,3,12,3"
+                                        Style="{StaticResource FiltroFecha}"
+                                        SelectedDate="{Binding Desde}"
+                                        IsEnabled="{Binding RequierePeriodo}"
+                                        materialDesign:HintAssist.Hint="Desde" />
+
+                            <DatePicker Width="140" Margin="0,3,12,3"
+                                        Style="{StaticResource FiltroFecha}"
+                                        SelectedDate="{Binding Hasta}"
+                                        IsEnabled="{Binding RequierePeriodo}"
+                                        materialDesign:HintAssist.Hint="Hasta" />
+
+                            <ComboBox Width="170" Margin="0,3,12,3"
+                                      Style="{StaticResource FiltroSeleccion}"
+                                      materialDesign:HintAssist.Hint="Categoría"
+                                      ItemsSource="{Binding Categorias}"
+                                      SelectedValue="{Binding CategoriaId}"
+                                      SelectedValuePath="Id" DisplayMemberPath="Nombre"
+                                      ToolTip="Restringir el reporte a una categoría" />
+
+                            <ComboBox Width="170" Margin="0,3,12,3"
+                                      Style="{StaticResource FiltroSeleccion}"
+                                      materialDesign:HintAssist.Hint="Cajero"
+                                      ItemsSource="{Binding Cajeros}"
+                                      SelectedValue="{Binding UsuarioId}"
+                                      SelectedValuePath="Id" DisplayMemberPath="Nombre"
+                                      IsEnabled="{Binding AdmiteCajero}"
+                                      ToolTip="Ver solo lo que hizo un operador" />
+
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Style="{StaticResource BotonTexto}" FontSize="11"
+                                        Command="{Binding PeriodoMesActualCommand}" Content="Mes actual" />
+                                <Button Style="{StaticResource BotonTexto}" FontSize="11"
+                                        Command="{Binding PeriodoMesAnteriorCommand}" Content="Mes anterior" />
+                                <Button Style="{StaticResource BotonTexto}" FontSize="11"
+                                        Command="{Binding PeriodoAnioActualCommand}" Content="Año actual" />
+                            </StackPanel>
+                        </WrapPanel>
+                    </DockPanel>
                 </StackPanel>
             </materialDesign:Card>
 

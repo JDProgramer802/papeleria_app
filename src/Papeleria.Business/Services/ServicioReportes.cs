@@ -34,7 +34,7 @@ public class ServicioReportes : IServicioReportes
         new(TipoReporte.ProductosMasVendidos, "Productos más vendidos",
             "Ranking de rotación por cantidad e importe facturado.", "TrendingUp", true),
         new(TipoReporte.Ventas, "Ventas",
-            "Facturas emitidas en el periodo, con su medio de pago y estado.", "CashRegister", true),
+            "Facturas emitidas en el periodo, con su medio de pago y estado.", "CashRegister", true, true),
         new(TipoReporte.Compras, "Compras",
             "Compras registradas a proveedores en el periodo.", "TruckDelivery", true),
         new(TipoReporte.Ganancias, "Ganancias por producto",
@@ -44,12 +44,29 @@ public class ServicioReportes : IServicioReportes
         new(TipoReporte.Proveedores, "Proveedores",
             "Directorio de proveedores con su histórico de compras.", "Domain", false),
         new(TipoReporte.Caja, "Caja",
-            "Sesiones de caja con su arqueo y diferencias.", "CashMultiple", true),
+            "Sesiones de caja con su arqueo y diferencias.", "CashMultiple", true, true),
         new(TipoReporte.Kardex, "Kardex",
-            "Movimientos de inventario registrados en el periodo.", "SwapHorizontal", true),
+            "Movimientos de inventario registrados en el periodo.", "SwapHorizontal", true, true),
         new(TipoReporte.Cartera, "Cartera por cobrar",
-            "Clientes que deben, con la antigüedad de su deuda.", "AccountCashOutline", false)
+            "Clientes que deben, con la antigüedad de su deuda.", "AccountCashOutline", false),
+        new(TipoReporte.VentasPorCajero, "Ventas por cajero",
+            "Cuánto vendió cada uno, cuánto descontó y cómo le cuadró la caja.", "AccountGroup", true, true)
     };
+
+    public async Task<IReadOnlyList<Cajero>> ListarCajerosAsync(CancellationToken ct = default)
+    {
+        _sesion.Exigir(Modulos.Reportes, AccionPermiso.Ver);
+
+        await using var unidad = _fabrica.Crear();
+
+        // Se listan también los inactivos: quien ya no trabaja aquí igual vendió el mes
+        // pasado, y su nombre tiene que seguir apareciendo en los informes del periodo.
+        return await unidad.Contexto.Usuarios.AsNoTracking()
+            .OrderBy(u => u.NombreCompleto)
+            .Select(u => new Cajero(
+                u.Id, u.Activo ? u.NombreCompleto : u.NombreCompleto + " (inactivo)"))
+            .ToListAsync(ct).ConfigureAwait(false);
+    }
 
     public async Task<ReporteTabular> GenerarAsync(ParametrosReporte parametros, CancellationToken ct = default)
     {
@@ -95,6 +112,7 @@ public class ServicioReportes : IServicioReportes
             TipoReporte.Proveedores => GenerarProveedoresAsync(parametros, ct),
             TipoReporte.Caja => GenerarCajaAsync(parametros, ct),
             TipoReporte.Cartera => GenerarCarteraAsync(parametros, ct),
+            TipoReporte.VentasPorCajero => GenerarVentasPorCajeroAsync(parametros, ct),
             _ => GenerarKardexAsync(parametros, ct)
         };
     }
@@ -336,6 +354,132 @@ public class ServicioReportes : IServicioReportes
                 new IndicadorReporte("Ingresos", Formatos.Moneda(Dinero.Redondear(totalIngresos)))
             },
             MensajeVacio = "No se registraron ventas en el periodo seleccionado."
+        };
+    }
+
+    /// <summary>
+    /// Qué hizo cada cajero en el periodo.
+    ///
+    /// Con dos o tres empleados, el dueño no tenía cómo responder quién vendió cuánto,
+    /// quién es el que más descuentos da, ni de quién es el turno que quedó corto. Los
+    /// datos estaban todos, pero repartidos entre tres pantallas y sin sumar por persona.
+    /// </summary>
+    private async Task<ReporteTabular> GenerarVentasPorCajeroAsync(
+        ParametrosReporte parametros, CancellationToken ct)
+    {
+        await using var unidad = _fabrica.Crear();
+
+        var (inicio, fin) = Rango(parametros);
+
+        var ventas = await unidad.Contexto.Ventas.AsNoTracking()
+            .Where(v => v.Fecha >= inicio && v.Fecha < fin)
+            .Select(v => new
+            {
+                v.UsuarioId,
+                Usuario = v.Usuario!.NombreCompleto,
+                v.Total,
+                v.Subtotal,
+                v.TotalDescuento,
+                v.CostoTotal,
+                v.Estado,
+                Unidades = v.Detalles.Sum(d => d.Cantidad)
+            })
+            .ToListAsync(ct).ConfigureAwait(false);
+
+        // Los turnos se agrupan por quien los cerró; si nadie los cerró todavía, por
+        // quien los abrió. La diferencia es responsabilidad de quien contó el dinero.
+        var turnos = await unidad.Contexto.CajaSesiones.AsNoTracking()
+            .Where(s => s.FechaApertura >= inicio && s.FechaApertura < fin)
+            .Select(s => new
+            {
+                UsuarioId = s.UsuarioCierreId ?? s.UsuarioAperturaId,
+                s.Estado,
+                s.Diferencia
+            })
+            .ToListAsync(ct).ConfigureAwait(false);
+
+        var porCajero = ventas
+            .GroupBy(v => new { v.UsuarioId, v.Usuario })
+            .Select(g =>
+            {
+                var completadas = g.Where(v => v.Estado == EstadoVenta.Completada).ToList();
+                var facturado = completadas.Sum(v => v.Total);
+
+                var cerrados = turnos
+                    .Where(s => s.UsuarioId == g.Key.UsuarioId && s.Estado == EstadoCajaSesion.Cerrada)
+                    .ToList();
+
+                return new
+                {
+                    g.Key.UsuarioId,
+                    g.Key.Usuario,
+                    Facturas = completadas.Count,
+                    Anuladas = g.Count(v => v.Estado == EstadoVenta.Anulada),
+                    Unidades = Dinero.Redondear(completadas.Sum(v => v.Unidades)),
+                    Facturado = facturado,
+                    Descuentos = completadas.Sum(v => v.TotalDescuento),
+                    Utilidad = completadas.Sum(v => v.Subtotal - v.TotalDescuento - v.CostoTotal),
+                    Ticket = completadas.Count == 0 ? 0m : Dinero.DividirSeguro(facturado, completadas.Count),
+                    Turnos = cerrados.Count,
+                    Diferencia = cerrados.Sum(s => s.Diferencia)
+                };
+            })
+            .OrderByDescending(c => c.Facturado)
+            .ToList();
+
+        if (parametros.UsuarioId is > 0)
+        {
+            porCajero = porCajero.Where(c => c.UsuarioId == parametros.UsuarioId).ToList();
+        }
+
+        var filas = porCajero.Select(c => new object?[]
+        {
+            c.Usuario, c.Facturas, c.Unidades, c.Facturado, c.Descuentos, c.Utilidad,
+            c.Ticket, c.Anuladas, c.Turnos, c.Diferencia
+        }).ToList();
+
+        var totalFacturado = porCajero.Sum(c => c.Facturado);
+        var totalDescuentos = porCajero.Sum(c => c.Descuentos);
+
+        var masVendio = porCajero.FirstOrDefault();
+
+        var peorCuadre = porCajero
+            .Where(c => c.Turnos > 0)
+            .OrderBy(c => c.Diferencia)
+            .FirstOrDefault();
+
+        return new ReporteTabular
+        {
+            Titulo = Definicion(TipoReporte.VentasPorCajero).Nombre,
+            Subtitulo = "Ventas, descuentos y cuadre de caja de cada operador",
+            Periodo = DescribirPeriodo(parametros),
+            GeneradoPor = _sesion.Usuario?.NombreCompleto ?? string.Empty,
+            Columnas = new[]
+            {
+                new ColumnaReporte { Titulo = "Cajero", Ancho = 2.4f },
+                new ColumnaReporte { Titulo = "Facturas", Tipo = TipoColumna.Entero, Ancho = 1f, Totalizar = true },
+                new ColumnaReporte { Titulo = "Unidades", Tipo = TipoColumna.Decimal, Ancho = 1f, Totalizar = true },
+                new ColumnaReporte { Titulo = "Facturado", Tipo = TipoColumna.Moneda, Ancho = 1.4f, Totalizar = true },
+                new ColumnaReporte { Titulo = "Descuentos", Tipo = TipoColumna.Moneda, Ancho = 1.3f, Totalizar = true },
+                new ColumnaReporte { Titulo = "Utilidad", Tipo = TipoColumna.Moneda, Ancho = 1.3f, Totalizar = true },
+                new ColumnaReporte { Titulo = "Ticket prom.", Tipo = TipoColumna.Moneda, Ancho = 1.3f },
+                new ColumnaReporte { Titulo = "Anuladas", Tipo = TipoColumna.Entero, Ancho = 1f, Totalizar = true },
+                new ColumnaReporte { Titulo = "Turnos", Tipo = TipoColumna.Entero, Ancho = 0.9f, Totalizar = true },
+                new ColumnaReporte { Titulo = "Dif. caja", Tipo = TipoColumna.Moneda, Ancho = 1.2f, Totalizar = true }
+            },
+            Filas = filas,
+            Indicadores = new[]
+            {
+                new IndicadorReporte("Cajeros", Formatos.Entero(porCajero.Count)),
+                new IndicadorReporte("Facturado", Formatos.Moneda(totalFacturado)),
+                new IndicadorReporte("Descuentos dados", Formatos.Moneda(totalDescuentos)),
+                new IndicadorReporte("Más vendió",
+                    masVendio is null ? "—" : $"{masVendio.Usuario} ({Formatos.Moneda(masVendio.Facturado)})"),
+                new IndicadorReporte("Peor cuadre",
+                    peorCuadre is null || peorCuadre.Diferencia >= 0
+                        ? "Sin faltantes"
+                        : $"{peorCuadre.Usuario} ({Formatos.Moneda(peorCuadre.Diferencia)})")
+            }
         };
     }
 
@@ -758,9 +902,19 @@ public class ServicioReportes : IServicioReportes
 
         var (inicio, fin) = Rango(parametros);
 
-        var datos = await unidad.Contexto.CajaSesiones
+        var consulta = unidad.Contexto.CajaSesiones
             .AsNoTracking()
-            .Where(s => s.FechaApertura >= inicio && s.FechaApertura < fin)
+            .Where(s => s.FechaApertura >= inicio && s.FechaApertura < fin);
+
+        // Un turno es de quien lo abrió y de quien lo cerró; al filtrar por alguien
+        // interesan los dos papeles, porque la responsabilidad del dinero es compartida.
+        if (parametros.UsuarioId is > 0)
+        {
+            consulta = consulta.Where(s =>
+                s.UsuarioAperturaId == parametros.UsuarioId || s.UsuarioCierreId == parametros.UsuarioId);
+        }
+
+        var datos = await consulta
             .OrderByDescending(s => s.FechaApertura)
             .Take(parametros.LimiteFilas + 1)
             .Select(s => new
