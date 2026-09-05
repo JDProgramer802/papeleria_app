@@ -1,0 +1,194 @@
+<UserControl x:Class="Papeleria.App.Views.Dialogos.ImportacionDialogoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
+             d:DataContext="{d:DesignInstance vm:ImportacionDialogoVistaModelo}"
+             mc:Ignorable="d"
+             Width="820">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- ══ Encabezado ══════════════════════════════════════════════════ -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="{Binding Titulo}" Style="{StaticResource TituloSeccion}" />
+            <TextBlock Style="{StaticResource TextoTenue}" FontSize="12.5"
+                       TextWrapping="Wrap" LineHeight="19"
+                       Text="Primero se lee la hoja y se muestra qué va a pasar con cada fila. Nada se guarda hasta que usted lo confirme." />
+        </StackPanel>
+
+        <!-- ══ Archivo ═════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" Margin="0,0,0,14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="8" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0" Style="{StaticResource CampoBusqueda}"
+                     Text="{Binding Archivo, Mode=OneWay}"
+                     IsReadOnly="True"
+                     materialDesign:TextFieldAssist.LeadingIcon="FileExcelOutline"
+                     materialDesign:HintAssist.Hint="Ningún archivo elegido todavía" />
+
+            <Button Grid.Column="2" Style="{StaticResource BotonPrincipal}"
+                    Command="{Binding ElegirArchivoCommand}"
+                    Content="Elegir archivo" />
+
+            <Button Grid.Column="4" Style="{StaticResource BotonSecundario}"
+                    Command="{Binding DescargarPlantillaCommand}"
+                    ToolTip="Genera una hoja de ejemplo con los encabezados que se esperan">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Download" VerticalAlignment="Center" />
+                    <TextBlock Text="Plantilla" Margin="6,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- ══ Previsualización ════════════════════════════════════════════ -->
+        <materialDesign:Card Grid.Row="2" Style="{StaticResource TarjetaBase}"
+                             Padding="0" Margin="0" MinHeight="280" MaxHeight="380">
+            <Grid>
+                <DataGrid Style="{StaticResource GrillaDatos}"
+                          ItemsSource="{Binding Filas}"
+                          IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Fila" Binding="{Binding Numero}" Width="60"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
+
+                        <DataGridTemplateColumn Header="Qué pasa" Width="110" SortMemberPath="Accion">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="9" Padding="9,3"
+                                            HorizontalAlignment="Left" VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{StaticResource AcentoExitoFondo}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding AccionTexto}" Value="Actualiza">
+                                                        <Setter Property="Background" Value="{StaticResource AcentoPrincipalFondo}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding AccionTexto}" Value="Se descarta">
+                                                        <Setter Property="Background" Value="{StaticResource AcentoPeligroFondo}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+
+                                        <TextBlock Text="{Binding AccionTexto}" FontSize="11" FontWeight="SemiBold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{StaticResource AcentoExitoTinta}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding AccionTexto}" Value="Actualiza">
+                                                            <Setter Property="Foreground" Value="{StaticResource AcentoPrincipalTinta}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding AccionTexto}" Value="Se descarta">
+                                                            <Setter Property="Foreground" Value="{StaticResource AcentoPeligroTinta}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="Código" Binding="{Binding Codigo}" Width="110" />
+
+                        <DataGridTemplateColumn Header="Producto" Width="*" SortMemberPath="Nombre">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Nombre}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Motivo}"
+                                                   FontSize="11"
+                                                   Foreground="{StaticResource BrochaError}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Visibility="{Binding Motivo, Converter={StaticResource TextoAVisible}}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="Costo" Width="100"
+                                            Binding="{Binding Costo, Converter={StaticResource Moneda}}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
+
+                        <DataGridTextColumn Header="P. venta" Width="100"
+                                            Binding="{Binding PrecioVenta, Converter={StaticResource Moneda}}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
+
+                        <DataGridTextColumn Header="Stock" Width="80"
+                                            Binding="{Binding StockActual, Converter={StaticResource Cantidad}}"
+                                            ElementStyle="{StaticResource CeldaNumerica}"
+                                            HeaderStyle="{StaticResource EncabezadoNumerico}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Visibility="{Binding HayPrevisualizacion, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+                    <materialDesign:PackIcon Kind="FileExcelOutline" Width="48" Height="48"
+                                             Opacity="0.2" HorizontalAlignment="Center" />
+                    <TextBlock Text="Elija una hoja de Excel para ver qué se va a importar"
+                               Style="{StaticResource TextoTenue}" Margin="0,10,0,0"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- ══ Resumen y avisos ════════════════════════════════════════════ -->
+        <StackPanel Grid.Row="3" Margin="0,12,0,0">
+            <TextBlock Text="{Binding Resumen}" FontWeight="SemiBold" FontSize="13"
+                       TextWrapping="Wrap"
+                       Visibility="{Binding Resumen, Converter={StaticResource TextoAVisible}}" />
+
+            <Border Background="{StaticResource BrochaAdvertenciaSuave}"
+                    CornerRadius="8" Padding="12,10" Margin="0,10,0,0"
+                    Visibility="{Binding HayDescartadas, Converter={StaticResource BoolAVisible}}">
+                <TextBlock Foreground="{StaticResource BrochaAdvertencia}"
+                           TextWrapping="Wrap" FontSize="12"
+                           Text="Las filas marcadas en rojo se van a saltar. El motivo está debajo del nombre; corríjalas en la hoja y vuelva a elegir el archivo si quiere incluirlas." />
+            </Border>
+
+            <Border Background="{StaticResource BrochaErrorSuave}"
+                    CornerRadius="8" Padding="12,10" Margin="0,10,0,0"
+                    Visibility="{Binding MensajeError, Converter={StaticResource TextoAVisible}}">
+                <TextBlock Text="{Binding MensajeError}"
+                           Foreground="{StaticResource BrochaError}"
+                           TextWrapping="Wrap" FontSize="12.5" />
+            </Border>
+        </StackPanel>
+
+        <!-- ══ Acciones ════════════════════════════════════════════════════ -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right"
+                    Margin="0,18,0,0">
+            <Button Style="{StaticResource BotonTexto}" Margin="0,0,8,0"
+                    Command="{Binding CancelarCommand}"
+                    Content="Cancelar" />
+
+            <Button Style="{StaticResource BotonPrincipal}"
+                    Command="{Binding ImportarCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="DatabaseArrowDownOutline" VerticalAlignment="Center" />
+                    <TextBlock Text="IMPORTAR" Margin="8,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

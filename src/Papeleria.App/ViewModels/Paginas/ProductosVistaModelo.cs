@@ -17,6 +17,7 @@ namespace Papeleria.App.ViewModels.Paginas;
 public partial class ProductosVistaModelo : PaginaVistaModelo
 {
     private readonly IServicioProductos _productos;
+    private readonly IServicioImportacion _importacion;
     private readonly IServicioCategorias _categorias;
     private readonly IServicioMarcas _marcas;
     private readonly IServicioUnidadesMedida _unidades;
@@ -34,6 +35,7 @@ public partial class ProductosVistaModelo : PaginaVistaModelo
 
     public ProductosVistaModelo(
         IServicioProductos productos,
+        IServicioImportacion importacion,
         IServicioCategorias categorias,
         IServicioMarcas marcas,
         IServicioUnidadesMedida unidades,
@@ -45,6 +47,7 @@ public partial class ProductosVistaModelo : PaginaVistaModelo
         IContextoSesion sesion)
     {
         _productos = productos;
+        _importacion = importacion;
         _categorias = categorias;
         _marcas = marcas;
         _unidades = unidades;
@@ -459,6 +462,32 @@ public partial class ProductosVistaModelo : PaginaVistaModelo
             ProductoSeleccionado.Id,
             ProductoSeleccionado.Codigo,
             ProductoSeleccionado.Nombre)).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Carga el catálogo desde una hoja de Excel. Es lo primero que necesita una
+    /// papelería que estrena el programa: nadie teclea mil quinientas referencias.
+    /// </summary>
+    [RelayCommand]
+    private async Task ImportarAsync()
+    {
+        if (!PuedeCrear)
+        {
+            await _dialogos.InformarAsync(
+                "Sin permiso",
+                "Su usuario no puede crear productos.",
+                esError: true).ConfigureAwait(true);
+
+            return;
+        }
+
+        var dialogo = new ImportacionDialogoVistaModelo(_importacion, _archivos, _dialogos);
+
+        if (await _dialogos.MostrarAsync(dialogo).ConfigureAwait(true) is true)
+        {
+            Paginador.Reiniciar();
+            await BuscarAsync().ConfigureAwait(true);
+        }
     }
 
     [RelayCommand]

@@ -37,6 +37,18 @@
                     </StackPanel>
                 </Button>
 
+                <!-- Cargar el catálogo desde Excel: es el primer trámite de un negocio
+                     que estrena el programa con mil referencias ya existiendo. -->
+                <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
+                        Command="{Binding ImportarCommand}"
+                        IsEnabled="{Binding PuedeCrear}"
+                        ToolTip="Cargar productos desde una hoja de Excel">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="FileExcelOutline" VerticalAlignment="Center" />
+                        <TextBlock Text="Importar" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
                 <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
                         Command="{Binding RegistrarCompraCommand}"
                         IsEnabled="{Binding HaySeleccion}"

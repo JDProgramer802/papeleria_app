@@ -84,6 +84,10 @@
         <dialogos:DialogoMensajeView />
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vmDialogos:ImportacionDialogoVistaModelo}">
+        <dialogos:ImportacionDialogoView />
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vmDialogos:DialogoTextoVistaModelo}">
         <dialogos:DialogoTextoView />
     </DataTemplate>
