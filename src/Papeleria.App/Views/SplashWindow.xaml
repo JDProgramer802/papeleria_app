@@ -14,7 +14,10 @@
         TextElement.Foreground="White"
         FontFamily="{materialDesign:MaterialDesignFont}">
 
-    <Border CornerRadius="14" Margin="16">
+    <!-- Mismo filo que la ventana de acceso: las dos van sin marco del sistema. -->
+    <Border CornerRadius="14" Margin="16"
+            BorderThickness="1" BorderBrush="#38FFFFFF"
+            ClipToBounds="False">
         <Border.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="#041D53" Offset="0" />
@@ -26,7 +29,9 @@
             <DropShadowEffect BlurRadius="26" ShadowDepth="5" Opacity="0.45" Color="#000000" />
         </Border.Effect>
 
-        <Grid>
+        <!-- El recorte se calcula en el código: ClipToBounds recorta al rectángulo,
+             no al radio, y los círculos de fondo se salían por las esquinas. -->
+        <Grid x:Name="Recorte" SizeChanged="AjustarRecorte">
             <!-- Círculos decorativos de fondo -->
             <Ellipse Width="260" Height="260" Fill="#14FFFFFF"
                      HorizontalAlignment="Right" VerticalAlignment="Top"

@@ -1,5 +1,7 @@
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Papeleria.App.ViewModels;
 
 namespace Papeleria.App.Views;
@@ -46,6 +48,26 @@ public partial class LoginWindow : Window
                 CampoUsuario.Focus();
             }
         };
+    }
+
+    /// <summary>
+    /// Recorta el contenido con las esquinas redondeadas de la ventana.
+    ///
+    /// <c>ClipToBounds</c> recorta al rectángulo, no al radio: sin esto el degradado
+    /// del fondo se desborda por las cuatro esquinas y la ventana se ve cuadrada
+    /// aunque el marco esté redondeado.
+    /// </summary>
+    private void AjustarRecorte(object remitente, SizeChangedEventArgs argumentos)
+    {
+        if (remitente is not Border marco)
+        {
+            return;
+        }
+
+        var radio = marco.CornerRadius.TopLeft;
+
+        marco.Clip = new RectangleGeometry(
+            new Rect(0, 0, marco.ActualWidth, marco.ActualHeight), radio, radio);
     }
 
     private void CerrarConExito(object? remitente, EventArgs argumentos)

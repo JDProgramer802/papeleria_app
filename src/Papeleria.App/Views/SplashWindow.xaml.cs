@@ -18,6 +18,19 @@ public partial class SplashWindow : Window
         TextoVersion.Text = $"Versión {version?.ToString(3) ?? "1.0.0"}";
     }
 
+    /// <summary>
+    /// Recorta el contenido con las esquinas redondeadas de la ventana. Sin esto, los
+    /// círculos decorativos del fondo se salen por las cuatro esquinas.
+    /// </summary>
+    private void AjustarRecorte(object remitente, SizeChangedEventArgs argumentos)
+    {
+        if (remitente is System.Windows.Controls.Grid marco)
+        {
+            marco.Clip = new System.Windows.Media.RectangleGeometry(
+                new Rect(0, 0, marco.ActualWidth, marco.ActualHeight), 13, 13);
+        }
+    }
+
     /// <summary>Actualiza el mensaje y anima la barra hasta el porcentaje indicado.</summary>
     public void ActualizarProgreso(string mensaje, int porcentaje)
     {
