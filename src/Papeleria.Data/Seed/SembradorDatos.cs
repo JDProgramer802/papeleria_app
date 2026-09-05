@@ -199,6 +199,10 @@ public class SembradorDatos
             (ClavesConfiguracion.CotizacionConsecutivo, "0", "Último consecutivo de cotización emitido"),
             (ClavesConfiguracion.CotizacionDiasValidez, "15", "Días que se respetan los precios cotizados"),
 
+            (ClavesConfiguracion.ImpresoraRecibos, "", "Impresora en la que salen las tirillas de venta"),
+            (ClavesConfiguracion.ImprimirReciboAutomatico, "false",
+                "Imprime el recibo al cobrar, sin abrir el visor de PDF"),
+
             (ClavesConfiguracion.BackupCarpeta, "", "Carpeta destino de las copias de seguridad"),
             (ClavesConfiguracion.BackupAutomatico, "true", "Genera una copia automática al cerrar la aplicación"),
             (ClavesConfiguracion.BackupFrecuenciaDias, "1", "Días entre copias automáticas"),

@@ -91,6 +91,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
     private readonly IServicioCaja _caja;
     private readonly IServicioCotizaciones _cotizaciones;
     private readonly IServicioDocumentos _documentos;
+    private readonly Impresion.IServicioImpresion _impresion;
     private readonly IServicioArchivos _archivos;
     private readonly IServicioDialogos _dialogos;
     private readonly IContextoSesion _sesion;
@@ -105,6 +106,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         IServicioCaja caja,
         IServicioCotizaciones cotizaciones,
         IServicioDocumentos documentos,
+        Impresion.IServicioImpresion impresion,
         IServicioArchivos archivos,
         IServicioDialogos dialogos,
         IContextoSesion sesion)
@@ -116,6 +118,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         _caja = caja;
         _cotizaciones = cotizaciones;
         _documentos = documentos;
+        _impresion = impresion;
         _archivos = archivos;
         _dialogos = dialogos;
         _sesion = sesion;
@@ -602,7 +605,11 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         }
 
         var dialogoPago = new PagoDialogoVistaModelo(
-            _dialogos, Total, await ConsultarCreditoAsync().ConfigureAwait(true));
+            _dialogos, Total, await ConsultarCreditoAsync().ConfigureAwait(true))
+        {
+            // La casilla viene marcada o no según lo que diga Configuración → Impresión.
+            ImprimirFactura = _impresion.ImprimeAutomatico
+        };
 
         if (await _dialogos.MostrarAsync(dialogoPago).ConfigureAwait(true) is not true)
         {
@@ -648,10 +655,20 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         }, "No se pudo completar la venta.");
     }
 
+    /// <summary>
+    /// Saca el recibo. Si hay una impresora configurada va derecho a ella; si no, se
+    /// cae al PDF de siempre, que es lo que había antes de poder imprimir directo.
+    /// </summary>
     private async Task ImprimirFacturaAsync(VentaDetalladaDto venta)
     {
         try
         {
+            if (!string.IsNullOrWhiteSpace(_impresion.ImpresoraDeRecibos))
+            {
+                _impresion.ImprimirRecibo(venta);
+                return;
+            }
+
             var ruta = await _documentos
                 .GenerarFacturaAsync(venta, FormatoFactura.Recibo80mm)
                 .ConfigureAwait(true);

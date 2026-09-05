@@ -81,6 +81,9 @@ public static class ClavesConfiguracion
     public const string DevolucionPrefijo = "devolucion.prefijo";
     public const string DevolucionConsecutivo = "devolucion.consecutivo";
 
+    public const string ImpresoraRecibos = "impresion.impresoraRecibos";
+    public const string ImprimirReciboAutomatico = "impresion.automatico";
+
     public const string BackupCarpeta = "backup.carpeta";
     public const string BackupAutomatico = "backup.automatico";
     public const string BackupFrecuenciaDias = "backup.frecuenciaDias";

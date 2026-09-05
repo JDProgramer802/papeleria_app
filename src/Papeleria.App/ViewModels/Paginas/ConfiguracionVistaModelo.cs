@@ -20,6 +20,7 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
 {
     private readonly IServicioConfiguracion _configuracion;
     private readonly IServicioBackup _respaldo;
+    private readonly Impresion.IServicioImpresion _impresion;
     private readonly IServicioArchivos _archivos;
     private readonly IServicioDialogos _dialogos;
     private readonly IServicioTema _tema;
@@ -29,6 +30,7 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
     public ConfiguracionVistaModelo(
         IServicioConfiguracion configuracion,
         IServicioBackup respaldo,
+        Impresion.IServicioImpresion impresion,
         IServicioArchivos archivos,
         IServicioDialogos dialogos,
         IServicioTema tema,
@@ -37,6 +39,7 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
     {
         _configuracion = configuracion;
         _respaldo = respaldo;
+        _impresion = impresion;
         _archivos = archivos;
         _dialogos = dialogos;
         _tema = tema;
@@ -93,6 +96,18 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
 
     /// <summary>Cuándo fue la última copia y si ya se pasó de la cuenta.</summary>
     [ObservableProperty] private EstadoRespaldoDto? _estadoRespaldo;
+
+    // ── Impresión ───────────────────────────────────────────────────────────
+
+    public ObservableCollection<Impresion.ImpresoraDisponible> Impresoras { get; } = new();
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ProbarImpresionCommand))]
+    private string _impresoraRecibos = string.Empty;
+
+    [ObservableProperty] private bool _imprimirReciboAutomatico;
+
+    public bool HayImpresoraElegida => !string.IsNullOrWhiteSpace(ImpresoraRecibos);
     [ObservableProperty] private bool _temaOscuro;
 
     // ── Actualizaciones ─────────────────────────────────────────────────────
@@ -144,6 +159,17 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
         FrecuenciaRespaldoDias = _configuracion.ObtenerEntero(ClavesConfiguracion.BackupFrecuenciaDias, 1);
         RetencionRespaldos = _configuracion.ObtenerEntero(ClavesConfiguracion.BackupRetencion, 30);
         EstadoRespaldo = _respaldo.ObtenerEstado();
+
+        ImpresoraRecibos = _configuracion.ObtenerTexto(ClavesConfiguracion.ImpresoraRecibos);
+        ImprimirReciboAutomatico =
+            _configuracion.ObtenerBooleano(ClavesConfiguracion.ImprimirReciboAutomatico);
+
+        Impresoras.Clear();
+
+        foreach (var impresora in _impresion.Listar())
+        {
+            Impresoras.Add(impresora);
+        }
 
         TemaOscuro = _tema.EsOscuro;
 
@@ -320,6 +346,40 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
 
     [RelayCommand]
     private Task AlternarTemaAsync() => _tema.EstablecerAsync(TemaOscuro);
+
+    // ── Impresión ───────────────────────────────────────────────────────────
+
+    [RelayCommand]
+    private Task GuardarImpresionAsync() => EjecutarAsync(async () =>
+    {
+        if (!PuedeEditar)
+        {
+            return;
+        }
+
+        await _configuracion.GuardarVariosAsync(new Dictionary<string, string?>
+        {
+            [ClavesConfiguracion.ImpresoraRecibos] = ImpresoraRecibos ?? string.Empty,
+            [ClavesConfiguracion.ImprimirReciboAutomatico] = ImprimirReciboAutomatico.ToString()
+        }).ConfigureAwait(true);
+
+        OnPropertyChanged(nameof(HayImpresoraElegida));
+        _dialogos.Notificar("Configuración de impresión guardada.");
+    }, "No se pudo guardar la configuración de impresión.");
+
+    private bool PuedeProbarImpresion() => !string.IsNullOrWhiteSpace(ImpresoraRecibos);
+
+    /// <summary>Saca una tirilla de prueba para comprobar que la impresora responde.</summary>
+    [RelayCommand(CanExecute = nameof(PuedeProbarImpresion))]
+    private Task ProbarImpresionAsync() => EjecutarAsync(async () =>
+    {
+        // Se guarda primero: probar con una impresora que todavía no se ha guardado
+        // deja al usuario sin saber si lo que falló fue la impresora o el guardado.
+        await GuardarImpresionAsync().ConfigureAwait(true);
+
+        _impresion.ImprimirPrueba();
+        _dialogos.Notificar("Se envió la prueba a la impresora.");
+    }, "No se pudo imprimir la prueba.");
 
     // ── Copias de seguridad ─────────────────────────────────────────────────
 

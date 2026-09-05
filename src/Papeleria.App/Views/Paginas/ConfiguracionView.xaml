@@ -444,6 +444,79 @@
                     </StackPanel>
                 </TabItem>
 
+                <!-- ══ Impresión ═══════════════════════════════════════════ -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" Width="184">
+                            <materialDesign:PackIcon Kind="PrinterOutline" VerticalAlignment="Center" />
+                            <TextBlock Text="Impresión" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </TabItem.Header>
+
+                    <StackPanel Margin="20" MaxWidth="620" HorizontalAlignment="Left">
+                        <TextBlock Text="Impresora de recibos" Style="{StaticResource TituloSeccion}" />
+
+                        <TextBlock Style="{StaticResource TextoTenue}" FontSize="12.5"
+                                   TextWrapping="Wrap" LineHeight="19" Margin="0,0,0,16"
+                                   Text="Elija aquí la impresora del mostrador y el recibo saldrá solo al cobrar. Si no elige ninguna, el programa abre el PDF para que lo imprima a mano, como hacía antes." />
+
+                        <ComboBox Style="{StaticResource CampoSeleccion}"
+                                  ItemsSource="{Binding Impresoras}"
+                                  SelectedValue="{Binding ImpresoraRecibos}"
+                                  SelectedValuePath="Nombre"
+                                  DisplayMemberPath="Descripcion"
+                                  IsEnabled="{Binding PuedeEditar}"
+                                  materialDesign:HintAssist.Hint="Impresora"
+                                  materialDesign:HintAssist.IsFloating="True" />
+
+                        <TextBlock Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                   TextWrapping="Wrap" Margin="0,0,0,16"
+                                   Visibility="{Binding Impresoras.Count, Converter={StaticResource ColeccionVaciaAVisible}}"
+                                   Text="No se encontró ninguna impresora instalada en este equipo." />
+
+                        <CheckBox Content="Imprimir el recibo automáticamente al cobrar"
+                                  IsChecked="{Binding ImprimirReciboAutomatico}"
+                                  IsEnabled="{Binding PuedeEditar}"
+                                  Margin="0,0,0,6" />
+
+                        <TextBlock Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                   TextWrapping="Wrap" LineHeight="17" Margin="26,0,0,18"
+                                   Text="Sin esto marcado, el cajero decide en cada venta si imprime, con la casilla del cuadro de cobro." />
+
+                        <StackPanel Orientation="Horizontal">
+                            <Button Style="{StaticResource BotonPrincipal}" Margin="0,0,8,0"
+                                    Command="{Binding GuardarImpresionCommand}"
+                                    IsEnabled="{Binding PuedeEditar}"
+                                    Content="Guardar" />
+
+                            <Button Style="{StaticResource BotonSecundario}"
+                                    Command="{Binding ProbarImpresionCommand}"
+                                    ToolTip="Saca una tirilla de prueba para comprobar que la impresora responde">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="PrinterOutline" VerticalAlignment="Center" />
+                                    <TextBlock Text="Imprimir prueba" Margin="8,0,0,0"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <Separator Style="{StaticResource SeparadorHorizontal}" />
+
+                        <Border Background="{StaticResource BrochaInformacionSuave}"
+                                CornerRadius="10" Padding="14,12">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="InformationOutline"
+                                                         Foreground="{StaticResource BrochaInformacion}"
+                                                         VerticalAlignment="Top" Margin="0,1,10,0" />
+                                <TextBlock Foreground="{StaticResource BrochaInformacion}"
+                                           TextWrapping="Wrap" FontSize="12.5" LineHeight="19"
+                                           MaxWidth="520"
+                                           Text="El recibo se imprime como tirilla de 80 mm, la medida de las impresoras térmicas de mostrador. El PDF se sigue generando cuando lo pida desde el historial de ventas, por si necesita guardarlo o enviarlo." />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </TabItem>
+
                 <!-- ══ Copias de seguridad ═════════════════════════════════ -->
                 <TabItem>
                     <TabItem.Header>

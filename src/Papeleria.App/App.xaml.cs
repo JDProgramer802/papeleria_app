@@ -257,6 +257,7 @@ public partial class App : Application
                 servicios.AddSingleton<IServicioDialogos, ServicioDialogos>();
                 servicios.AddSingleton<IServicioArchivos, ServicioArchivos>();
                 servicios.AddSingleton<IServicioTema, ServicioTema>();
+                servicios.AddSingleton<Impresion.IServicioImpresion, Impresion.ServicioImpresion>();
                 servicios.AddSingleton<INavegacion, Navegacion>();
 
                 // Modelos de vista principales
