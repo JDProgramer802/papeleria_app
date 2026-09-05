@@ -89,6 +89,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
     private readonly IServicioClientes _clientes;
     private readonly IServicioCartera _cartera;
     private readonly IServicioCaja _caja;
+    private readonly IServicioCotizaciones _cotizaciones;
     private readonly IServicioDocumentos _documentos;
     private readonly IServicioArchivos _archivos;
     private readonly IServicioDialogos _dialogos;
@@ -102,6 +103,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         IServicioClientes clientes,
         IServicioCartera cartera,
         IServicioCaja caja,
+        IServicioCotizaciones cotizaciones,
         IServicioDocumentos documentos,
         IServicioArchivos archivos,
         IServicioDialogos dialogos,
@@ -112,6 +114,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         _clientes = clientes;
         _cartera = cartera;
         _caja = caja;
+        _cotizaciones = cotizaciones;
         _documentos = documentos;
         _archivos = archivos;
         _dialogos = dialogos;
@@ -191,6 +194,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         OnPropertyChanged(nameof(HayLineas));
         OnPropertyChanged(nameof(CantidadArticulos));
         CobrarCommand.NotifyCanExecuteChanged();
+        CotizarCommand.NotifyCanExecuteChanged();
     }
 
     public override async Task CargarAsync()
@@ -517,6 +521,70 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
             Carrito.Clear();
             MensajeError = null;
         }
+    }
+
+    /// <summary>
+    /// Cotizar no necesita caja abierta: no entra ni sale dinero. Es el precio en firme
+    /// que el cliente se lleva para pensarlo.
+    /// </summary>
+    private bool PuedeCotizar() =>
+        Carrito.Count > 0 && _sesion.Puede(Modulos.Cotizaciones, AccionPermiso.Crear) && !EstaCargando;
+
+    public bool MuestraCotizar => _sesion.Puede(Modulos.Cotizaciones, AccionPermiso.Crear);
+
+    [RelayCommand(CanExecute = nameof(PuedeCotizar))]
+    private async Task CotizarAsync()
+    {
+        var respuesta = await _dialogos.PedirTextoAsync(
+            "Guardar como cotización",
+            "¿Cuántos días se le respetan estos precios al cliente?",
+            "15").ConfigureAwait(true);
+
+        if (string.IsNullOrWhiteSpace(respuesta))
+        {
+            return;
+        }
+
+        if (!int.TryParse(respuesta.Trim(), out var dias) || dias <= 0)
+        {
+            MensajeError = "Indique un número de días mayor que cero.";
+            return;
+        }
+
+        await EjecutarAsync(async () =>
+        {
+            var cotizacion = await _cotizaciones.RegistrarAsync(new SolicitudCotizacion
+            {
+                ClienteId = ClienteId,
+                DiasValidez = dias,
+                Observaciones = Observaciones,
+                Lineas = Carrito.Select(l => new LineaCotizacion
+                {
+                    ProductoId = l.ProductoId,
+                    Cantidad = l.Cantidad,
+                    PrecioUnitario = l.PrecioUnitario,
+                    CostoUnitario = l.CostoUnitario,
+                    PorcentajeDescuento = l.PorcentajeDescuento,
+                    PorcentajeIva = l.PorcentajeIva
+                }).ToList()
+            }).ConfigureAwait(true);
+
+            Carrito.Clear();
+            Observaciones = null;
+            MensajeError = null;
+
+            var imprimir = await _dialogos.ConfirmarAsync(
+                $"Cotización {cotizacion.Numero}",
+                $"Queda guardada por {Formatos.Moneda(cotizacion.Total)} y vale hasta el " +
+                $"{Formatos.Fecha(cotizacion.FechaVence)}. ¿Quiere imprimirla ahora?",
+                "Imprimir").ConfigureAwait(true);
+
+            if (imprimir)
+            {
+                var ruta = await _cotizaciones.GenerarDocumentoAsync(cotizacion.Id).ConfigureAwait(true);
+                _archivos.AbrirConAplicacionPredeterminada(ruta);
+            }
+        }, "No se pudo guardar la cotización.");
     }
 
     private bool PuedeCobrar() => Carrito.Count > 0 && CajaAbierta && PuedeVender && !EstaCargando;

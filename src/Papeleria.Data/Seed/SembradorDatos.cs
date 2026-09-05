@@ -130,6 +130,12 @@ public class SembradorDatos
                     permiso.PuedeVer = true;
                     break;
 
+                // Cotizar es parte de atender el mostrador: el cliente pregunta y hay
+                // que darle el precio ahí mismo, sin llamar al dueño.
+                case Modulos.Cotizaciones:
+                    permiso.PuedeVer = permiso.PuedeCrear = permiso.PuedeEditar = true;
+                    break;
+
                 // Consultar la deuda y recibir abonos en el mostrador.
                 case Modulos.Cartera:
                     permiso.PuedeVer = permiso.PuedeCrear = true;
@@ -189,6 +195,9 @@ public class SembradorDatos
             (ClavesConfiguracion.CompraConsecutivo, "0", "Último consecutivo de compra registrado"),
             (ClavesConfiguracion.DevolucionPrefijo, "DEV-", "Prefijo del consecutivo de devoluciones"),
             (ClavesConfiguracion.DevolucionConsecutivo, "0", "Último consecutivo de devolución registrado"),
+            (ClavesConfiguracion.CotizacionPrefijo, "COT-", "Prefijo del consecutivo de cotizaciones"),
+            (ClavesConfiguracion.CotizacionConsecutivo, "0", "Último consecutivo de cotización emitido"),
+            (ClavesConfiguracion.CotizacionDiasValidez, "15", "Días que se respetan los precios cotizados"),
 
             (ClavesConfiguracion.BackupCarpeta, "", "Carpeta destino de las copias de seguridad"),
             (ClavesConfiguracion.BackupAutomatico, "true", "Genera una copia automática al cerrar la aplicación"),

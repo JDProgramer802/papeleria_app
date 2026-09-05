@@ -376,6 +376,20 @@
                         </StackPanel>
                     </Button>
 
+                    <!--
+                        El mismo carrito sirve para cotizar. No hace falta caja abierta:
+                        no entra dinero, es un precio que el cliente se lleva a pensar.
+                    -->
+                    <Button Style="{StaticResource BotonSecundario}" Margin="0,8,0,0" Height="42"
+                            Command="{Binding CotizarCommand}"
+                            Visibility="{Binding MuestraCotizar, Converter={StaticResource BoolAVisible}}"
+                            ToolTip="Guardar como cotización, sin cobrar todavía">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FileDocumentEditOutline" VerticalAlignment="Center" />
+                            <TextBlock Text="GUARDAR COTIZACIÓN" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
                     <Button Style="{StaticResource BotonTexto}" Margin="0,8,0,0"
                             Command="{Binding VaciarCarritoCommand}"
                             Foreground="{StaticResource BrochaError}"

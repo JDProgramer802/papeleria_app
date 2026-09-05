@@ -36,6 +36,10 @@ public interface IServicioDocumentos
         VentaDetalladaDto venta, FormatoFactura formato = FormatoFactura.Recibo80mm,
         string? rutaDestino = null, CancellationToken ct = default);
 
+    /// <summary>Cotización en formato carta, para imprimir o mandar por correo.</summary>
+    Task<string> GenerarCotizacionAsync(
+        CotizacionDetalladaDto cotizacion, string? rutaDestino = null, CancellationToken ct = default);
+
     Task<string> GenerarComprobanteCompraAsync(
         CompraDetalladaDto compra, string? rutaDestino = null, CancellationToken ct = default);
 

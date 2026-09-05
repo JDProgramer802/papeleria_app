@@ -14,6 +14,7 @@ public static class Modulos
     public const string Compras = "compras";
     public const string Ventas = "ventas";
     public const string HistorialVentas = "historialVentas";
+    public const string Cotizaciones = "cotizaciones";
     public const string Cartera = "cartera";
     public const string Inventario = "inventario";
     public const string Kardex = "kardex";
@@ -35,6 +36,7 @@ public static class Modulos
         [Compras] = "Compras",
         [Ventas] = "Ventas (POS)",
         [HistorialVentas] = "Historial de ventas",
+        [Cotizaciones] = "Cotizaciones",
         [Cartera] = "Cartera (cuentas por cobrar)",
         [Inventario] = "Inventario",
         [Kardex] = "Kardex",
@@ -70,6 +72,10 @@ public static class ClavesConfiguracion
     public const string FacturaConsecutivo = "factura.consecutivo";
     public const string FacturaResolucion = "factura.resolucion";
     public const string FacturaPieDePagina = "factura.pie";
+    public const string CotizacionPrefijo = "cotizacion.prefijo";
+    public const string CotizacionConsecutivo = "cotizacion.consecutivo";
+    public const string CotizacionDiasValidez = "cotizacion.diasValidez";
+
     public const string CompraPrefijo = "compra.prefijo";
     public const string CompraConsecutivo = "compra.consecutivo";
     public const string DevolucionPrefijo = "devolucion.prefijo";

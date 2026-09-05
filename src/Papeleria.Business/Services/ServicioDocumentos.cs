@@ -413,6 +413,191 @@ public class ServicioDocumentos : IServicioDocumentos
 
     // ── Comprobante de compra ───────────────────────────────────────────────
 
+    /// <summary>
+    /// Cotización en carta. No es una factura y el documento lo dice de frente: lleva
+    /// la fecha hasta la que valen esos precios, que es lo que evita la discusión de
+    /// «pero usted me dijo» tres meses después.
+    /// </summary>
+    public async Task<string> GenerarCotizacionAsync(
+        CotizacionDetalladaDto cotizacion, string? rutaDestino = null, CancellationToken ct = default)
+    {
+        var ruta = rutaDestino ?? RutasAplicacion.RutaTemporal(".pdf");
+        var empresa = _configuracion.ObtenerEmpresa();
+
+        await Task.Run(() =>
+        {
+            Document.Create(documento =>
+            {
+                documento.Page(pagina =>
+                {
+                    pagina.Size(PageSizes.Letter);
+                    pagina.Margin(28);
+                    pagina.DefaultTextStyle(estilo => estilo.FontSize(9).FontFamily(Fonts.Calibri));
+
+                    pagina.Header().Column(encabezado =>
+                    {
+                        encabezado.Item().Row(fila =>
+                        {
+                            fila.RelativeItem().Column(datos =>
+                            {
+                                datos.Item().Text(empresa.Nombre).FontSize(16).Bold().FontColor(ColorPrincipal);
+
+                                if (!string.IsNullOrWhiteSpace(empresa.Eslogan))
+                                {
+                                    datos.Item().Text(empresa.Eslogan).FontSize(8).Italic()
+                                        .FontColor(Colors.Grey.Darken1);
+                                }
+
+                                foreach (var linea in new[]
+                                         {
+                                             empresa.LineaIdentificacion, empresa.LineaUbicacion,
+                                             empresa.LineaContacto
+                                         }.Where(l => !string.IsNullOrWhiteSpace(l)))
+                                {
+                                    datos.Item().Text(linea).FontSize(8);
+                                }
+                            });
+
+                            fila.ConstantItem(190).Border(1).BorderColor(ColorPrincipal).Padding(8).Column(caja =>
+                            {
+                                caja.Item().AlignCenter().Text("COTIZACIÓN")
+                                    .FontSize(11).Bold().FontColor(ColorPrincipal);
+                                caja.Item().AlignCenter().PaddingTop(3).Text(cotizacion.Numero)
+                                    .FontSize(14).Bold();
+                                caja.Item().AlignCenter().PaddingTop(3)
+                                    .Text(Formatos.Fecha(cotizacion.Fecha)).FontSize(8);
+                                caja.Item().AlignCenter().PaddingTop(3)
+                                    .Text($"Válida hasta el {Formatos.Fecha(cotizacion.FechaVence)}")
+                                    .FontSize(8).Bold();
+                            });
+                        });
+
+                        encabezado.Item().PaddingTop(8).Background(Colors.Grey.Lighten4).Padding(6).Column(cliente =>
+                        {
+                            cliente.Item().Text("CLIENTE").FontSize(7).Bold().FontColor(Colors.Grey.Darken2);
+                            cliente.Item().Text(cotizacion.ClienteNombre).Bold();
+
+                            if (!string.IsNullOrWhiteSpace(cotizacion.ClienteDocumento))
+                            {
+                                cliente.Item().Text($"Documento: {cotizacion.ClienteDocumento}").FontSize(8);
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(cotizacion.ClienteTelefono))
+                            {
+                                cliente.Item().Text($"Tel.: {cotizacion.ClienteTelefono}").FontSize(8);
+                            }
+                        });
+
+                        encabezado.Item().PaddingBottom(10);
+                    });
+
+                    pagina.Content().Column(contenido =>
+                    {
+                        contenido.Item().Table(tabla =>
+                        {
+                            tabla.ColumnsDefinition(definicion =>
+                            {
+                                definicion.ConstantColumn(60);
+                                definicion.RelativeColumn(4);
+                                definicion.ConstantColumn(45);
+                                definicion.ConstantColumn(75);
+                                definicion.ConstantColumn(50);
+                                definicion.ConstantColumn(80);
+                            });
+
+                            tabla.Header(cabecera =>
+                            {
+                                foreach (var (titulo, derecha) in new[]
+                                         {
+                                             ("Código", false), ("Descripción", false), ("Cant.", true),
+                                             ("V. unitario", true), ("Desc.", true), ("Total", true)
+                                         })
+                                {
+                                    var celda = cabecera.Cell().Background(ColorPrincipal).Padding(4);
+                                    var texto = celda.Text(titulo).FontColor(Colors.White).Bold().FontSize(8);
+
+                                    if (derecha)
+                                    {
+                                        texto.AlignRight();
+                                    }
+                                }
+                            });
+
+                            var indice = 0;
+
+                            foreach (var linea in cotizacion.Lineas)
+                            {
+                                Color fondo = indice % 2 == 0 ? Colors.White : Colors.Grey.Lighten5;
+
+                                CeldaFactura(tabla, fondo).Text(linea.Codigo).FontSize(8);
+                                CeldaFactura(tabla, fondo).Text(linea.Descripcion).FontSize(8);
+                                CeldaFactura(tabla, fondo).AlignRight()
+                                    .Text(Formatos.Cantidad(linea.Cantidad)).FontSize(8);
+                                CeldaFactura(tabla, fondo).AlignRight()
+                                    .Text(Formatos.Moneda(linea.PrecioUnitario)).FontSize(8);
+                                CeldaFactura(tabla, fondo).AlignRight()
+                                    .Text(linea.PorcentajeDescuento > 0
+                                        ? Formatos.Porcentaje(linea.PorcentajeDescuento, 0)
+                                        : "—").FontSize(8);
+                                CeldaFactura(tabla, fondo).AlignRight()
+                                    .Text(Formatos.Moneda(linea.Total)).FontSize(8).Bold();
+
+                                indice++;
+                            }
+                        });
+
+                        contenido.Item().PaddingTop(10).Row(fila =>
+                        {
+                            fila.RelativeItem().Column(notas =>
+                            {
+                                if (!string.IsNullOrWhiteSpace(cotizacion.Observaciones))
+                                {
+                                    notas.Item().Text("Observaciones").FontSize(7).Bold()
+                                        .FontColor(Colors.Grey.Darken2);
+                                    notas.Item().Text(cotizacion.Observaciones).FontSize(8);
+                                }
+
+                                notas.Item().PaddingTop(8)
+                                    .Text($"Estos precios se respetan hasta el {Formatos.Fecha(cotizacion.FechaVence)}.")
+                                    .FontSize(8).Italic();
+
+                                notas.Item().Text("Este documento no es una factura de venta.")
+                                    .FontSize(7).FontColor(Colors.Grey.Darken1);
+                            });
+
+                            fila.ConstantItem(220).Column(totales =>
+                            {
+                                FilaTotalCarta(totales, "Subtotal", cotizacion.Subtotal);
+
+                                if (cotizacion.TotalDescuento > 0)
+                                {
+                                    FilaTotalCarta(totales, "Descuentos", -cotizacion.TotalDescuento);
+                                }
+
+                                FilaTotalCarta(totales, "IVA", cotizacion.TotalIva);
+
+                                totales.Item().PaddingTop(4).BorderTop(1).BorderColor(ColorPrincipal)
+                                    .PaddingTop(4).Row(total =>
+                                    {
+                                        total.RelativeItem().Text("TOTAL").Bold().FontSize(12);
+                                        total.RelativeItem().AlignRight()
+                                            .Text(Formatos.Moneda(cotizacion.Total)).Bold().FontSize(12)
+                                            .FontColor(ColorPrincipal);
+                                    });
+                            });
+                        });
+                    });
+
+                    pagina.Footer().AlignCenter()
+                        .Text($"Cotización elaborada por {cotizacion.UsuarioNombre}")
+                        .FontSize(7).FontColor(Colors.Grey.Darken1);
+                });
+            }).GeneratePdf(ruta);
+        }, ct).ConfigureAwait(false);
+
+        return ruta;
+    }
+
     public async Task<string> GenerarComprobanteCompraAsync(
         CompraDetalladaDto compra, string? rutaDestino = null, CancellationToken ct = default)
     {

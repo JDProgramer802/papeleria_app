@@ -39,6 +39,22 @@ public enum EstadoVenta
     Anulada = 2
 }
 
+/// <summary>
+/// Estado de una cotización. «Vencida» no se guarda: se deduce de la fecha, así que
+/// nunca queda una marcada como vigente cuando ya se le pasó el plazo.
+/// </summary>
+public enum EstadoCotizacion
+{
+    [Display(Name = "Vigente")]
+    Vigente = 1,
+
+    [Display(Name = "Aceptada")]
+    Aceptada = 2,
+
+    [Display(Name = "Rechazada")]
+    Rechazada = 3
+}
+
 /// <summary>Estado de una compra registrada a un proveedor.</summary>
 public enum EstadoCompra
 {

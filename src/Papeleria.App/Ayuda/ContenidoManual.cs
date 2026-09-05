@@ -177,6 +177,42 @@ public static class ContenidoManual
         },
         new()
         {
+            Titulo = "Cotizaciones",
+            Resumen = "Dar un precio en firme antes de vender",
+            Icono = PackIconKind.FileDocumentEditOutline,
+            Bloques = new[]
+            {
+                Parrafo(
+                    "Cuando el colegio pregunta cuánto vale marcar doscientos cuadernos, o la " +
+                    "oficina pide precio por mil tarjetas, eso es una cotización: un precio en " +
+                    "firme que el cliente se lleva para pensarlo."),
+                Pasos("Hacer una cotización",
+                    "Vaya al Punto de venta y arme el pedido igual que si fuera a cobrarlo.",
+                    "Elija el cliente. Si es alguien nuevo, créelo con el botón de al lado.",
+                    "En vez de COBRAR, pulse GUARDAR COTIZACIÓN.",
+                    "Indique cuántos días se le respetan esos precios.",
+                    "Imprímala o mándela en PDF; lleva el logo y los datos del negocio."),
+                Aviso(
+                    "Cotizar no descuenta nada del inventario ni mueve la caja, y no necesita " +
+                    "caja abierta. Es un papel, no una venta."),
+                Pasos("Cuando el cliente acepta",
+                    "Entre a Cotizaciones y búsquela por número o por cliente.",
+                    "Pulse FACTURAR y cobre como en cualquier venta.",
+                    "Ahí sí se descuenta la mercancía y entra el dinero."),
+                Lista("Lo que conviene saber",
+                    "Se factura con el precio que se cotizó, aunque hoy esté más caro. Para eso " +
+                    "sirve la fecha de vencimiento: pasada esa fecha, usted decide.",
+                    "Una cotización vencida se puede facturar igual; el programa avisa antes.",
+                    "Si el cliente no la tomó, márquela como rechazada. No se borra: queda en " +
+                    "el histórico por si vuelve a preguntar.",
+                    "Una vez facturada no se puede volver a facturar ni rechazar."),
+                Consejo(
+                    "El filtro «Solo vigentes» deja a la vista las que todavía están en pie. " +
+                    "Es la lista de a quién vale la pena llamar para preguntar si se decidió.")
+            }
+        },
+        new()
+        {
             Titulo = "Productos y servicios",
             Resumen = "Mercancía, fotocopias y presentaciones",
             Icono = PackIconKind.PackageVariantClosed,
