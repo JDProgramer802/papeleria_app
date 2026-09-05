@@ -8,7 +8,7 @@
         d:DataContext="{d:DesignInstance vm:LoginVistaModelo}"
         mc:Ignorable="d"
         Title="Iniciar sesión — PapelSoft"
-        Height="640" Width="1000"
+        Height="700" Width="940"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -19,203 +19,159 @@
 
     <Window.Resources>
         <!--
-            Estilos con clave explícita a propósito: un estilo implícito
-            (TargetType sin x:Key) declarado dentro de StackPanel.Resources se
-            aplicaría también al StackPanel contenedor y volcaría la lista entera
-            en horizontal.
+            Los campos del acceso son más altos que los del resto del programa: aquí
+            solo hay dos y se escriben con el negocio abriendo, muchas veces de pie.
         -->
-        <Style x:Key="FilaCaracteristica" TargetType="StackPanel">
-            <Setter Property="Orientation" Value="Horizontal" />
-            <Setter Property="Margin" Value="0,0,0,16" />
+        <Style x:Key="CampoDeAcceso" TargetType="TextBox"
+               BasedOn="{StaticResource CampoAcceso}">
+            <Setter Property="Height" Value="50" />
+            <Setter Property="FontSize" Value="14.5" />
         </Style>
 
-        <Style x:Key="IconoCaracteristica" TargetType="Border">
-            <Setter Property="Width" Value="34" />
-            <Setter Property="Height" Value="34" />
+        <Style x:Key="CampoDeAccesoOculto" TargetType="PasswordBox"
+               BasedOn="{StaticResource CampoAccesoContrasena}">
+            <Setter Property="Height" Value="50" />
+            <Setter Property="FontSize" Value="14.5" />
+        </Style>
+
+        <Style x:Key="BotonDeAcceso" TargetType="Button"
+               BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="Height" Value="52" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="10" />
+            <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
+        </Style>
+
+        <!-- Avisos de la tarjeta: mismo cuerpo, distinto color según lo que digan. -->
+        <Style x:Key="AvisoAcceso" TargetType="Border">
             <Setter Property="CornerRadius" Value="10" />
-            <Setter Property="Background" Value="#1FFFFFFF" />
-            <Setter Property="Margin" Value="0,0,14,0" />
-        </Style>
-
-        <Style x:Key="GlifoCaracteristica" TargetType="materialDesign:PackIcon">
-            <Setter Property="Width" Value="18" />
-            <Setter Property="Height" Value="18" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-        </Style>
-
-        <Style x:Key="TextoCaracteristica" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="Opacity" Value="0.92" />
-            <Setter Property="FontSize" Value="13.5" />
-            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Padding" Value="13,11" />
         </Style>
     </Window.Resources>
 
-    <Border CornerRadius="16" Margin="16" Background="{DynamicResource MaterialDesignPaper}"
+    <Border CornerRadius="18" Margin="18" ClipToBounds="True"
             RenderTransformOrigin="0.5,0.5">
         <Border.RenderTransform>
             <TranslateTransform x:Name="DesplazamientoEntrada" Y="24" />
         </Border.RenderTransform>
         <Border.Effect>
-            <DropShadowEffect BlurRadius="34" ShadowDepth="6" Opacity="0.42" Color="#000000" />
+            <DropShadowEffect BlurRadius="38" ShadowDepth="8" Opacity="0.45" Color="#000000" />
         </Border.Effect>
 
-        <Border CornerRadius="16" ClipToBounds="True">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1.15*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
+        <Grid MouseLeftButtonDown="ArrastrarVentana">
+            <!-- ══ Fondo de marca ═══════════════════════════════════════════ -->
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#03153F" Offset="0" />
+                    <GradientStop Color="#0B3F9E" Offset="0.52" />
+                    <GradientStop Color="#0379EE" Offset="1" />
+                </LinearGradientBrush>
+            </Grid.Background>
 
-                <!-- ══════════════ PANEL DE MARCA ═══════════════════════════ -->
-                <Grid Grid.Column="0" MouseLeftButtonDown="ArrastrarVentana">
-                    <Grid.Background>
-                        <!-- Los tres azules salen del propio logotipo. -->
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#041D53" Offset="0" />
-                            <GradientStop Color="#0B3F9E" Offset="0.55" />
-                            <GradientStop Color="#0379EE" Offset="1" />
-                        </LinearGradientBrush>
-                    </Grid.Background>
+            <!--
+                Dos halos y nada más. Antes había tres círculos recortados por los
+                bordes que se veían como un error de recorte; un resplandor suave da
+                profundidad sin que se note de dónde sale.
+            -->
+            <Ellipse Width="700" Height="700"
+                     HorizontalAlignment="Right" VerticalAlignment="Top"
+                     Margin="0,-260,-220,0">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#2EFFFFFF" Offset="0" />
+                        <GradientStop Color="#00FFFFFF" Offset="1" />
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
 
-                    <!-- Formas decorativas de fondo -->
-                    <Ellipse Width="380" Height="380" HorizontalAlignment="Left"
-                             VerticalAlignment="Bottom" Margin="-150,0,0,-160">
-                        <Ellipse.Fill>
-                            <RadialGradientBrush>
-                                <GradientStop Color="#26FFFFFF" Offset="0" />
-                                <GradientStop Color="#00FFFFFF" Offset="1" />
-                            </RadialGradientBrush>
-                        </Ellipse.Fill>
-                    </Ellipse>
+            <Ellipse Width="560" Height="560"
+                     HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                     Margin="-200,0,0,-220">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#1FFFFFFF" Offset="0" />
+                        <GradientStop Color="#00FFFFFF" Offset="1" />
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
 
-                    <Ellipse Width="240" Height="240" HorizontalAlignment="Right"
-                             VerticalAlignment="Top" Margin="0,-90,-70,0" Fill="#14FFFFFF" />
+            <!-- ══ Controles de ventana ═════════════════════════════════════ -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                        VerticalAlignment="Top" Margin="0,12,16,0" Panel.ZIndex="2">
+                <Button Style="{StaticResource BotonVentana}"
+                        Foreground="White" Click="MinimizarVentana" ToolTip="Minimizar">
+                    <materialDesign:PackIcon Kind="WindowMinimize" Width="15" Height="15" />
+                </Button>
 
-                    <Ellipse Width="130" Height="130" HorizontalAlignment="Right"
-                             VerticalAlignment="Bottom" Margin="0,0,60,54" Fill="#0DFFFFFF" />
+                <Button Style="{StaticResource BotonVentanaCerrar}"
+                        Foreground="White"
+                        Command="{Binding SalirCommand}" ToolTip="Salir del sistema">
+                    <materialDesign:PackIcon Kind="Close" Width="16" Height="16" />
+                </Button>
+            </StackPanel>
 
-                    <StackPanel VerticalAlignment="Center" Margin="54,0,48,0">
-                        <!--
-                            El logotipo va sobre una placa blanca. Está dibujado para
-                            leerse sobre claro —el marco del monitor es azul marino— y
-                            puesto directamente sobre el degradado se pierde.
-                        -->
-                        <Border CornerRadius="16" Background="White"
-                                HorizontalAlignment="Left" Padding="20,16">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="22" ShadowDepth="3"
-                                                  Opacity="0.22" Color="#000000" />
-                            </Border.Effect>
-                            <Image Source="pack://application:,,,/Papeleria;component/Resources/Images/logo.png"
-                                   Width="240" Stretch="Uniform" />
-                        </Border>
+            <!-- ══ La tarjeta ═══════════════════════════════════════════════ -->
+            <Border Background="White" CornerRadius="20"
+                    Width="440" Padding="42,38,42,34"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="48" ShadowDepth="14"
+                                      Opacity="0.34" Color="#00122E" />
+                </Border.Effect>
+
+                <Grid>
+                    <!--
+                        Cinta de marca. Son los cuatro colores del logotipo —el azul del
+                        nombre, el verde agua de la goma, el amarillo del lápiz y el rojo
+                        del bolígrafo— en el mismo orden. Se sale del relleno para tocar
+                        el borde, y las esquinas se las recorta el propio marco.
+                    -->
+                    <Border VerticalAlignment="Top" Height="6"
+                            Margin="-42,-38,-42,0" CornerRadius="20,20,0,0"
+                            Panel.ZIndex="2">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#0379EE" Offset="0" />
+                                <GradientStop Color="#0379EE" Offset="0.25" />
+                                <GradientStop Color="#01CED1" Offset="0.25" />
+                                <GradientStop Color="#01CED1" Offset="0.5" />
+                                <GradientStop Color="#FFCF20" Offset="0.5" />
+                                <GradientStop Color="#FFCF20" Offset="0.75" />
+                                <GradientStop Color="#FB5A76" Offset="0.75" />
+                                <GradientStop Color="#FB5A76" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <!-- ── Acceso normal ──────────────────────────────────── -->
+                    <StackPanel Visibility="{Binding ExigiendoCambioContrasena, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+                        <!-- El logotipo va sobre el blanco de la tarjeta, que es donde
+                             está dibujado para leerse. Sin placas ni recuadros. -->
+                        <Image Source="pack://application:,,,/Papeleria;component/Resources/Images/logo.png"
+                               Width="196" Stretch="Uniform"
+                               HorizontalAlignment="Center"
+                               RenderOptions.BitmapScalingMode="HighQuality" />
 
                         <TextBlock Text="{Binding NombreEmpresa}"
-                                   FontSize="21" FontWeight="SemiBold"
-                                   Foreground="White" Opacity="0.95"
-                                   TextWrapping="Wrap"
-                                   Margin="0,28,0,0" />
+                                   HorizontalAlignment="Center"
+                                   FontSize="13" Opacity="0.55"
+                                   Margin="0,14,0,0"
+                                   TextTrimming="CharacterEllipsis" />
 
-                        <Rectangle Height="3" Width="48" RadiusX="2" RadiusY="2"
-                                   Fill="#66FFFFFF" HorizontalAlignment="Left"
-                                   Margin="0,14,0,0" />
+                        <Separator Style="{StaticResource SeparadorHorizontal}" Margin="0,18,0,20" />
 
-                        <TextBlock Text="Punto de venta, inventario, caja y cartera. Todo en el computador del negocio, sin depender de internet."
-                                   FontSize="14"
-                                   Foreground="White" Opacity="0.88"
-                                   TextWrapping="Wrap"
-                                   LineHeight="22"
-                                   MaxWidth="380"
-                                   HorizontalAlignment="Left"
-                                   Margin="0,16,0,0" />
-
-                        <StackPanel Margin="0,36,0,0">
-                            <StackPanel Style="{StaticResource FilaCaracteristica}">
-                                <Border Style="{StaticResource IconoCaracteristica}">
-                                    <materialDesign:PackIcon Kind="WifiOff"
-                                                             Style="{StaticResource GlifoCaracteristica}" />
-                                </Border>
-                                <TextBlock Text="Funciona sin conexión a Internet"
-                                           Style="{StaticResource TextoCaracteristica}" />
-                            </StackPanel>
-
-                            <StackPanel Style="{StaticResource FilaCaracteristica}">
-                                <Border Style="{StaticResource IconoCaracteristica}">
-                                    <materialDesign:PackIcon Kind="ShieldCheckOutline"
-                                                             Style="{StaticResource GlifoCaracteristica}" />
-                                </Border>
-                                <TextBlock Text="Contraseñas cifradas y permisos por rol"
-                                           Style="{StaticResource TextoCaracteristica}" />
-                            </StackPanel>
-
-                            <StackPanel Style="{StaticResource FilaCaracteristica}">
-                                <Border Style="{StaticResource IconoCaracteristica}">
-                                    <materialDesign:PackIcon Kind="DatabaseCheckOutline"
-                                                             Style="{StaticResource GlifoCaracteristica}" />
-                                </Border>
-                                <TextBlock Text="Copias de seguridad automáticas"
-                                           Style="{StaticResource TextoCaracteristica}" />
-                            </StackPanel>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                               Margin="54,0,0,26"
-                               Foreground="White" Opacity="0.6" FontSize="11.5">
-                        <Run Text="Versión" />
-                        <Run Text="{Binding Version, Mode=OneWay}" />
-                        <Run Text="  ·  © 2026" />
-                    </TextBlock>
-                </Grid>
-
-                <!-- ══════════════ FORMULARIO ═══════════════════════════════ -->
-                <Grid Grid.Column="1" MouseLeftButtonDown="ArrastrarVentana">
-                    <!--
-                        Controles de ventana. Con el estilo de icono suelto quedaban dos
-                        marcas grises casi invisibles en una esquina: parecía que faltaba
-                        algo. Ahora son botones con su zona de clic, y el de salir se pone
-                        rojo al pasar por encima, como en cualquier ventana.
-                    -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
-                                VerticalAlignment="Top" Margin="0,10,18,0">
-                        <Button Style="{StaticResource BotonVentana}"
-                                Click="MinimizarVentana"
-                                ToolTip="Minimizar">
-                            <materialDesign:PackIcon Kind="WindowMinimize" Width="15" Height="15" />
-                        </Button>
-
-                        <Button Style="{StaticResource BotonVentanaCerrar}"
-                                Command="{Binding SalirCommand}"
-                                ToolTip="Salir del sistema">
-                            <materialDesign:PackIcon Kind="Close" Width="16" Height="16" />
-                        </Button>
-                    </StackPanel>
-
-                    <StackPanel VerticalAlignment="Center" Margin="48,0,48,0"
-                                Visibility="{Binding ExigiendoCambioContrasena, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
-                        <TextBlock Text="Bienvenido"
-                                   FontSize="30" FontWeight="Bold" />
-                        <TextBlock Text="Entre a PapelSoft con su usuario y contraseña"
-                                   Style="{StaticResource SubtituloPagina}"
-                                   FontSize="13.5"
-                                   Margin="0,6,0,28" />
-
-                        <!-- Usuario -->
                         <TextBox x:Name="CampoUsuario"
-                                 Style="{StaticResource CampoAcceso}"
-                                 Margin="0,0,0,18"
+                                 Style="{StaticResource CampoDeAcceso}"
+                                 Margin="0,0,0,16"
                                  materialDesign:HintAssist.Hint="Usuario"
                                  materialDesign:TextFieldAssist.LeadingIcon="AccountOutline"
                                  Text="{Binding NombreUsuario, UpdateSourceTrigger=PropertyChanged}"
                                  MaxLength="50" />
 
                         <!-- Contraseña: campo enmascarado y campo visible superpuestos -->
-                        <Grid Margin="0,0,0,6">
+                        <Grid Margin="0,0,0,4">
                             <PasswordBox x:Name="CampoContrasena"
-                                         Style="{StaticResource CampoAccesoContrasena}"
+                                         Style="{StaticResource CampoDeAccesoOculto}"
                                          materialDesign:HintAssist.Hint="Contraseña"
                                          materialDesign:TextFieldAssist.LeadingIcon="LockOutline"
                                          MaxLength="80"
@@ -224,7 +180,7 @@
                                          Visibility="{Binding MostrarContrasena, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}" />
 
                             <TextBox x:Name="CampoContrasenaVisible"
-                                     Style="{StaticResource CampoAcceso}"
+                                     Style="{StaticResource CampoDeAcceso}"
                                      materialDesign:HintAssist.Hint="Contraseña"
                                      materialDesign:TextFieldAssist.LeadingIcon="LockOpenOutline"
                                      MaxLength="80"
@@ -232,7 +188,6 @@
                                      Text="{Binding Contrasena, UpdateSourceTrigger=PropertyChanged}"
                                      Visibility="{Binding MostrarContrasena, Converter={StaticResource BoolAVisible}}" />
 
-                            <!-- El «ojito» -->
                             <ToggleButton x:Name="BotonVerContrasena"
                                           Style="{StaticResource MaterialDesignFlatToggleButton}"
                                           Width="38" Height="38"
@@ -263,7 +218,7 @@
                         </Grid>
 
                         <!-- Aviso de Bloq Mayús -->
-                        <StackPanel Orientation="Horizontal" Margin="2,0,0,10"
+                        <StackPanel Orientation="Horizontal" Margin="2,6,0,0"
                                     Visibility="{Binding BloqueoMayusculasActivo, Converter={StaticResource BoolAVisible}}">
                             <materialDesign:PackIcon Kind="AppleKeyboardCaps"
                                                      Width="15" Height="15"
@@ -277,11 +232,11 @@
 
                         <CheckBox Content="Recordar mi usuario"
                                   IsChecked="{Binding RecordarUsuario}"
-                                  Margin="0,10,0,24" />
+                                  Margin="0,12,0,20" />
 
-                        <!-- Error de autenticación -->
-                        <Border Background="{StaticResource BrochaErrorSuave}"
-                                CornerRadius="8" Padding="13,10" Margin="0,0,0,16"
+                        <Border Style="{StaticResource AvisoAcceso}"
+                                Background="{StaticResource BrochaErrorSuave}"
+                                Margin="0,0,0,16"
                                 Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="AlertCircleOutline"
@@ -291,16 +246,14 @@
                                 <TextBlock Text="{Binding MensajeError}"
                                            Foreground="{StaticResource BrochaError}"
                                            TextWrapping="Wrap"
-                                           MaxWidth="290"
+                                           MaxWidth="280"
                                            FontSize="12.5" />
                             </StackPanel>
                         </Border>
 
-                        <Button Height="50" FontSize="14"
+                        <Button Style="{StaticResource BotonDeAcceso}"
                                 Command="{Binding IniciarSesionCommand}"
-                                IsDefault="True"
-                                materialDesign:ButtonAssist.CornerRadius="8"
-                                Style="{StaticResource MaterialDesignRaisedButton}">
+                                IsDefault="True">
                             <Grid>
                                 <StackPanel Orientation="Horizontal"
                                             Visibility="{Binding EstaCargando, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
@@ -320,9 +273,10 @@
                             </Grid>
                         </Button>
 
-                        <!-- Credenciales de fábrica -->
-                        <Border Background="{StaticResource BrochaInformacionSuave}"
-                                CornerRadius="8" Padding="13,10" Margin="0,20,0,0"
+                        <!-- Credenciales de fábrica, solo el primer día -->
+                        <Border Style="{StaticResource AvisoAcceso}"
+                                Background="{StaticResource BrochaInformacionSuave}"
+                                Margin="0,18,0,0"
                                 Visibility="{Binding MostrarAvisoContrasenaPorDefecto, Converter={StaticResource BoolAVisible}}">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="KeyOutline"
@@ -332,7 +286,7 @@
                                 <TextBlock Text="{Binding AvisoContrasenaPorDefecto}"
                                            Foreground="{StaticResource BrochaInformacion}"
                                            TextWrapping="Wrap"
-                                           MaxWidth="290"
+                                           MaxWidth="280"
                                            LineHeight="17"
                                            FontSize="11.5" />
                             </StackPanel>
@@ -341,49 +295,60 @@
 
                     <!--
                         Segundo paso, solo la primera vez: quien entra con la contraseña
-                        de fábrica no llega al programa hasta ponerle una suya. Ocupa el
-                        mismo sitio que el formulario de acceso, que queda oculto.
+                        de fábrica no llega al programa hasta ponerle una suya.
                     -->
-                    <StackPanel VerticalAlignment="Center" Margin="48,0,48,0"
-                                Visibility="{Binding ExigiendoCambioContrasena, Converter={StaticResource BoolAVisible}}">
+                    <StackPanel Visibility="{Binding ExigiendoCambioContrasena, Converter={StaticResource BoolAVisible}}">
+                        <Border Width="62" Height="62" CornerRadius="18"
+                                HorizontalAlignment="Center"
+                                Background="{StaticResource BrochaInformacionSuave}">
+                            <materialDesign:PackIcon Kind="LockReset"
+                                                     Width="32" Height="32"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
+                        </Border>
+
                         <TextBlock Text="Póngale su contraseña"
-                                   FontSize="27" FontWeight="Bold" TextWrapping="Wrap" />
-                        <TextBlock Style="{StaticResource SubtituloPagina}"
-                                   FontSize="13" TextWrapping="Wrap" LineHeight="19"
-                                   Margin="0,6,0,24"
-                                   Text="Entró con la contraseña que trae el programa de fábrica. Esa la conoce cualquiera que lo haya visto, así que elija una propia antes de seguir." />
+                                   HorizontalAlignment="Center"
+                                   FontSize="22" FontWeight="Bold"
+                                   TextWrapping="Wrap" Margin="0,16,0,0" />
+
+                        <TextBlock HorizontalAlignment="Center" TextAlignment="Center"
+                                   Style="{StaticResource TextoTenue}"
+                                   FontSize="12.5" TextWrapping="Wrap" LineHeight="19"
+                                   Margin="0,8,0,22"
+                                   Text="Entró con la contraseña que trae el programa de fábrica. Esa la conoce cualquiera que lo haya visto." />
 
                         <PasswordBox x:Name="CampoContrasenaNueva"
-                                     Style="{StaticResource CampoAccesoContrasena}"
+                                     Style="{StaticResource CampoDeAccesoOculto}"
                                      Margin="0,0,0,16"
                                      PasswordChanged="ContrasenaNuevaCambiada"
                                      materialDesign:HintAssist.Hint="Contraseña nueva"
                                      materialDesign:TextFieldAssist.LeadingIcon="LockOutline" />
 
                         <PasswordBox x:Name="CampoContrasenaRepetida"
-                                     Style="{StaticResource CampoAccesoContrasena}"
-                                     Margin="0,0,0,6"
+                                     Style="{StaticResource CampoDeAccesoOculto}"
+                                     Margin="0,0,0,8"
                                      PasswordChanged="ContrasenaRepetidaCambiada"
                                      materialDesign:HintAssist.Hint="Repítala"
                                      materialDesign:TextFieldAssist.LeadingIcon="LockCheckOutline" />
 
                         <TextBlock Style="{StaticResource TextoTenue}" FontSize="11.5"
-                                   TextWrapping="Wrap" Margin="0,0,0,18"
+                                   TextWrapping="Wrap" LineHeight="17" Margin="2,0,0,18"
                                    Text="Mínimo 6 caracteres, con letras y números. Anótela en algún lado: no hay forma de recuperarla." />
 
-                        <Border Background="{StaticResource BrochaErrorSuave}"
-                                CornerRadius="8" Padding="13,10" Margin="0,0,0,16"
+                        <Border Style="{StaticResource AvisoAcceso}"
+                                Background="{StaticResource BrochaErrorSuave}"
+                                Margin="0,0,0,16"
                                 Visibility="{Binding MensajeError, Converter={StaticResource TextoAVisible}}">
                             <TextBlock Text="{Binding MensajeError}"
                                        Foreground="{StaticResource BrochaError}"
-                                       TextWrapping="Wrap" MaxWidth="290" FontSize="12.5" />
+                                       TextWrapping="Wrap" MaxWidth="280" FontSize="12.5" />
                         </Border>
 
-                        <Button Height="50" FontSize="14"
+                        <Button Style="{StaticResource BotonDeAcceso}"
                                 Command="{Binding ConfirmarContrasenaNuevaCommand}"
-                                IsDefault="True"
-                                materialDesign:ButtonAssist.CornerRadius="8"
-                                Style="{StaticResource MaterialDesignRaisedButton}">
+                                IsDefault="True">
                             <Grid>
                                 <StackPanel Orientation="Horizontal"
                                             Visibility="{Binding EstaCargando, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
@@ -407,8 +372,22 @@
                                 Content="Volver" />
                     </StackPanel>
                 </Grid>
-            </Grid>
-        </Border>
+            </Border>
+
+            <!-- ══ Pie ══════════════════════════════════════════════════════ -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom" Margin="0,0,0,22">
+                <materialDesign:PackIcon Kind="WifiOff" Width="14" Height="14"
+                                         Foreground="White" Opacity="0.6"
+                                         VerticalAlignment="Center" Margin="0,0,7,0" />
+                <TextBlock Foreground="White" Opacity="0.6" FontSize="11.5"
+                           VerticalAlignment="Center">
+                    <Run Text="Funciona sin conexión a internet" />
+                    <Run Text="  ·  Versión" />
+                    <Run Text="{Binding Version, Mode=OneWay}" />
+                </TextBlock>
+            </StackPanel>
+        </Grid>
     </Border>
 
     <Window.Triggers>
