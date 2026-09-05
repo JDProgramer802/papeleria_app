@@ -140,6 +140,15 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
+                            <!-- Filo de aviso; se sale del relleno para tocar el borde. -->
+                            <Border x:Name="Filo" Grid.RowSpan="3"
+                                    Width="3" HorizontalAlignment="Left"
+                                    Margin="-16,-14,0,-14"
+                                    CornerRadius="2,0,0,2"
+                                    Background="{StaticResource BrochaAdvertencia}"
+                                    Visibility="Collapsed" />
+
+
                             <!-- La cifra manda: ocupa la primera línea de lectura. -->
                             <TextBlock Grid.Row="0" Grid.Column="0"
                                        Text="{Binding Valor, RelativeSource={RelativeSource TemplatedParent}}"
@@ -183,11 +192,14 @@
                     </materialDesign:Card>
 
                     <ControlTemplate.Triggers>
-                        <!-- Un dato que exige actuar se marca con un borde, no con otro color de fondo. -->
+                        <!--
+                            Un dato que exige actuar saca un filo de color a la izquierda.
+                            Antes se enmarcaba la tarjeta entera en naranja: dos tarjetas
+                            así en la misma fila gritaban más que la cifra que llevaban
+                            dentro, que es lo que en realidad hay que leer.
+                        -->
                         <Trigger Property="EsAlerta" Value="True">
-                            <Setter TargetName="Tarjeta" Property="BorderBrush"
-                                    Value="{StaticResource BrochaAdvertencia}" />
-                            <Setter TargetName="Tarjeta" Property="BorderThickness" Value="1,1,1,3" />
+                            <Setter TargetName="Filo" Property="Visibility" Value="Visible" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

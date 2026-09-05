@@ -168,21 +168,24 @@
 
                 <!-- ══════════════ FORMULARIO ═══════════════════════════════ -->
                 <Grid Grid.Column="1" MouseLeftButtonDown="ArrastrarVentana">
-                    <!-- Controles de ventana -->
+                    <!--
+                        Controles de ventana. Con el estilo de icono suelto quedaban dos
+                        marcas grises casi invisibles en una esquina: parecía que faltaba
+                        algo. Ahora son botones con su zona de clic, y el de salir se pone
+                        rojo al pasar por encima, como en cualquier ventana.
+                    -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
-                                VerticalAlignment="Top" Margin="0,12,12,0">
-                        <Button Style="{StaticResource MaterialDesignIconButton}"
-                                Width="32" Height="32" Padding="0"
+                                VerticalAlignment="Top" Margin="0,10,18,0">
+                        <Button Style="{StaticResource BotonVentana}"
                                 Click="MinimizarVentana"
                                 ToolTip="Minimizar">
-                            <materialDesign:PackIcon Kind="WindowMinimize" Width="16" Height="16" />
+                            <materialDesign:PackIcon Kind="WindowMinimize" Width="15" Height="15" />
                         </Button>
 
-                        <Button Style="{StaticResource MaterialDesignIconButton}"
-                                Width="32" Height="32" Padding="0"
+                        <Button Style="{StaticResource BotonVentanaCerrar}"
                                 Command="{Binding SalirCommand}"
                                 ToolTip="Salir del sistema">
-                            <materialDesign:PackIcon Kind="Close" Width="17" Height="17" />
+                            <materialDesign:PackIcon Kind="Close" Width="16" Height="16" />
                         </Button>
                     </StackPanel>
 
@@ -269,7 +272,7 @@
 
                         <CheckBox Content="Recordar mi usuario"
                                   IsChecked="{Binding RecordarUsuario}"
-                                  Margin="0,4,0,18" />
+                                  Margin="0,10,0,24" />
 
                         <!-- Error de autenticación -->
                         <Border Background="{StaticResource BrochaErrorSuave}"

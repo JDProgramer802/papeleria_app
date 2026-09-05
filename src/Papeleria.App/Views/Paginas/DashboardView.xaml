@@ -65,9 +65,9 @@
                             </Grid.ColumnDefinitions>
 
                             <Border Grid.Column="0" Width="44" Height="44" CornerRadius="12"
-                                    Background="#E8F5E9" VerticalAlignment="Top">
+                                    Background="{StaticResource AcentoExitoFondo}" VerticalAlignment="Top">
                                 <materialDesign:PackIcon Kind="CashRegister" Width="24" Height="24"
-                                                         Foreground="#2E7D32"
+                                                         Foreground="{StaticResource AcentoExitoTinta}"
                                                          HorizontalAlignment="Center"
                                                          VerticalAlignment="Center" />
                             </Border>
@@ -124,9 +124,9 @@
                             </Grid.ColumnDefinitions>
 
                             <Border Grid.Column="0" Width="44" Height="44" CornerRadius="12"
-                                    Background="#FFF3E0" VerticalAlignment="Top">
+                                    Background="{StaticResource AcentoPrincipalFondo}" VerticalAlignment="Top">
                                 <materialDesign:PackIcon Kind="AccountCashOutline" Width="24" Height="24"
-                                                         Foreground="#EF6C00"
+                                                         Foreground="{StaticResource AcentoPrincipalTinta}"
                                                          HorizontalAlignment="Center"
                                                          VerticalAlignment="Center" />
                             </Border>
@@ -179,9 +179,9 @@
                             </Grid.ColumnDefinitions>
 
                             <Border Grid.Column="0" Width="44" Height="44" CornerRadius="12"
-                                    Background="#EDE7F6" VerticalAlignment="Top">
+                                    Background="{StaticResource AcentoNeutroFondo}" VerticalAlignment="Top">
                                 <materialDesign:PackIcon Kind="PackageVariantClosedRemove"
-                                                         Width="24" Height="24" Foreground="#5E35B1"
+                                                         Width="24" Height="24" Foreground="{StaticResource AcentoNeutroTinta}"
                                                          HorizontalAlignment="Center"
                                                          VerticalAlignment="Center" />
                             </Border>
@@ -230,8 +230,8 @@
                 <UniformGrid Columns="5" Margin="0,0,-14,4">
                     <controls:TarjetaMetrica
                         Icono="CashRegister"
-                        FondoIcono="#E1F5FE"
-                        ColorIcono="#0277BD"
+                        FondoIcono="{StaticResource AcentoPrincipalFondo}"
+                        ColorIcono="{StaticResource AcentoPrincipalTinta}"
                         Etiqueta="Ventas del mes"
                         Valor="{Binding Resumen.VentasDelMes, Converter={StaticResource Moneda}}"
                         ToolTip="Ir al punto de venta">
@@ -280,8 +280,8 @@
 
                     <controls:TarjetaMetrica
                         Icono="ChartLine"
-                        FondoIcono="#F1F8E9"
-                        ColorIcono="#558B2F"
+                        FondoIcono="{StaticResource AcentoExitoFondo}"
+                        ColorIcono="{StaticResource AcentoExitoTinta}"
                         Etiqueta="Ganancias del mes"
                         Valor="{Binding Resumen.GananciasDelMes, Converter={StaticResource Moneda}}"
                         ToolTip="Ver el reporte de ganancias">
@@ -307,8 +307,8 @@
 
                     <controls:TarjetaMetrica
                         Icono="TruckDeliveryOutline"
-                        FondoIcono="#FFF3E0"
-                        ColorIcono="#EF6C00"
+                        FondoIcono="{StaticResource AcentoNeutroFondo}"
+                        ColorIcono="{StaticResource AcentoNeutroTinta}"
                         Etiqueta="Compras del mes"
                         Valor="{Binding Resumen.ComprasDelMes, Converter={StaticResource Moneda}}"
                         ToolTip="Ir a compras">
@@ -334,8 +334,8 @@
 
                     <controls:TarjetaMetrica
                         Icono="Warehouse"
-                        FondoIcono="#E8F5E9"
-                        ColorIcono="#2E7D32"
+                        FondoIcono="{StaticResource AcentoNeutroFondo}"
+                        ColorIcono="{StaticResource AcentoNeutroTinta}"
                         Etiqueta="Valor inventario"
                         Valor="{Binding Resumen.ValorInventario, Converter={StaticResource Moneda}}"
                         Nota="valorado a costo"
@@ -349,8 +349,8 @@
 
                     <controls:TarjetaMetrica
                         Icono="PackageVariantClosed"
-                        FondoIcono="#E3F2FD"
-                        ColorIcono="#1565C0"
+                        FondoIcono="{StaticResource AcentoNeutroFondo}"
+                        ColorIcono="{StaticResource AcentoNeutroTinta}"
                         Etiqueta="Productos"
                         Valor="{Binding Resumen.TotalProductos, Converter={StaticResource Cantidad}}"
                         Nota="artículos activos"
@@ -364,8 +364,8 @@
 
                     <controls:TarjetaMetrica
                         Icono="AlertOutline"
-                        FondoIcono="#FFF8E1"
-                        ColorIcono="#F57F17"
+                        FondoIcono="{StaticResource AcentoAvisoFondo}"
+                        ColorIcono="{StaticResource AcentoAvisoTinta}"
                         Etiqueta="Bajo stock"
                         Valor="{Binding Resumen.ProductosBajoStock}"
                         Nota="productos por reponer"
@@ -380,8 +380,8 @@
 
                     <controls:TarjetaMetrica
                         Icono="CloseCircleOutline"
-                        FondoIcono="#FFEBEE"
-                        ColorIcono="#C62828"
+                        FondoIcono="{StaticResource AcentoPeligroFondo}"
+                        ColorIcono="{StaticResource AcentoPeligroTinta}"
                         Etiqueta="Agotados"
                         Valor="{Binding Resumen.ProductosAgotados}"
                         Nota="sin existencias"
@@ -396,8 +396,8 @@
 
                     <controls:TarjetaMetrica
                         Icono="AccountGroupOutline"
-                        FondoIcono="#E0F7FA"
-                        ColorIcono="#00838F"
+                        FondoIcono="{StaticResource AcentoNeutroFondo}"
+                        ColorIcono="{StaticResource AcentoNeutroTinta}"
                         Etiqueta="Clientes"
                         Valor="{Binding Resumen.TotalClientes}"
                         Nota="clientes registrados"
@@ -411,8 +411,8 @@
 
                     <controls:TarjetaMetrica
                         Icono="DomainPlus"
-                        FondoIcono="#EDE7F6"
-                        ColorIcono="#5E35B1"
+                        FondoIcono="{StaticResource AcentoNeutroFondo}"
+                        ColorIcono="{StaticResource AcentoNeutroTinta}"
                         Etiqueta="Proveedores"
                         Valor="{Binding Resumen.TotalProveedores}"
                         Nota="proveedores activos"
@@ -449,9 +449,9 @@
                                     <!-- El distintivo imita el trazo: línea para ventas, bloque para compras. -->
                                     <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
                                         <Grid Width="18" Height="11" VerticalAlignment="Center">
-                                            <Border Height="2.5" CornerRadius="2" Background="#1E88E5"
+                                            <Border Height="2.5" CornerRadius="2" Background="#1565C0"
                                                     VerticalAlignment="Center" />
-                                            <Ellipse Width="7" Height="7" Fill="#1E88E5"
+                                            <Ellipse Width="7" Height="7" Fill="#1565C0"
                                                      Stroke="{DynamicResource MaterialDesignPaper}"
                                                      StrokeThickness="1.5"
                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -460,7 +460,7 @@
                                                    Margin="6,0,0,0" />
                                     </StackPanel>
                                     <StackPanel Orientation="Horizontal">
-                                        <Border Width="11" Height="11" CornerRadius="3" Background="#FB8C00"
+                                        <Border Width="11" Height="11" CornerRadius="3" Background="#9AA7B8"
                                                 VerticalAlignment="Center" />
                                         <TextBlock Text="Compras" FontSize="12" VerticalAlignment="Center"
                                                    Margin="6,0,0,0" />

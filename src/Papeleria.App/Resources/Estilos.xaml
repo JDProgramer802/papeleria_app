@@ -21,6 +21,32 @@
     <SolidColorBrush x:Key="BrochaInformacionSuave" Color="#E3F2FD" />
 
     <!--
+        Acentos de los iconos.
+
+        Antes cada tarjeta elegía su propio pastel y el panel terminaba con nueve
+        colores distintos a la vez: parecía una caja de colores, no una herramienta de
+        trabajo. Aquí el color vuelve a significar algo. Lo neutro es lo normal, y el
+        color se reserva para el dinero, para lo que va bien y para lo que va mal.
+    -->
+    <!-- Tinte del módulo abierto en el menú: transparente, sirve en claro y en oscuro. -->
+    <SolidColorBrush x:Key="BrochaMenuActivo" Color="#1F2196F3" />
+
+    <SolidColorBrush x:Key="AcentoNeutroFondo" Color="#EEF1F5" />
+    <SolidColorBrush x:Key="AcentoNeutroTinta" Color="#5A6472" />
+
+    <SolidColorBrush x:Key="AcentoPrincipalFondo" Color="#E3F0FC" />
+    <SolidColorBrush x:Key="AcentoPrincipalTinta" Color="#1565C0" />
+
+    <SolidColorBrush x:Key="AcentoExitoFondo" Color="#E6F4EA" />
+    <SolidColorBrush x:Key="AcentoExitoTinta" Color="#256B36" />
+
+    <SolidColorBrush x:Key="AcentoAvisoFondo" Color="#FDF1DF" />
+    <SolidColorBrush x:Key="AcentoAvisoTinta" Color="#9A5B00" />
+
+    <SolidColorBrush x:Key="AcentoPeligroFondo" Color="#FCEAEA" />
+    <SolidColorBrush x:Key="AcentoPeligroTinta" Color="#B3261E" />
+
+    <!--
         Realce de la fila elegida: un filo del color del programa a la izquierda y el
         resto teñido apenas.
 
@@ -74,11 +100,18 @@
     </Style>
 
     <!-- ══ Tarjetas ══════════════════════════════════════════════════════════ -->
+    <!--
+        Un solo tratamiento para todas: filo de un pelo y una sombra apenas insinuada.
+        Antes llevaban borde marcado Y sombra a la vez, que es lo que hace que una
+        pantalla se vea recargada sin que uno sepa por qué.
+    -->
     <Style x:Key="TarjetaBase" TargetType="materialDesign:Card">
-        <Setter Property="UniformCornerRadius" Value="10" />
+        <Setter Property="UniformCornerRadius" Value="12" />
         <Setter Property="Padding" Value="{StaticResource RellenoTarjeta}" />
         <Setter Property="Margin" Value="0,0,0,16" />
-        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp2" />
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
     </Style>
 
     <!-- La tarjeta interactiva se eleva y desplaza levemente al pasar el ratón. -->
@@ -282,6 +315,150 @@
         <Setter Property="materialDesign:TextFieldAssist.HasLeadingIcon" Value="True" />
         <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="8" />
         <Setter Property="materialDesign:TextFieldAssist.CharacterCounterVisibility" Value="Collapsed" />
+    </Style>
+
+    <!-- ══ Controles de ventana ══════════════════════════════════════════════ -->
+    <Style x:Key="BotonVentana" TargetType="Button">
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Fondo" Background="Transparent" CornerRadius="6">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Fondo" Property="Background"
+                                    Value="{DynamicResource MaterialDesignChipBackground}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- El de cerrar se pone rojo al pasar por encima, como en cualquier ventana. -->
+    <Style x:Key="BotonVentanaCerrar" TargetType="Button" BasedOn="{StaticResource BotonVentana}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Fondo" Background="Transparent" CornerRadius="6">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Fondo" Property="Background" Value="#E03A32" />
+                            <Setter Property="Foreground" Value="White" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ══ Barras de desplazamiento ══════════════════════════════════════════ -->
+    <!--
+        Las de fábrica son anchas, grises y con flechitas en las puntas: ocupan sitio,
+        parten la pantalla en dos y son lo primero que delata un programa viejo. Estas
+        son una franja fina que se oscurece al pasar el ratón y desaparece del camino.
+    -->
+    <Style x:Key="PulgarBarra" TargetType="Thumb">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Border x:Name="Cuerpo" CornerRadius="4"
+                            Background="{DynamicResource MaterialDesignBody}"
+                            Opacity="0.22"
+                            Margin="2" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Cuerpo" Property="Opacity" Value="0.42" />
+                        </Trigger>
+                        <Trigger Property="IsDragging" Value="True">
+                            <Setter TargetName="Cuerpo" Property="Opacity" Value="0.55" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- El canal por el que se arrastra: invisible, pero tiene que seguir recibiendo
+         los clics para que saltar de página siga funcionando. -->
+    <Style x:Key="CanalBarra" TargetType="RepeatButton">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RepeatButton">
+                    <Border Background="Transparent" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ScrollBar">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Width" Value="10" />
+        <Setter Property="MinWidth" Value="10" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid Background="Transparent">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.PageUpCommand"
+                                              Style="{StaticResource CanalBarra}" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource PulgarBarra}" />
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.PageDownCommand"
+                                              Style="{StaticResource CanalBarra}" />
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="Height" Value="10" />
+                <Setter Property="MinHeight" Value="10" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ScrollBar">
+                            <Grid Background="Transparent">
+                                <Track x:Name="PART_Track" IsDirectionReversed="False">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Command="ScrollBar.PageLeftCommand"
+                                                      Style="{StaticResource CanalBarra}" />
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Style="{StaticResource PulgarBarra}" />
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Command="ScrollBar.PageRightCommand"
+                                                      Style="{StaticResource CanalBarra}" />
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- ══ Grillas ═══════════════════════════════════════════════════════════ -->
@@ -510,7 +687,7 @@
     <Style x:Key="BotonMenuLateral" TargetType="RadioButton">
         <Setter Property="GroupName" Value="MenuLateral" />
         <!-- Con quince módulos, cada píxel de alto decide si el último se ve. -->
-        <Setter Property="Height" Value="44" />
+        <Setter Property="Height" Value="41" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -541,12 +718,18 @@
                             <Setter TargetName="Fondo" Property="Background"
                                     Value="{DynamicResource MaterialDesignChipBackground}" />
                         </Trigger>
+                        <!--
+                            El módulo abierto se tiñe apenas y pone su nombre en el color
+                            del programa. Antes se pintaba de azul claro macizo con letra
+                            negra encima: pesaba más que el contenido de la pantalla y
+                            era lo primero que delataba que el diseño venía de fábrica.
+                        -->
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="Fondo" Property="Background"
-                                    Value="{DynamicResource MaterialDesign.Brush.Primary.Light}" />
+                                    Value="{StaticResource BrochaMenuActivo}" />
                             <Setter TargetName="Indicador" Property="Opacity" Value="1" />
                             <Setter Property="Foreground"
-                                    Value="{DynamicResource MaterialDesign.Brush.Primary.Light.Foreground}" />
+                                    Value="{DynamicResource MaterialDesign.Brush.Primary.Dark}" />
                             <Setter Property="FontWeight" Value="SemiBold" />
                         </Trigger>
                     </ControlTemplate.Triggers>

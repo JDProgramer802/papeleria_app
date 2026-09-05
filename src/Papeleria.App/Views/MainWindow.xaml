@@ -153,9 +153,9 @@
                                     Visibility="{Binding MenuColapsado, Converter={StaticResource BoolAVisible},
                                                  ConverterParameter=Invertir}">
                             <Border Width="34" Height="34" CornerRadius="17"
-                                    Background="{DynamicResource MaterialDesign.Brush.Secondary}">
+                                    Background="{DynamicResource MaterialDesign.Brush.Primary}">
                                 <TextBlock Text="{Binding InicialesUsuario}"
-                                           Foreground="{DynamicResource MaterialDesign.Brush.Secondary.Foreground}"
+                                           Foreground="White"
                                            FontWeight="Bold" FontSize="13"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center" />
@@ -293,14 +293,21 @@
                                 <materialDesign:PackIcon Kind="DatabaseArrowDownOutline" Width="20" Height="20" />
                             </Button>
 
+                            <!--
+                                Mismo peso visual que sus vecinos. Como botón relleno era
+                                lo más llamativo de la barra superior, y cambiar de tema es
+                                lo menos importante que hay ahí.
+                            -->
                             <ToggleButton Style="{StaticResource MaterialDesignActionToggleButton}"
-                                          Width="34" Height="34" Margin="6,0,0,0"
+                                          Width="38" Height="38"
+                                          Background="Transparent" BorderThickness="0"
+                                          Foreground="{DynamicResource MaterialDesignBody}"
                                           IsChecked="{Binding EsTemaOscuro, Mode=OneWay}"
                                           Command="{Binding AlternarTemaCommand}"
                                           ToolTip="Cambiar entre tema claro y oscuro">
-                                <materialDesign:PackIcon Kind="WeatherSunny" Width="18" Height="18" />
+                                <materialDesign:PackIcon Kind="WeatherSunny" Width="20" Height="20" />
                                 <materialDesign:ToggleButtonAssist.OnContent>
-                                    <materialDesign:PackIcon Kind="WeatherNight" Width="18" Height="18" />
+                                    <materialDesign:PackIcon Kind="WeatherNight" Width="20" Height="20" />
                                 </materialDesign:ToggleButtonAssist.OnContent>
                             </ToggleButton>
 

@@ -41,11 +41,15 @@
                                 <Setter TargetName="Fondo" Property="Background"
                                         Value="{DynamicResource MaterialDesignChipBackground}" />
                             </Trigger>
+                            <!-- Mismo trato que el menú lateral: tinte suave y letra
+                                 del color del programa, no un bloque de azul macizo. -->
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="Fondo" Property="Background"
-                                        Value="{DynamicResource MaterialDesign.Brush.Primary.Light}" />
+                                        Value="{StaticResource BrochaMenuActivo}" />
                                 <Setter TargetName="Marca" Property="Background"
                                         Value="{DynamicResource MaterialDesign.Brush.Primary}" />
+                                <Setter Property="TextElement.Foreground"
+                                        Value="{DynamicResource MaterialDesign.Brush.Primary.Dark}" />
                                 <Setter Property="TextElement.FontWeight" Value="SemiBold" />
                             </Trigger>
                         </ControlTemplate.Triggers>
