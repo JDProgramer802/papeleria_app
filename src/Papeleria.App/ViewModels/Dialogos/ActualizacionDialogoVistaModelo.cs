@@ -117,7 +117,14 @@ public partial class ActualizacionDialogoVistaModelo : VistaModeloBase
 
         if (!string.IsNullOrWhiteSpace(ejecutable))
         {
-            Process.Start(new ProcessStartInfo(ejecutable) { UseShellExecute = true });
+            // El argumento le dice a la copia nueva que espere a que esta termine de
+            // cerrarse —respaldo de cierre incluido— en vez de chocar con el semáforo de
+            // instancia única y morir con «El sistema ya está abierto».
+            Process.Start(new ProcessStartInfo(ejecutable)
+            {
+                UseShellExecute = true,
+                Arguments = App.ArgumentoTrasActualizar
+            });
         }
 
         System.Windows.Application.Current.Shutdown();

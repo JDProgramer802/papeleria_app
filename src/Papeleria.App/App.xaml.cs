@@ -33,6 +33,12 @@ public partial class App : Application
     /// </summary>
     private const string NombreInstanciaUnica = @"Local\PapeleriaApp.InstanciaUnica";
 
+    /// <summary>
+    /// Con este argumento se lanza la copia recién actualizada. Le dice al arranque que
+    /// espere a que la copia anterior termine de cerrarse en vez de darse por vencido.
+    /// </summary>
+    public const string ArgumentoTrasActualizar = "--tras-actualizar";
+
     private IHost? _anfitrion;
     private Mutex? _instanciaUnica;
 
@@ -91,7 +97,7 @@ public partial class App : Application
 
         // Se comprueba antes que nada: la segunda copia debe salir sin tocar
         // siquiera los archivos de registro de la primera.
-        if (!TomarInstanciaUnica())
+        if (!TomarInstanciaUnica(e.Args))
         {
             MessageBox.Show(
                 "El sistema ya está abierto." + Environment.NewLine + Environment.NewLine +
@@ -154,13 +160,23 @@ public partial class App : Application
     /// Reserva el semáforo de instancia única. Devuelve <c>false</c> si otra copia
     /// del programa ya lo tiene tomado en esta sesión de Windows.
     /// </summary>
-    private bool TomarInstanciaUnica()
+    private bool TomarInstanciaUnica(string[] argumentos)
     {
         try
         {
             _instanciaUnica = new Mutex(true, NombreInstanciaUnica, out var creado);
 
             if (creado)
+            {
+                return true;
+            }
+
+            // Al actualizarse, la copia nueva se lanza antes de que la vieja termine de
+            // cerrarse: todavía está haciendo el respaldo de cierre y sigue teniendo el
+            // semáforo. Rendirse aquí dejaba al usuario con «El sistema ya está abierto»
+            // justo después de actualizar, y sin ninguna ventana abierta.
+            if (argumentos.Contains(ArgumentoTrasActualizar, StringComparer.OrdinalIgnoreCase) &&
+                EsperarASemaforoLibre())
             {
                 return true;
             }
@@ -175,6 +191,28 @@ public partial class App : Application
             // Si el sistema no deja crear el semáforo, es preferible arrancar
             // a dejar al usuario sin programa.
             return true;
+        }
+    }
+
+    /// <summary>
+    /// Espera a que la copia anterior suelte el semáforo. Veinte segundos son de sobra
+    /// para un respaldo de cierre y siguen siendo poco para quedarse mirando: si se
+    /// agotan, se sigue por el camino normal y el usuario ve el aviso de siempre.
+    /// </summary>
+    private bool EsperarASemaforoLibre()
+    {
+        try
+        {
+            return _instanciaUnica!.WaitOne(TimeSpan.FromSeconds(20));
+        }
+        catch (AbandonedMutexException)
+        {
+            // La copia anterior murió sin soltarlo; el semáforo es nuestro igualmente.
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 

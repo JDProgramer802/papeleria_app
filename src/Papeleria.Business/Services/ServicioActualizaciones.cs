@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -191,6 +192,59 @@ public class ServicioActualizaciones : IServicioActualizaciones
             return null;
         }
 
+        if (ElegirEjecutable(adjuntos, NombreEjecutable) is not { } adjunto)
+        {
+            _log.LogWarning(
+                "La publicación {Version} no trae ningún «{Nombre}» que se pueda aplicar",
+                version, NombreEjecutable);
+
+            return null;
+        }
+
+        return new ActualizacionDisponible
+        {
+            Version = version,
+            Nombre = raiz.TryGetProperty("name", out var titulo) && !string.IsNullOrWhiteSpace(titulo.GetString())
+                ? titulo.GetString()!
+                : $"Versión {version.ToString(3)}",
+            Notas = raiz.TryGetProperty("body", out var cuerpo) ? cuerpo.GetString() ?? string.Empty : string.Empty,
+            UrlDescarga = adjunto.GetProperty("browser_download_url").GetString()!,
+            TamanoBytes = adjunto.TryGetProperty("size", out var tamano) ? tamano.GetInt64() : 0,
+            Sha256 = LeerHuella(adjunto),
+            Publicada = raiz.TryGetProperty("published_at", out var fecha) &&
+                        fecha.TryGetDateTime(out var publicada)
+                ? publicada.ToLocalTime()
+                : null
+        };
+    }
+
+    /// <summary>Nombre del archivo que está corriendo; es el que hay que buscar publicado.</summary>
+    private static string NombreEjecutable =>
+        Path.GetFileName(RutaEjecutable) is { Length: > 0 } nombre ? nombre : "Papeleria.exe";
+
+    /// <summary>Palabras que delatan a un instalador y no al programa en sí.</summary>
+    private static readonly string[] PalabrasDeInstalador =
+    {
+        "instalador", "instalar", "setup", "install"
+    };
+
+    /// <summary>
+    /// Decide cuál de los archivos adjuntos hay que descargar.
+    ///
+    /// Desde que la publicación lleva también el instalador, quedarse con «el primer
+    /// .exe de la lista» pasó a ser una lotería: aplicar una actualización consiste en
+    /// renombrar lo descargado encima del programa, así que bajarse el instalador por
+    /// error dejaría a la papelería con un asistente de instalación donde antes tenía
+    /// su punto de venta, y sin forma cómoda de volver atrás.
+    ///
+    /// Se busca por nombre exacto. Solo si no aparece se acepta otro ejecutable, y
+    /// nunca uno que se llame como un instalador: es preferible no ofrecer la
+    /// actualización a aplicar el archivo equivocado.
+    /// </summary>
+    internal static JsonElement? ElegirEjecutable(JsonElement adjuntos, string nombreEsperado)
+    {
+        JsonElement? suplente = null;
+
         foreach (var adjunto in adjuntos.EnumerateArray())
         {
             var nombre = adjunto.TryGetProperty("name", out var n) ? n.GetString() : null;
@@ -207,25 +261,19 @@ public class ServicioActualizaciones : IServicioActualizaciones
                 continue;
             }
 
-            return new ActualizacionDisponible
+            if (nombre.Equals(nombreEsperado, StringComparison.OrdinalIgnoreCase))
             {
-                Version = version,
-                Nombre = raiz.TryGetProperty("name", out var titulo) && !string.IsNullOrWhiteSpace(titulo.GetString())
-                    ? titulo.GetString()!
-                    : $"Versión {version.ToString(3)}",
-                Notas = raiz.TryGetProperty("body", out var cuerpo) ? cuerpo.GetString() ?? string.Empty : string.Empty,
-                UrlDescarga = url,
-                TamanoBytes = adjunto.TryGetProperty("size", out var tamano) ? tamano.GetInt64() : 0,
-                Sha256 = LeerHuella(adjunto),
-                Publicada = raiz.TryGetProperty("published_at", out var fecha) &&
-                            fecha.TryGetDateTime(out var publicada)
-                    ? publicada.ToLocalTime()
-                    : null
-            };
+                return adjunto;
+            }
+
+            if (suplente is null &&
+                !PalabrasDeInstalador.Any(p => nombre.Contains(p, StringComparison.OrdinalIgnoreCase)))
+            {
+                suplente = adjunto;
+            }
         }
 
-        _log.LogWarning("La publicación {Version} no incluye ningún ejecutable adjunto", version);
-        return null;
+        return suplente;
     }
 
     /// <summary>GitHub expone la huella como «sha256:abc…» en el campo <c>digest</c>.</summary>
@@ -340,6 +388,12 @@ public class ServicioActualizaciones : IServicioActualizaciones
                 "La descarga quedó incompleta y se descartó. Inténtelo de nuevo.");
         }
 
+        if (!EsElPrograma(archivo))
+        {
+            throw new NegocioException(
+                "El archivo descargado no es el programa PapelSoft y se descartó por seguridad.");
+        }
+
         if (string.IsNullOrWhiteSpace(actualizacion.Sha256))
         {
             _log.LogInformation("La publicación no trae huella SHA-256; se validó solo el tamaño");
@@ -357,15 +411,48 @@ public class ServicioActualizaciones : IServicioActualizaciones
         }
     }
 
+    /// <summary>Nombre de producto que declara el ejecutable de la aplicación.</summary>
+    private const string NombreProducto = "PapelSoft";
+
+    /// <summary>
+    /// Comprueba que lo descargado es de verdad el programa y no otro ejecutable de la
+    /// misma publicación.
+    ///
+    /// El tamaño y la huella SHA-256 no sirven para esto: los dos salieron del mismo
+    /// adjunto que se eligió, así que un archivo equivocado —el instalador, pongamos—
+    /// los pasa con nota perfecta. Lo único que distingue a uno de otro es lo que cada
+    /// binario declara ser. El instalador se identifica a propósito como
+    /// «PapelSoft (Instalador)» para no poder colarse por aquí.
+    /// </summary>
+    internal static bool EsElPrograma(string archivo)
+    {
+        try
+        {
+            var producto = FileVersionInfo.GetVersionInfo(archivo).ProductName?.Trim();
+
+            return string.Equals(producto, NombreProducto, StringComparison.Ordinal);
+        }
+        catch (Exception)
+        {
+            // Si no se puede leer la información de versión, no es el programa.
+            return false;
+        }
+    }
+
     public async Task AplicarAsync(string archivoDescargado, CancellationToken ct = default)
     {
         var impedimento = ComprobarViabilidad();
 
         if (impedimento != ImpedimentoActualizacion.Ninguno)
         {
+            // Aquí no se puede aconsejar «ejecute como administrador»: los datos viven en
+            // %LOCALAPPDATA%, que es del perfil de Windows. Quien elevara con las
+            // credenciales de otra cuenta abriría una base vacía y creería que perdió el
+            // negocio entero.
             throw new NegocioException(impedimento == ImpedimentoActualizacion.CarpetaSoloLectura
-                ? "No hay permisos para escribir en la carpeta del programa. " +
-                  "Ejecute la aplicación como administrador o muévala a otra carpeta."
+                ? "PapelSoft está en una carpeta protegida de Windows y no puede actualizarse " +
+                  "solo. Descargue el instalador y ejecútelo con la misma cuenta de Windows " +
+                  "que usa a diario; sus datos no se tocan."
                 : "Las actualizaciones automáticas solo funcionan sobre el ejecutable publicado.");
         }
 

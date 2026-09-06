@@ -33,7 +33,7 @@ dotnet run --project src/Papeleria.App/Papeleria.App.csproj
 
 ### Generar el ejecutable distribuible
 
-Produce un **único `.exe` autónomo** (~85 MB) que no requiere .NET instalado en el
+Produce un **único `.exe` autónomo** (~87 MB) que no requiere .NET instalado en el
 equipo de destino:
 
 ```bash
@@ -41,7 +41,52 @@ dotnet publish src/Papeleria.App/Papeleria.App.csproj -c Release -r win-x64 --se
 ```
 
 El resultado queda en `publish/win-x64/Papeleria.exe`. Se puede copiar a cualquier
-equipo con Windows 10/11 de 64 bits y ejecutarlo directamente.
+equipo con Windows 10/11 de 64 bits y ejecutarlo directamente. Ese archivo suelto es
+el que descarga el actualizador; **para entregarle el programa a un cliente use el
+instalador**, no el `.exe` crudo.
+
+### Generar el instalador
+
+```bash
+powershell -ExecutionPolicy Bypass -File instalador\construir.ps1
+```
+
+Publica el ejecutable y lo empaqueta con [Inno Setup 6](https://jrsoftware.org/isinfo.php),
+que se instala una sola vez con `winget install --id JRSoftware.InnoSetup --exact`. El
+guion toma el número de versión del `.csproj`, así que el instalador y el ejecutable no
+pueden contradecirse, y antes de terminar comprueba que los dos binarios se identifican
+distinto (ver más abajo por qué eso importa).
+
+El resultado es `publish/instalador/PapelSoft-Instalador.exe` (~82 MB). Lo que hace en
+el equipo del cliente:
+
+| | |
+|---|---|
+| Dónde instala | `%LOCALAPPDATA%\Programs\PapelSoft` |
+| Permisos | ninguno: **no pide administrador ni UAC** |
+| Accesos directos | escritorio y menú Inicio, siempre, sin preguntar |
+| Desinstalación | Configuración → Aplicaciones → Aplicaciones instaladas → PapelSoft |
+| Pasos del asistente | bienvenida → progreso → fin |
+
+Se instala en la carpeta del usuario y no en `Archivos de programa` por dos razones que
+pesan más que la costumbre: el dueño de una papelería rara vez es administrador de su
+equipo, y el programa se actualiza solo reemplazando su propio ejecutable —cosa que en
+`Archivos de programa` Windows no permite—.
+
+**Instálelo siempre desde la sesión de Windows que el cliente usa a diario**, nunca con
+«Ejecutar como administrador» ni desde otra cuenta: los datos viven en el perfil de cada
+usuario, así que instalarlo desde otra cuenta hace que el programa abra una base vacía y
+el cliente crea que perdió su información. El asistente lo advierte en su primera
+pantalla.
+
+### Desinstalar
+
+Configuración → Aplicaciones → Aplicaciones instaladas → PapelSoft → Desinstalar.
+
+**Los datos del negocio no se borran.** La base de datos, las imágenes y los respaldos
+viven en `%LOCALAPPDATA%\PapeleriaApp`, fuera de la carpeta del programa, y el
+desinstalador no los toca: si se vuelve a instalar en la misma cuenta de Windows, todo
+sigue como estaba. Para eliminarlos de verdad hay que borrar esa carpeta a mano.
 
 ### Primer acceso
 
@@ -217,10 +262,35 @@ credenciales.
    Este paso no es opcional: la app compara la versión del ensamblado con la etiqueta
    de la release, y si no sube el número no detectará nada.
 
-2. **Generar el ejecutable** con el comando de publicación de más arriba.
+2. **Generar el ejecutable y el instalador** con `instalador\construir.ps1`.
 
 3. **Crear la release en GitHub** con la etiqueta `v1.0.1` (vale `1.0.1`, `v1.0.1` o
-   `version-1.0.1`) y **adjuntar `Papeleria.exe`** como archivo de la release.
+   `version-1.0.1`) y adjuntar los dos archivos:
+
+   | Archivo | Para quién |
+   |---|---|
+   | `Papeleria.exe` | para el programa: es el que descarga el actualizador |
+   | `PapelSoft-Instalador.exe` | para las personas: es el que se instala en el equipo |
+
+   **El nombre `Papeleria.exe` no se puede cambiar.** El actualizador busca el adjunto
+   que se llama exactamente igual que el ejecutable en marcha; si no lo encuentra,
+   prefiere no ofrecer la actualización antes que aplicar el archivo equivocado.
+
+   El instalador tampoco cambia de nombre, y a propósito no lleva la versión dentro:
+   así el enlace
+   `https://github.com/<usuario>/<repo>/releases/latest/download/PapelSoft-Instalador.exe`
+   apunta siempre a la última versión y se puede mandar por WhatsApp una sola vez.
+
+   Escriba las notas de la release **en frases planas, sin markdown**: el programa las
+   muestra tal cual dentro del aviso de actualización, y los `##` y los `**` se ven
+   como basura.
+
+   > **Excepción de la 2.3.0.** El filtro por nombre exacto vive en el ejecutable del
+   > cliente, no en GitHub, así que las copias anteriores a la 2.3.0 siguen tomando «el
+   > primer `.exe`» que encuentren. Por eso la release 2.3.0 adjunta el instalador
+   > comprimido, `PapelSoft-Instalador.zip`, y deja `Papeleria.exe` como único `.exe`
+   > de la lista. De la 2.4.0 en adelante, con el parque ya actualizado, el instalador
+   > vuelve a ir suelto como `.exe`.
 
 Al abrir el programa, el cliente verá el aviso de versión nueva con sus notas, podrá
 instalarla con un clic y reiniciar. También puede buscarlas a mano desde
@@ -233,6 +303,11 @@ instalarla con un clic y reiniciar. También puede buscarlas a mano desde
   programa funciona con normalidad.
 - **Verifica la descarga** contra la huella SHA-256 que publica GitHub; un archivo
   incompleto o alterado se descarta sin instalarse.
+- **Comprueba que lo descargado es el programa** y no otro ejecutable de la misma
+  release. El tamaño y la huella no bastan para esto: los dos salen del mismo adjunto,
+  así que el archivo equivocado los pasaría con nota perfecta. Lo que se mira es qué
+  dice ser el binario: el programa se identifica como «PapelSoft» y el instalador como
+  «PapelSoft (Instalador)».
 - **Conserva el ejecutable anterior** con la extensión `.anterior` hasta el siguiente
   arranque, por si hubiera que volver atrás.
 - **No toca los datos.** La base de datos, los respaldos y la configuración viven en
@@ -245,7 +320,19 @@ instalarla con un clic y reiniciar. También puede buscarlas a mano desde
 - Solo funciona sobre el **ejecutable publicado**. Si se ejecuta la compilación de
   desarrollo, la pantalla lo indica y desactiva la instalación automática.
 - Si el programa está en `C:\Program Files`, Windows no deja sustituirlo sin permisos
-  de administrador. Se recomienda instalarlo en una carpeta propia como `C:\Papeleria`.
+  de administrador y la actualización automática queda desactivada. Por eso el
+  instalador lo pone en `%LOCALAPPDATA%\Programs\PapelSoft`, donde el propio usuario
+  sí puede escribir. Si alguna vez aparece ese aviso, la salida es volver a ejecutar el
+  instalador con la cuenta de siempre; nunca elevar como administrador, porque con otra
+  cuenta el programa abriría una base de datos vacía.
+- **La versión que muestra «Aplicaciones instaladas» se queda congelada** en la que puso
+  el instalador: las actualizaciones automáticas reemplazan el ejecutable pero no tocan
+  el registro de Windows. Para saber qué versión tiene un cliente, pregunte por la que
+  muestra el propio programa, no por la del panel de Windows.
+- El instalador **no está firmado digitalmente**. La primera vez, el navegador avisa de
+  una descarga poco frecuente y SmartScreen muestra «Windows protegió su PC»: hay que
+  pulsar *Más información → Ejecutar de todas formas*. Las actualizaciones posteriores
+  no pasan por ahí, así que el único momento incómodo es la instalación inicial.
 
 ---
 
