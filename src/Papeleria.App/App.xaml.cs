@@ -9,6 +9,7 @@ using Papeleria.App.Infrastructure;
 using Papeleria.App.ViewModels;
 using Papeleria.App.ViewModels.Paginas;
 using Papeleria.App.Views;
+using Papeleria.Business.Common;
 using Papeleria.Business.DependencyInjection;
 using Papeleria.Business.Services;
 using Papeleria.Data;
@@ -95,6 +96,8 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        FijarIdiomaDeLaInterfaz();
+
         // Se comprueba antes que nada: la segunda copia debe salir sin tocar
         // siquiera los archivos de registro de la primera.
         if (!TomarInstanciaUnica(e.Args))
@@ -155,6 +158,20 @@ public partial class App : Application
             Shutdown(1);
         }
     }
+
+    /// <summary>
+    /// Le dice a WPF en qué idioma tiene que formatear los números de los enlaces.
+    ///
+    /// Sin esto, todo «StringFormat» de un XAML se formatea en inglés por omisión, sin
+    /// importar la cultura del hilo: en el punto de venta se leía «6,800.00» en la
+    /// columna de precio mientras la de al lado decía «$ 13.600». Los conversores
+    /// propios nunca tuvieron el problema porque pasan la cultura a mano.
+    /// </summary>
+    private static void FijarIdiomaDeLaInterfaz() =>
+        FrameworkElement.LanguageProperty.OverrideMetadata(
+            typeof(FrameworkElement),
+            new FrameworkPropertyMetadata(
+                System.Windows.Markup.XmlLanguage.GetLanguage(Formatos.Cultura.IetfLanguageTag)));
 
     /// <summary>
     /// Reserva el semáforo de instancia única. Devuelve <c>false</c> si otra copia

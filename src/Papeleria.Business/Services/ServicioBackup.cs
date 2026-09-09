@@ -14,6 +14,14 @@ public class ServicioBackup : IServicioBackup
     private const string Extension = ".db";
     private const string PrefijoArchivo = "papeleria_backup_";
 
+    /// <summary>
+    /// Mientras se escribe, la copia lleva este sufijo. Solo se le quita cuando ya se
+    /// comprobó que sirve, y quitarlo es un renombrado, que en Windows es atómico: o hay
+    /// copia entera o no hay archivo. Nunca un archivo a medias con nombre de bueno,
+    /// esperando al día que alguien lo necesite de verdad.
+    /// </summary>
+    private const string SufijoParcial = ".parcial";
+
     private readonly IServicioConfiguracion _configuracion;
     private readonly IContextoSesion _sesion;
     private readonly ILogger<ServicioBackup> _log;
@@ -67,23 +75,20 @@ public class ServicioBackup : IServicioBackup
 
         var nombre = $"{PrefijoArchivo}{DateTime.Now:yyyyMMdd_HHmmss}{Extension}";
         var destino = Path.Combine(carpeta, nombre);
+        var provisional = destino + SufijoParcial;
+
+        TryEliminar(provisional);
 
         try
         {
             // La API de respaldo de SQLite copia la base de forma consistente aunque
             // haya operaciones en curso, sin necesidad de cerrar la aplicación.
-            await Task.Run(() =>
-            {
-                using var origen = new SqliteConnection(RutasAplicacion.CadenaConexion);
-                using var copia = new SqliteConnection($"Data Source={destino}");
-
-                origen.Open();
-                copia.Open();
-                origen.BackupDatabase(copia);
-            }, ct).ConfigureAwait(false);
+            await Task.Run(() => CopiarBaseDatos(provisional), ct).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
+            TryEliminar(provisional);
+
             throw new NegocioException($"No se pudo crear la copia de seguridad. {ex.Message}", ex);
         }
 
@@ -92,15 +97,30 @@ public class ServicioBackup : IServicioBackup
         // no el día que haga falta restaurarla.
         try
         {
-            await VerificarQueEsBaseDeDatosAsync(destino, ct).ConfigureAwait(false);
+            await VerificarQueEsBaseDeDatosAsync(provisional, ct).ConfigureAwait(false);
         }
-        catch (NegocioException)
+        catch (NegocioException ex)
         {
-            TryEliminar(destino);
+            TryEliminar(provisional);
+
+            // El motivo de verdad va en el mensaje. Cuando este aviso decía solo
+            // «quedó dañada», el usuario no tenía forma de saber si era el disco, el
+            // destino desconectado o un fallo del programa, y resultó ser lo tercero.
+            throw new NegocioException(
+                $"La copia se escribió en «{carpeta}» pero no se pudo dar por buena y se " +
+                $"descartó. {ex.Message}", ex);
+        }
+
+        try
+        {
+            File.Move(provisional, destino, overwrite: true);
+        }
+        catch (Exception ex)
+        {
+            TryEliminar(provisional);
 
             throw new NegocioException(
-                $"La copia se escribió en «{carpeta}» pero quedó dañada y se descartó. " +
-                "Revise que el destino tenga espacio y siga conectado.");
+                $"La copia se hizo bien pero no se pudo dejar en «{carpeta}». {ex.Message}", ex);
         }
 
         await _configuracion.GuardarAsync(
@@ -113,6 +133,29 @@ public class ServicioBackup : IServicioBackup
         await DepurarAntiguasAsync(ct).ConfigureAwait(false);
 
         return destino;
+    }
+
+    /// <summary>
+    /// Vuelca la base de datos en un archivo nuevo con la API de respaldo del motor.
+    ///
+    /// El «Pooling=False» del destino no es un adorno. Con el pool activado —que es lo
+    /// que trae de fábrica— cerrar la conexión de destino la devuelve al pool con el
+    /// archivo TODAVÍA abierto: la comprobación posterior no podía ni leerlo, una copia
+    /// perfectamente buena se daba por dañada, y el intento de borrarla también fallaba,
+    /// así que la carpeta se iba llenando de respaldos «rotos» que en realidad servían.
+    /// </summary>
+    private static void CopiarBaseDatos(string destino)
+    {
+        using var origen = new SqliteConnection(RutasAplicacion.CadenaConexion);
+        using var copia = new SqliteConnection($"Data Source={destino};Pooling=False");
+
+        origen.Open();
+        copia.Open();
+
+        origen.BackupDatabase(copia);
+
+        copia.Close();
+        origen.Close();
     }
 
     public async Task RestaurarAsync(string archivoBackup, CancellationToken ct = default)
@@ -131,10 +174,11 @@ public class ServicioBackup : IServicioBackup
         await VerificarQueEsBaseDeDatosAsync(archivoBackup, ct).ConfigureAwait(false);
 
         // Antes de sobrescribir se conserva el estado actual: si el respaldo estuviera
-        // dañado, el negocio no se queda sin datos.
-        var copiaSeguridad = Path.Combine(
-            RutasAplicacion.CarpetaBackupsPorDefecto,
-            $"previo_a_restaurar_{DateTime.Now:yyyyMMdd_HHmmss}{Extension}");
+        // dañado, el negocio no se queda sin datos. Se hace con la API del motor y no
+        // con File.Copy: en modo WAL, copiar el archivo a pelo puede dejar fuera las
+        // últimas transacciones, y esta es justamente la copia de la que depende el
+        // rescate si la restauración sale mal.
+        var copiaSeguridad = string.Empty;
 
         try
         {
@@ -142,8 +186,8 @@ public class ServicioBackup : IServicioBackup
 
             if (File.Exists(RutasAplicacion.ArchivoBaseDatos))
             {
-                await CrearAsync(RutasAplicacion.CarpetaBackupsPorDefecto, ct).ConfigureAwait(false);
-                File.Copy(RutasAplicacion.ArchivoBaseDatos, copiaSeguridad, overwrite: true);
+                copiaSeguridad = await CrearAsync(RutasAplicacion.CarpetaBackupsPorDefecto, ct)
+                    .ConfigureAwait(false);
             }
 
             // Las conexiones agrupadas mantienen el archivo abierto: hay que liberarlas.
@@ -158,7 +202,7 @@ public class ServicioBackup : IServicioBackup
         {
             throw new NegocioException(
                 $"No se pudo restaurar la copia de seguridad. {ex.Message} " +
-                (File.Exists(copiaSeguridad)
+                (copiaSeguridad.Length > 0 && File.Exists(copiaSeguridad)
                     ? $"La base anterior quedó guardada en «{copiaSeguridad}»."
                     : string.Empty), ex);
         }
@@ -167,7 +211,6 @@ public class ServicioBackup : IServicioBackup
             archivoBackup, _sesion.Usuario?.NombreUsuario);
     }
 
-    /// <summary>Comprueba la cabecera del archivo para no restaurar algo que no sea SQLite.</summary>
     private static void TryEliminar(string archivo)
     {
         try
@@ -184,27 +227,78 @@ public class ServicioBackup : IServicioBackup
         }
     }
 
+    /// <summary>Tablas que tiene que traer cualquier copia que sea de este sistema.</summary>
+    private static readonly string[] TablasEsperadas =
+    {
+        "Ventas", "VentaDetalles", "Productos", "Clientes", "Configuraciones", "MovimientosKardex"
+    };
+
+    /// <summary>
+    /// Comprueba que el archivo es una copia utilizable de ESTA base de datos.
+    ///
+    /// Mirar los primeros bytes no bastaba, y era peligroso: SQLite escribe la cabecera
+    /// al principio del respaldo, de modo que una copia cortada por la mitad la tiene
+    /// perfecta y pasaba por buena. La única forma de saber si una copia sirve es
+    /// abrirla y hacerla hablar: que el motor la revise entera, que estén las tablas del
+    /// negocio y que se puedan contar las ventas.
+    /// </summary>
     private static async Task VerificarQueEsBaseDeDatosAsync(string archivo, CancellationToken ct)
     {
-        const string cabeceraEsperada = "SQLite format 3";
+        var cadena = new SqliteConnectionStringBuilder
+        {
+            DataSource = archivo,
+            Mode = SqliteOpenMode.ReadOnly,
+            Pooling = false
+        }.ToString();
 
         try
         {
-            await using var flujo = File.OpenRead(archivo);
-            var buffer = new byte[16];
-            var leidos = await flujo.ReadAsync(buffer, ct).ConfigureAwait(false);
+            await using var conexion = new SqliteConnection(cadena);
+            await conexion.OpenAsync(ct).ConfigureAwait(false);
 
-            var cabecera = System.Text.Encoding.ASCII.GetString(buffer, 0, Math.Max(leidos - 1, 0));
-
-            if (leidos < 16 || !cabecera.StartsWith(cabeceraEsperada, StringComparison.Ordinal))
+            await using (var revision = conexion.CreateCommand())
             {
-                throw new NegocioException(
-                    "El archivo seleccionado no es una base de datos válida del sistema.");
+                revision.CommandText = "PRAGMA quick_check";
+
+                var resultado = await revision.ExecuteScalarAsync(ct).ConfigureAwait(false) as string;
+
+                if (!string.Equals(resultado, "ok", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new NegocioException(
+                        $"El motor encontró daños dentro del archivo: {resultado}");
+                }
+            }
+
+            await using (var tablas = conexion.CreateCommand())
+            {
+                var lista = string.Join(", ", TablasEsperadas.Select(t => $"'{t}'"));
+
+                tablas.CommandText =
+                    $"SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name IN ({lista})";
+
+                var encontradas = Convert.ToInt32(
+                    await tablas.ExecuteScalarAsync(ct).ConfigureAwait(false), CultureInfo.InvariantCulture);
+
+                if (encontradas < TablasEsperadas.Length)
+                {
+                    throw new NegocioException(
+                        "El archivo es una base de datos, pero no es la del sistema: le faltan tablas.");
+                }
+            }
+
+            await using (var ventas = conexion.CreateCommand())
+            {
+                ventas.CommandText = "SELECT COUNT(*) FROM Ventas";
+                await ventas.ExecuteScalarAsync(ct).ConfigureAwait(false);
             }
         }
-        catch (Exception ex) when (ex is not NegocioException)
+        catch (NegocioException)
         {
-            throw new NegocioException($"No se pudo leer el archivo de respaldo. {ex.Message}", ex);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new NegocioException($"No se pudo abrir el archivo para comprobarlo. {ex.Message}", ex);
         }
     }
 
@@ -241,6 +335,8 @@ public class ServicioBackup : IServicioBackup
             return Task.FromResult(new List<ArchivoBackupDto>());
         }
 
+        // El comodín «*.db» no recoge los «.db.parcial»: una copia a medio escribir no
+        // debe aparecer nunca en la lista desde la que el usuario elige qué restaurar.
         var archivos = new DirectoryInfo(destino)
             .GetFiles($"*{Extension}")
             .OrderByDescending(f => f.LastWriteTime)

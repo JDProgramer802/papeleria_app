@@ -256,6 +256,7 @@
                     <DataGrid Grid.Row="1" Style="{StaticResource GrillaDatos}"
                               ItemsSource="{Binding VistaPrevia}"
                               AutoGenerateColumns="True"
+                              AutoGeneratingColumn="AlGenerarColumna"
                               RowHeight="34" ColumnHeaderHeight="38"
                               CanUserSortColumns="True"
                               Visibility="{Binding HayResultado, Converter={StaticResource BoolAVisible}}" />
