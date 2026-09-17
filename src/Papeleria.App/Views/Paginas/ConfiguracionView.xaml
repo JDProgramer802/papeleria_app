@@ -449,7 +449,7 @@
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" Width="184">
                             <materialDesign:PackIcon Kind="PrinterOutline" VerticalAlignment="Center" />
-                            <TextBlock Text="Impresión" Margin="8,0,0,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Impresión y caja" Margin="8,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </TabItem.Header>
 
@@ -514,6 +514,85 @@
                                            Text="El recibo se imprime como tirilla de 80 mm, la medida de las impresoras térmicas de mostrador. El PDF se sigue generando cuando lo pida desde el historial de ventas, por si necesita guardarlo o enviarlo." />
                             </StackPanel>
                         </Border>
+
+                        <!-- ══ Caja registradora ═══════════════════════════ -->
+                        <Separator Style="{StaticResource SeparadorHorizontal}" />
+
+                        <TextBlock Text="Caja registradora" Style="{StaticResource TituloSeccion}" />
+
+                        <TextBlock Style="{StaticResource TextoTenue}" FontSize="12.5"
+                                   TextWrapping="Wrap" LineHeight="19" Margin="0,0,0,16"
+                                   Text="El cajón del dinero no se conecta al computador: se conecta a la impresora de recibos con un cable de teléfono, y es la impresora la que lo abre. Dígale aquí dónde está conectado y se abrirá solo cada vez que cobre en efectivo." />
+
+                        <ComboBox Style="{StaticResource CampoSeleccion}"
+                                  ItemsSource="{Binding ModosDeCajon}"
+                                  SelectedValue="{Binding ModoCajon}"
+                                  SelectedValuePath="Modo"
+                                  DisplayMemberPath="Nombre"
+                                  IsEnabled="{Binding PuedeEditar}"
+                                  materialDesign:HintAssist.Hint="Cómo está conectada"
+                                  materialDesign:HintAssist.IsFloating="True" />
+
+                        <ComboBox Style="{StaticResource CampoSeleccion}"
+                                  Margin="0,12,0,0"
+                                  ItemsSource="{Binding Impresoras}"
+                                  SelectedValue="{Binding CajonImpresora}"
+                                  SelectedValuePath="Nombre"
+                                  DisplayMemberPath="Descripcion"
+                                  IsEnabled="{Binding PuedeEditar}"
+                                  Visibility="{Binding CajonPorImpresoraPropia, Converter={StaticResource BoolAVisible}}"
+                                  materialDesign:HintAssist.Hint="Impresora a la que está conectado el cajón"
+                                  materialDesign:HintAssist.IsFloating="True" />
+
+                        <ComboBox Style="{StaticResource CampoSeleccion}"
+                                  Margin="0,12,0,0"
+                                  ItemsSource="{Binding PuertosSerie}"
+                                  SelectedItem="{Binding CajonPuerto}"
+                                  IsEnabled="{Binding PuedeEditar}"
+                                  Visibility="{Binding CajonPorPuerto, Converter={StaticResource BoolAVisible}}"
+                                  materialDesign:HintAssist.Hint="Puerto COM"
+                                  materialDesign:HintAssist.IsFloating="True" />
+
+                        <StackPanel Visibility="{Binding HayCajon, Converter={StaticResource BoolAVisible}}">
+                            <ComboBox Style="{StaticResource CampoSeleccion}"
+                                      Margin="0,12,0,0"
+                                      ItemsSource="{Binding Patillas}"
+                                      SelectedItem="{Binding CajonPatilla}"
+                                      IsEnabled="{Binding PuedeEditar}"
+                                      materialDesign:HintAssist.Hint="Patilla del conector"
+                                      materialDesign:HintAssist.IsFloating="True" />
+
+                            <TextBlock Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                       TextWrapping="Wrap" LineHeight="17" Margin="0,6,0,16"
+                                       Text="Casi todos los cajones usan la 2. Si prueba y no abre, cambie a la 5 y vuelva a probar: esto lo decide el fabricante del cajón y no hay forma de saberlo de antemano." />
+
+                            <CheckBox Content="Abrir el cajón al cobrar en efectivo"
+                                      IsChecked="{Binding AbrirCajonAlCobrar}"
+                                      IsEnabled="{Binding PuedeEditar}"
+                                      Margin="0,0,0,6" />
+
+                            <TextBlock Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                       TextWrapping="Wrap" LineHeight="17" Margin="26,0,0,18"
+                                       Text="Solo en efectivo: cobrando con tarjeta, Nequi o a crédito no entra plata al cajón, así que no hay por qué abrirlo. Desde el punto de venta se puede abrir a mano cuando haga falta." />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <Button Style="{StaticResource BotonPrincipal}" Margin="0,0,8,0"
+                                    Command="{Binding GuardarCajonCommand}"
+                                    IsEnabled="{Binding PuedeEditar}"
+                                    Content="Guardar" />
+
+                            <Button Style="{StaticResource BotonSecundario}"
+                                    Command="{Binding ProbarCajonCommand}"
+                                    Visibility="{Binding HayCajon, Converter={StaticResource BoolAVisible}}"
+                                    ToolTip="Manda la orden de apertura ahora mismo">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="CashRegister" VerticalAlignment="Center" />
+                                    <TextBlock Text="Abrir el cajón ahora" Margin="8,0,0,0"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
                     </StackPanel>
                 </TabItem>
 

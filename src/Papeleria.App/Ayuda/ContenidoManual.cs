@@ -277,7 +277,21 @@ public static class ContenidoManual
                     "Tarjeta y transferencia: no, aunque sí cuentan como venta.",
                     "Ventas a crédito: no, quedan en Cartera.",
                     "Abonos en efectivo de clientes: sí.",
-                    "Devoluciones de ventas cobradas en efectivo: salen del cajón.")
+                    "Devoluciones de ventas cobradas en efectivo: salen del cajón."),
+                Parrafo(
+                    "Si tiene caja registradora —el cajón metálico del dinero—, el programa puede " +
+                    "abrirlo solo cada vez que cobre en efectivo. Se configura en Configuración → " +
+                    "Impresión y caja."),
+                Pasos("Conectar la caja registradora",
+                    "Conecte el cajón a la impresora de recibos con el cable de teléfono que trae.",
+                    "En Configuración → Impresión y caja, elija cómo está conectado.",
+                    "Pulse «Abrir el cajón ahora» para probarlo.",
+                    "Si no abrió, cambie la patilla del conector de la 2 a la 5 y pruebe otra vez."),
+                Aviso(
+                    "El cajón no se conecta al computador sino a la impresora, y es la impresora la " +
+                    "que lo abre. Por eso hace falta tener elegida una impresora de recibos para que " +
+                    "funcione. Desde el punto de venta hay un botón para abrirlo a mano cuando " +
+                    "necesite dar un cambio.")
             }
         },
         new()

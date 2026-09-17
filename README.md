@@ -88,6 +88,15 @@ viven en `%LOCALAPPDATA%\PapeleriaApp`, fuera de la carpeta del programa, y el
 desinstalador no los toca: si se vuelve a instalar en la misma cuenta de Windows, todo
 sigue como estaba. Para eliminarlos de verdad hay que borrar esa carpeta a mano.
 
+### Pruebas
+
+```bash
+dotnet run --project tests/Papeleria.Pruebas
+```
+
+Comprobaciones de integración sobre una base de datos de usar y tirar en la carpeta
+temporal; la base real del usuario no se toca. Devuelve 0 si todo pasa.
+
 ### Primer acceso
 
 | Usuario | Contraseña  |

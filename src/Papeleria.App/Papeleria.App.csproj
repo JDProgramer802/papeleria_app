@@ -10,9 +10,9 @@
     <AssemblyName>Papeleria</AssemblyName>
     <ApplicationIcon>Resources\Images\app.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>2.3.1</Version>
-    <AssemblyVersion>2.3.1.0</AssemblyVersion>
-    <FileVersion>2.3.1.0</FileVersion>
+    <Version>2.4.0</Version>
+    <AssemblyVersion>2.4.0.0</AssemblyVersion>
+    <FileVersion>2.4.0.0</FileVersion>
     <Product>PapelSoft</Product>
     <AssemblyTitle>PapelSoft</AssemblyTitle>
     <Description>Software de papelería: punto de venta, inventario, caja y cartera.</Description>
@@ -41,6 +41,8 @@
 
   <ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
+    <!-- Para hablarle a un cajón de dinero conectado a un puerto COM. -->
+    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
     <PackageReference Include="Serilog" Version="4.2.0" />

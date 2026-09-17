@@ -92,6 +92,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
     private readonly IServicioCotizaciones _cotizaciones;
     private readonly IServicioDocumentos _documentos;
     private readonly Impresion.IServicioImpresion _impresion;
+    private readonly Impresion.IServicioCajonMonedero _cajon;
     private readonly IServicioArchivos _archivos;
     private readonly IServicioDialogos _dialogos;
     private readonly IContextoSesion _sesion;
@@ -107,6 +108,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         IServicioCotizaciones cotizaciones,
         IServicioDocumentos documentos,
         Impresion.IServicioImpresion impresion,
+        Impresion.IServicioCajonMonedero cajon,
         IServicioArchivos archivos,
         IServicioDialogos dialogos,
         IContextoSesion sesion)
@@ -119,6 +121,7 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
         _cotizaciones = cotizaciones;
         _documentos = documentos;
         _impresion = impresion;
+        _cajon = cajon;
         _archivos = archivos;
         _dialogos = dialogos;
         _sesion = sesion;
@@ -648,6 +651,15 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
             WeakReferenceMessenger.Default.Send(new VentaRegistradaMensaje(venta.NumeroFactura));
             WeakReferenceMessenger.Default.Send(new InventarioCambiadoMensaje());
 
+            // Solo en efectivo: con tarjeta, Nequi o a crédito no entra plata al cajón.
+            // Y nunca con await ni con excepciones hacia arriba: la venta ya está
+            // guardada, así que un cajón desconectado no puede tumbarla.
+            if (venta.MetodoPago == MetodoPago.Efectivo && _cajon.AbreAlCobrar &&
+                _cajon.IntentarAbrir() is { } motivo)
+            {
+                _dialogos.Notificar($"La venta quedó registrada, pero el cajón no abrió. {motivo}");
+            }
+
             if (dialogoPago.ImprimirFactura)
             {
                 await ImprimirFacturaAsync(venta).ConfigureAwait(true);
@@ -686,6 +698,27 @@ public partial class PuntoVentaVistaModelo : PaginaVistaModelo
                 "el comprobante para imprimir. Puede reimprimirla desde el historial de ventas.",
                 esError: true).ConfigureAwait(true);
         }
+    }
+
+    /// <summary>Hay una caja registradora configurada a la que se le puede hablar.</summary>
+    public bool HayCajon => _cajon.EstaConectado;
+
+    /// <summary>
+    /// Abrir el cajón sin vender: para dar un cambio, para guardar un billete que
+    /// entró por otra vía, o sencillamente porque hizo falta.
+    /// </summary>
+    [RelayCommand]
+    private async Task AbrirCajonAsync()
+    {
+        if (_cajon.IntentarAbrir() is { } motivo)
+        {
+            await _dialogos.InformarAsync("Caja registradora",
+                $"No se pudo abrir el cajón. {motivo}", esError: true).ConfigureAwait(true);
+
+            return;
+        }
+
+        _dialogos.Notificar("Cajón abierto.");
     }
 
     [RelayCommand]

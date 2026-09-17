@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Pruebas de integración sobre una base de datos de usar y tirar. Es un programa de
+    consola y no un proyecto de pruebas al uso: no hace falta más, y así se ejecuta con
+    un solo «dotnet run» sin instalar nada.
+
+    Vive dentro del repositorio a propósito. Las que había antes se escribían en una
+    carpeta temporal y se perdieron tres veces; cada pérdida costó volver a escribirlas.
+
+    Es WinExe y apunta a net8.0-windows porque parte de lo que comprueba —que las
+    pantallas carguen y que el cajón del dinero hable con la impresora— vive en la capa
+    de presentación.
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Papeleria.Pruebas</AssemblyName>
+    <RootNamespace>Papeleria.Pruebas</RootNamespace>
+    <IsPublishable>false</IsPublishable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Papeleria.App\Papeleria.App.csproj" />
+  </ItemGroup>
+
+</Project>

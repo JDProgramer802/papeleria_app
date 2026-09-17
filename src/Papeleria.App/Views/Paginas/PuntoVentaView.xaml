@@ -399,6 +399,21 @@
                             <TextBlock Text="VACIAR CARRITO" Margin="8,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
+
+                    <!--
+                        Solo aparece si hay una caja registradora configurada. El cajón se
+                        abre solo al cobrar en efectivo; esto es para las otras veces: dar
+                        un cambio, guardar un billete, sacar sencillo.
+                    -->
+                    <Button Style="{StaticResource BotonTexto}" Margin="0,2,0,0"
+                            Command="{Binding AbrirCajonCommand}"
+                            Visibility="{Binding HayCajon, Converter={StaticResource BoolAVisible}}"
+                            ToolTip="Abrir el cajón del dinero sin registrar una venta">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CashRegister" VerticalAlignment="Center" />
+                            <TextBlock Text="ABRIR CAJÓN" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </materialDesign:Card>

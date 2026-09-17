@@ -84,6 +84,15 @@ public static class ClavesConfiguracion
     public const string ImpresoraRecibos = "impresion.impresoraRecibos";
     public const string ImprimirReciboAutomatico = "impresion.automatico";
 
+    // ── Caja registradora ───────────────────────────────────────────────────
+    // El cajón del dinero no se conecta al computador: cuelga de la impresora de
+    // recibos, que es la que le da el golpe de corriente para abrirlo.
+    public const string CajonModo = "cajon.modo";
+    public const string CajonImpresora = "cajon.impresora";
+    public const string CajonPuerto = "cajon.puerto";
+    public const string CajonPatilla = "cajon.patilla";
+    public const string CajonAbrirAlCobrar = "cajon.abrirAlCobrar";
+
     public const string BackupCarpeta = "backup.carpeta";
     public const string BackupAutomatico = "backup.automatico";
     public const string BackupFrecuenciaDias = "backup.frecuenciaDias";

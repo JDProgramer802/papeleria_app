@@ -313,6 +313,7 @@ public partial class App : Application
                 servicios.AddSingleton<IServicioArchivos, ServicioArchivos>();
                 servicios.AddSingleton<IServicioTema, ServicioTema>();
                 servicios.AddSingleton<Impresion.IServicioImpresion, Impresion.ServicioImpresion>();
+                servicios.AddSingleton<Impresion.IServicioCajonMonedero, Impresion.ServicioCajonMonedero>();
                 servicios.AddSingleton<INavegacion, Navegacion>();
 
                 // Modelos de vista principales

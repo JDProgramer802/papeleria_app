@@ -21,6 +21,7 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
     private readonly IServicioConfiguracion _configuracion;
     private readonly IServicioBackup _respaldo;
     private readonly Impresion.IServicioImpresion _impresion;
+    private readonly Impresion.IServicioCajonMonedero _cajon;
     private readonly IServicioArchivos _archivos;
     private readonly IServicioDialogos _dialogos;
     private readonly IServicioTema _tema;
@@ -31,6 +32,7 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
         IServicioConfiguracion configuracion,
         IServicioBackup respaldo,
         Impresion.IServicioImpresion impresion,
+        Impresion.IServicioCajonMonedero cajon,
         IServicioArchivos archivos,
         IServicioDialogos dialogos,
         IServicioTema tema,
@@ -40,6 +42,7 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
         _configuracion = configuracion;
         _respaldo = respaldo;
         _impresion = impresion;
+        _cajon = cajon;
         _archivos = archivos;
         _dialogos = dialogos;
         _tema = tema;
@@ -100,6 +103,40 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
     // ── Impresión ───────────────────────────────────────────────────────────
 
     public ObservableCollection<Impresion.ImpresoraDisponible> Impresoras { get; } = new();
+
+    // ── Caja registradora ───────────────────────────────────────────────────
+
+    /// <summary>Puertos COM que el equipo tiene ahora mismo.</summary>
+    public ObservableCollection<string> PuertosSerie { get; } = new();
+
+    /// <summary>Las formas de conectar el cajón, tal como se ofrecen en la pantalla.</summary>
+    public IReadOnlyList<OpcionCajon> ModosDeCajon { get; } = new List<OpcionCajon>
+    {
+        new(Impresion.ModoCajon.Ninguno, "No tengo caja registradora"),
+        new(Impresion.ModoCajon.PorLaImpresora, "Conectada a la impresora de recibos"),
+        new(Impresion.ModoCajon.PorOtraImpresora, "Conectada a otra impresora"),
+        new(Impresion.ModoCajon.PorPuertoSerie, "Conectada a un puerto COM")
+    };
+
+    /// <summary>Las dos patillas posibles del conector del cajón.</summary>
+    public IReadOnlyList<int> Patillas { get; } = new[] { 2, 5 };
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CajonPorImpresoraPropia))]
+    [NotifyPropertyChangedFor(nameof(CajonPorPuerto))]
+    [NotifyPropertyChangedFor(nameof(HayCajon))]
+    private Impresion.ModoCajon _modoCajon;
+
+    [ObservableProperty] private string? _cajonImpresora;
+    [ObservableProperty] private string? _cajonPuerto;
+    [ObservableProperty] private int _cajonPatilla = 2;
+    [ObservableProperty] private bool _abrirCajonAlCobrar = true;
+
+    public bool HayCajon => ModoCajon != Impresion.ModoCajon.Ninguno;
+
+    public bool CajonPorImpresoraPropia => ModoCajon == Impresion.ModoCajon.PorOtraImpresora;
+
+    public bool CajonPorPuerto => ModoCajon == Impresion.ModoCajon.PorPuertoSerie;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ProbarImpresionCommand))]
@@ -163,6 +200,23 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
         ImpresoraRecibos = _configuracion.ObtenerTexto(ClavesConfiguracion.ImpresoraRecibos);
         ImprimirReciboAutomatico =
             _configuracion.ObtenerBooleano(ClavesConfiguracion.ImprimirReciboAutomatico);
+
+        ModoCajon = Enum.TryParse<Impresion.ModoCajon>(
+            _configuracion.ObtenerTexto(ClavesConfiguracion.CajonModo), out var modo)
+            ? modo
+            : Impresion.ModoCajon.Ninguno;
+
+        CajonImpresora = _configuracion.ObtenerTexto(ClavesConfiguracion.CajonImpresora);
+        CajonPuerto = _configuracion.ObtenerTexto(ClavesConfiguracion.CajonPuerto);
+        CajonPatilla = _configuracion.ObtenerEntero(ClavesConfiguracion.CajonPatilla, 2);
+        AbrirCajonAlCobrar = _configuracion.ObtenerBooleano(ClavesConfiguracion.CajonAbrirAlCobrar, true);
+
+        PuertosSerie.Clear();
+
+        foreach (var puerto in _cajon.PuertosDisponibles())
+        {
+            PuertosSerie.Add(puerto);
+        }
 
         Impresoras.Clear();
 
@@ -367,6 +421,45 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
         _dialogos.Notificar("Configuración de impresión guardada.");
     }, "No se pudo guardar la configuración de impresión.");
 
+    [RelayCommand]
+    private Task GuardarCajonAsync() => EjecutarAsync(async () =>
+    {
+        if (!PuedeEditar)
+        {
+            return;
+        }
+
+        await _configuracion.GuardarVariosAsync(new Dictionary<string, string?>
+        {
+            [ClavesConfiguracion.CajonModo] = ModoCajon.ToString(),
+            [ClavesConfiguracion.CajonImpresora] = CajonImpresora ?? string.Empty,
+            [ClavesConfiguracion.CajonPuerto] = CajonPuerto ?? string.Empty,
+            [ClavesConfiguracion.CajonPatilla] = CajonPatilla.ToString(),
+            [ClavesConfiguracion.CajonAbrirAlCobrar] = AbrirCajonAlCobrar.ToString()
+        }).ConfigureAwait(true);
+
+        _dialogos.Notificar(HayCajon
+            ? "Caja registradora configurada."
+            : "Se quitó la caja registradora.");
+    }, "No se pudo guardar la configuración de la caja registradora.");
+
+    /// <summary>
+    /// Abre el cajón ahora mismo. Es la única forma de acertar con la patilla: si el
+    /// cajón está en la otra, no salta ningún error, sencillamente no pasa nada.
+    /// </summary>
+    [RelayCommand]
+    private Task ProbarCajonAsync() => EjecutarAsync(async () =>
+    {
+        _cajon.Abrir();
+
+        await _dialogos.InformarAsync(
+            "Caja registradora",
+            "Se mandó la orden de apertura." + Environment.NewLine + Environment.NewLine +
+            "Si el cajón NO se abrió, pruebe con la otra patilla del conector y vuelva a " +
+            "probar: la elige el fabricante del cajón y no hay forma de saberla de antemano.")
+            .ConfigureAwait(true);
+    }, "No se pudo abrir la caja registradora.");
+
     private bool PuedeProbarImpresion() => !string.IsNullOrWhiteSpace(ImpresoraRecibos);
 
     /// <summary>Saca una tirilla de prueba para comprobar que la impresora responde.</summary>
@@ -510,3 +603,6 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
     [RelayCommand]
     private Task ActualizarRespaldosAsync() => CargarRespaldosAsync();
 }
+
+/// <summary>Una forma de conectar la caja registradora, con su nombre en cristiano.</summary>
+public record OpcionCajon(Impresion.ModoCajon Modo, string Nombre);
