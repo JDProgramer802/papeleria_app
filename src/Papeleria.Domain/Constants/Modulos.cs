@@ -19,6 +19,7 @@ public static class Modulos
     public const string Inventario = "inventario";
     public const string Kardex = "kardex";
     public const string Caja = "caja";
+    public const string Gastos = "gastos";
     public const string Reportes = "reportes";
     public const string Configuracion = "configuracion";
     public const string Usuarios = "usuarios";
@@ -41,6 +42,7 @@ public static class Modulos
         [Inventario] = "Inventario",
         [Kardex] = "Kardex",
         [Caja] = "Caja",
+        [Gastos] = "Gastos",
         [Reportes] = "Reportes",
         [Configuracion] = "Configuración",
         [Usuarios] = "Usuarios y permisos",

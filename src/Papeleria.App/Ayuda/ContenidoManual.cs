@@ -86,6 +86,27 @@ public static class ContenidoManual
     {
         new()
         {
+            Titulo = "Gastos del negocio",
+            Resumen = "Registrar pagos operativos, consultar y anular gastos",
+            Icono = PackIconKind.CashMinus,
+            Bloques = new[]
+            {
+                Parrafo("Use Gastos para arriendo, servicios públicos, nómina, transporte y otros pagos operativos. Las compras de mercancía se registran en Compras para actualizar el inventario."),
+                Pasos("Registrar un gasto",
+                    "Entre a Gastos y pulse Registrar gasto.",
+                    "Indique fecha, categoría, concepto, valor y medio de pago. Puede añadir beneficiario y referencia.",
+                    "Pulse Guardar gasto. El efectivo requiere una caja abierta con saldo suficiente; se descuenta del turno actual aunque la fecha del gasto sea anterior."),
+                Parrafo("Consulte por fechas, categoría, concepto, beneficiario o referencia y pulse Aplicar filtros. Este mes restablece las fechas. Exportar Excel usa los filtros actuales. Los indicadores excluyen anulados."),
+                Aviso("No registre también como egreso manual de caja el mismo gasto: Gastos ya genera su movimiento en efectivo."),
+                Pasos("Anular un gasto",
+                    "Seleccione el gasto y pulse Anular seleccionado. De fábrica esta acción corresponde al administrador.",
+                    "Confirme que el pago fue cancelado o reembolsado e indique el motivo.",
+                    "Si era efectivo, el importe se reintegra a la caja abierta. No se modifican cierres anteriores. Active Incluir anulados y aplique los filtros para consultar el historial."),
+                Consejo("Use el buscador del menú lateral para encontrar rápidamente un módulo por su nombre o función.")
+            }
+        },
+        new()
+        {
             Titulo = "Primeros pasos",
             Resumen = "Qué hacer el primer día, en orden",
             Icono = PackIconKind.FlagOutline,

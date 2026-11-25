@@ -157,6 +157,7 @@ elige la vista. Los modelos de vista no conocen ningún tipo de WPF.
 | **Inventario** | Existencias con semáforo, entradas, salidas, ajustes por conteo y transferencias de ubicación. |
 | **Compras** | Historial y registro de compras: actualiza existencias, recalcula el costo promedio y escribe en el kardex. |
 | **Cartera** | Cuentas por cobrar de las ventas a crédito: quién debe y desde cuándo, cupo por cliente, estado de cuenta con las facturas fiadas y lo pendiente de cada una, registro y anulación de abonos, y reparto de la deuda por antigüedad. |
+| **Gastos** | Registro de pagos operativos por categoría, beneficiario y referencia; filtros por período, resumen, exportación Excel y anulación con motivo. El efectivo genera un egreso en el turno abierto y su anulación registra un reintegro en el turno actual. Los otros medios no afectan el cajón. |
 | **Caja** | Apertura con base, ingresos, egresos, arqueo comparando esperado contra contado, cierre e historial de turnos. |
 | **Historial de ventas** | Registro de todas las facturas emitidas: rangos rápidos (hoy, ayer, semana, mes) o fechas a medida, búsqueda por número, cliente o método de pago, resumen del periodo con importe, ticket promedio y utilidad, detalle con los productos de cada factura, impresión de una factura suelta o del listado completo del periodo, anulación y exportación. |
 | **Devoluciones** | Devolución parcial de una factura desde el historial: se eligen los renglones y las cantidades, la mercancía vuelve al inventario, queda registrada en el kardex y el dinero sale del turno de caja. La factura no se anula ni se rehace. |
@@ -354,3 +355,25 @@ instalarla con un clic y reiniciar. También puede buscarlas a mano desde
 - Al restaurar se guarda primero una copia del estado vigente, se valida que el archivo
   sea realmente una base de datos del sistema y la aplicación se cierra para que el
   siguiente arranque trabaje con los datos restaurados.
+
+### Gastos operativos
+
+El módulo Gastos está disponible para administradores y cajeros; la anulación requiere
+el permiso Eliminar de Gastos (inicialmente solo administrador). La migración
+`GastosOperativos` agrega su tabla al iniciar la versión actualizada.
+
+Los gastos no sustituyen las compras de mercancía ni los egresos manuales históricos.
+No registre el mismo pago en Gastos y en Caja: el módulo ya crea el egreso en efectivo.
+La fecha del gasto determina el período de consulta; el movimiento de efectivo siempre
+pertenece al turno abierto al guardar. Anular exige confirmar el reembolso y conserva
+autor, fecha, motivo y movimientos de salida/reintegro. No se alteran cierres anteriores.
+
+Inicio muestra los gastos vigentes del mes si el usuario tiene permiso para consultarlos.
+La búsqueda del menú admite nombres y descripciones sin distinguir mayúsculas ni tildes.
+
+Para generar vistas de prueba de Gastos en claro/oscuro y de las facturas:
+
+```powershell
+$env:PAPELSOFT_MUESTRAS = "$PWD/publish/qa-gastos"
+dotnet run --project tests/Papeleria.Pruebas
+```

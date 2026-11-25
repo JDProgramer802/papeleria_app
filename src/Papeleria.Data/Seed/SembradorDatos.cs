@@ -120,6 +120,10 @@ public class SembradorDatos
                     permiso.PuedeVer = permiso.PuedeCrear = permiso.PuedeEditar = true;
                     break;
 
+                case Modulos.Gastos:
+                    permiso.PuedeVer = permiso.PuedeCrear = true;
+                    break;
+
                 case Modulos.Ventas:
                 case Modulos.Caja:
                     permiso.PuedeVer = permiso.PuedeCrear = permiso.PuedeEditar = true;

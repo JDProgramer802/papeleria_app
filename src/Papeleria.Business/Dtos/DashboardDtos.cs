@@ -39,6 +39,10 @@ public class ResumenDashboardDto
 
     public decimal ValorInventario { get; init; }
 
+    public bool PuedeVerGastos { get; init; }
+
+    public decimal GastosDelMes { get; init; }
+
     public decimal ComprasDelMes { get; init; }
 
     public decimal VentasDelMes { get; init; }

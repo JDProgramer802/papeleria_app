@@ -135,8 +135,16 @@ public class ServicioDashboard : IServicioDashboard
             inventario, cajaAbierta, ventasMes.Cantidad, cartera, turno?.FechaApertura,
             bajoCosto, puedeVerCartera, respaldo);
 
+        var puedeVerGastos = _sesion.Puede(Domain.Constants.Modulos.Gastos);
+        var finMes = inicioMes.AddMonths(1);
+        var gastosMes = puedeVerGastos
+            ? await unidad.Contexto.Gastos.Where(g => !g.Anulado && g.Fecha >= inicioMes && g.Fecha < finMes)
+                .SumAsync(g => g.Monto, ct).ConfigureAwait(false) : 0;
+
         return new ResumenDashboardDto
         {
+            PuedeVerGastos = puedeVerGastos,
+            GastosDelMes = Dinero.Redondear(gastosMes),
             TotalProductos = inventario.TotalProductos,
             ValorInventario = inventario.ValorCosto,
             ComprasDelMes = comprasMes,

@@ -658,6 +658,82 @@ namespace Papeleria.Data.Migrations
                     b.ToTable("DevolucionDetalles", (string)null);
                 });
 
+            modelBuilder.Entity("Papeleria.Domain.Entities.Gasto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Anulado")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Beneficiario")
+                        .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Categoria")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Concepto")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("FechaAnulacion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MetodoPago")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("Monto")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("MotivoAnulacion")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("MovimientoCajaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("MovimientoReversionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Referencia")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("UsuarioAnulacionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Fecha");
+
+                    b.HasIndex("MovimientoCajaId");
+
+                    b.HasIndex("MovimientoReversionId");
+
+                    b.HasIndex("UsuarioAnulacionId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Gastos", (string)null);
+                });
+
             modelBuilder.Entity("Papeleria.Domain.Entities.Marca", b =>
                 {
                     b.Property<int>("Id")
@@ -1467,6 +1543,38 @@ namespace Papeleria.Data.Migrations
                     b.Navigation("Devolucion");
 
                     b.Navigation("Producto");
+                });
+
+            modelBuilder.Entity("Papeleria.Domain.Entities.Gasto", b =>
+                {
+                    b.HasOne("Papeleria.Domain.Entities.MovimientoCaja", "MovimientoCaja")
+                        .WithMany()
+                        .HasForeignKey("MovimientoCajaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Papeleria.Domain.Entities.MovimientoCaja", "MovimientoReversion")
+                        .WithMany()
+                        .HasForeignKey("MovimientoReversionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Papeleria.Domain.Entities.Usuario", "UsuarioAnulacion")
+                        .WithMany()
+                        .HasForeignKey("UsuarioAnulacionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Papeleria.Domain.Entities.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MovimientoCaja");
+
+                    b.Navigation("MovimientoReversion");
+
+                    b.Navigation("Usuario");
+
+                    b.Navigation("UsuarioAnulacion");
                 });
 
             modelBuilder.Entity("Papeleria.Domain.Entities.MovimientoCaja", b =>

@@ -39,6 +39,24 @@
                     </StackPanel>
                 </Grid>
 
+                <materialDesign:Card Style="{StaticResource TarjetaBase}"
+                    Visibility="{Binding Resumen.PuedeVerGastos, Converter={StaticResource BoolAVisible}}">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="Ver gastos" Style="{StaticResource BotonSecundario}"
+                                Command="{Binding IrAModuloCommand}" CommandParameter="gastos" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="44" Height="44" CornerRadius="12" Background="{StaticResource AcentoAvisoFondo}" Margin="0,0,14,0">
+                                <materialDesign:PackIcon Kind="CashMinus" Foreground="{StaticResource AcentoAvisoTinta}"
+                                    Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel>
+                                <TextBlock Text="Gastos operativos del mes" Style="{StaticResource EtiquetaCampo}" />
+                                <TextBlock Text="{Binding Resumen.GastosDelMes, Converter={StaticResource Moneda}}" FontSize="23" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </StackPanel>
+                    </DockPanel>
+                </materialDesign:Card>
+
                 <!-- ══ Cómo va el negocio ahora mismo ══════════════════════ -->
                 <!--
                     Lo primero que se mira al abrir el programa: cuánto debería haber en

@@ -10,6 +10,10 @@
         contenido o al host de diálogos, WPF elige aquí la vista que le corresponde.
     -->
 
+    <DataTemplate DataType="{x:Type vmPaginas:GastosVistaModelo}">
+        <paginas:GastosView />
+    </DataTemplate>
+
     <!-- ══ Páginas ══════════════════════════════════════════════════════════ -->
     <DataTemplate DataType="{x:Type vmPaginas:DashboardVistaModelo}">
         <paginas:DashboardView />

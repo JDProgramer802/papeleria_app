@@ -28,7 +28,7 @@ namespace Papeleria.Pruebas;
 ///
 /// Devuelve 0 si todo pasa y 1 si algo falla, para poder encadenarlo.
 /// </summary>
-public static class Programa
+public static partial class Programa
 {
     private static int _correctas;
     private static int _fallos;
@@ -65,6 +65,7 @@ public static class Programa
 
     private static async Task<int> Ejecutar(string archivo)
     {
+        await ComprobarMigracionGastosAsync(archivo + ".upgrade");
         var proveedor = Construir(archivo);
 
         await proveedor.GetRequiredService<IInicializadorBaseDatos>()
@@ -81,7 +82,9 @@ public static class Programa
 
         await ComprobarCajaRegistradoraAsync(proveedor).ConfigureAwait(false);
         ComprobarQueLasPantallasCargan();
+        ComprobarGastosVisuales(proveedor);
         await ComprobarFacturaAsync(proveedor).ConfigureAwait(false);
+        await ComprobarGastosAsync(proveedor).ConfigureAwait(false);
 
         Console.WriteLine();
         Console.WriteLine($"Comprobaciones correctas : {_correctas}");
@@ -240,6 +243,7 @@ public static class Programa
             ("Configuración", () => new App.Views.Paginas.ConfiguracionView()),
             ("Punto de venta", () => new App.Views.Paginas.PuntoVentaView()),
             ("Caja", () => new App.Views.Paginas.CajaView()),
+            ("Gastos", () => new App.Views.Paginas.GastosView()),
             ("Inicio", () => new App.Views.Paginas.DashboardView()),
             ("Ventana principal", () => new App.Views.MainWindow()),
             ("Acceso", () => new App.Views.LoginWindow())

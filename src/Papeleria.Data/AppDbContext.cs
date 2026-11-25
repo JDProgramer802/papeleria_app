@@ -35,6 +35,7 @@ public class AppDbContext : DbContext
     public DbSet<CotizacionDetalle> CotizacionDetalles => Set<CotizacionDetalle>();
     public DbSet<Devolucion> Devoluciones => Set<Devolucion>();
     public DbSet<DevolucionDetalle> DevolucionDetalles => Set<DevolucionDetalle>();
+    public DbSet<Gasto> Gastos => Set<Gasto>();
     public DbSet<Configuracion> Configuraciones => Set<Configuracion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

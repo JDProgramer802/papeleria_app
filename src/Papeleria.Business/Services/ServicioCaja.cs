@@ -279,7 +279,7 @@ public class ServicioCaja : IServicioCaja
         return await CalcularArqueoInternoAsync(unidad, sesionCaja, ct).ConfigureAwait(false);
     }
 
-    private static async Task<ArqueoCajaDto> CalcularArqueoInternoAsync(
+    internal static async Task<ArqueoCajaDto> CalcularArqueoInternoAsync(
         IUnidadDeTrabajo unidad, CajaSesion sesionCaja, CancellationToken ct)
     {
         var ventas = await unidad.Contexto.Ventas
