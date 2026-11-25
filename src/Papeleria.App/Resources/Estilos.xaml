@@ -4,7 +4,7 @@
                     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <!-- ══ Medidas y duraciones compartidas ══════════════════════════════════ -->
-    <CornerRadius x:Key="RadioTarjeta">10</CornerRadius>
+    <CornerRadius x:Key="RadioTarjeta">14</CornerRadius>
     <Thickness x:Key="MargenPagina">24,20,24,20</Thickness>
     <Thickness x:Key="RellenoTarjeta">18</Thickness>
     <system:Double x:Key="AlturaBarraSuperior">60</system:Double>
@@ -106,10 +106,10 @@
         pantalla se vea recargada sin que uno sepa por qué.
     -->
     <Style x:Key="TarjetaBase" TargetType="materialDesign:Card">
-        <Setter Property="UniformCornerRadius" Value="12" />
+        <Setter Property="UniformCornerRadius" Value="14" />
         <Setter Property="Padding" Value="{StaticResource RellenoTarjeta}" />
         <Setter Property="Margin" Value="0,0,0,16" />
-        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp1" />
+        <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp0" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
     </Style>
@@ -161,7 +161,7 @@
         <Setter Property="Height" Value="38" />
         <Setter Property="MinWidth" Value="110" />
         <Setter Property="Padding" Value="14,0" />
-        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="6" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8" />
     </Style>
 
     <Style x:Key="BotonSecundario" TargetType="Button"
@@ -169,7 +169,7 @@
         <Setter Property="Height" Value="38" />
         <Setter Property="MinWidth" Value="110" />
         <Setter Property="Padding" Value="14,0" />
-        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="6" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8" />
     </Style>
 
     <Style x:Key="BotonTexto" TargetType="Button"
@@ -186,7 +186,7 @@
         <Setter Property="Background" Value="{StaticResource BrochaError}" />
         <Setter Property="BorderBrush" Value="{StaticResource BrochaError}" />
         <Setter Property="Foreground" Value="White" />
-        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="6" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="8" />
     </Style>
 
     <Style x:Key="BotonIconoAccion" TargetType="Button"

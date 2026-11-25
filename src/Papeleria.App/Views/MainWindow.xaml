@@ -92,11 +92,17 @@
                     </Grid>
 
                     <!-- Módulos -->
-                    <ScrollViewer Grid.Row="1"
+                    <DockPanel Grid.Row="1">
+                    <TextBox DockPanel.Dock="Top" Margin="16,10,16,8"
+                             Text="{Binding BusquedaMenu, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Buscar módulo…"
+                             ToolTip="Busca por nombre o función del módulo"
+                             Visibility="{Binding MenuColapsado, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}" />
+                    <ScrollViewer
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled"
                                   Margin="0,6,0,6">
-                        <ItemsControl ItemsSource="{Binding Menu}">
+                        <ItemsControl ItemsSource="{Binding MenuFiltrado}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type vm:ElementoMenu}">
                                     <!--
@@ -141,6 +147,7 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
+                    </DockPanel>
 
                     <!-- Pie del menú: usuario y sesión -->
                     <StackPanel Grid.Row="2" Margin="8,6,8,12">

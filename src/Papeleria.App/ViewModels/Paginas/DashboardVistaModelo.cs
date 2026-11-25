@@ -18,7 +18,7 @@ public partial class DashboardVistaModelo : PaginaVistaModelo
     {
         _dashboard = dashboard;
 
-        Titulo = "Dashboard";
+        Titulo = "Tu negocio, de un vistazo";
         Subtitulo = "Resumen del estado actual del negocio";
 
         // El panel se refresca solo cuando cambia algo que afecta a sus cifras.

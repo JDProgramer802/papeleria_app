@@ -240,6 +240,8 @@ public static class Programa
             ("Configuración", () => new App.Views.Paginas.ConfiguracionView()),
             ("Punto de venta", () => new App.Views.Paginas.PuntoVentaView()),
             ("Caja", () => new App.Views.Paginas.CajaView()),
+            ("Inicio", () => new App.Views.Paginas.DashboardView()),
+            ("Ventana principal", () => new App.Views.MainWindow()),
             ("Acceso", () => new App.Views.LoginWindow())
         };
 

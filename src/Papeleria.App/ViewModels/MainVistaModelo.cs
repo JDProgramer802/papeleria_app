@@ -83,6 +83,21 @@ public partial class MainVistaModelo : ObservableObject
     public ObservableCollection<ElementoMenu> Menu { get; } = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MenuFiltrado))]
+    private string _busquedaMenu = string.Empty;
+
+    public IEnumerable<ElementoMenu> MenuFiltrado => Menu.Where(e =>
+        string.IsNullOrWhiteSpace(BusquedaMenu) ||
+        System.Globalization.CultureInfo.GetCultureInfo("es-CO").CompareInfo.IndexOf(
+            e.Titulo + " " + e.Descripcion, BusquedaMenu.Trim(),
+            System.Globalization.CompareOptions.IgnoreCase | System.Globalization.CompareOptions.IgnoreNonSpace) >= 0);
+
+    partial void OnMenuColapsadoChanged(bool value)
+    {
+        if (value) BusquedaMenu = string.Empty;
+    }
+
+    [ObservableProperty]
     private PaginaVistaModelo? _paginaActual;
 
     [ObservableProperty]
@@ -148,6 +163,7 @@ public partial class MainVistaModelo : ObservableObject
         MenuColapsado = _configuracion.ObtenerBooleano(ClavesConfiguracion.MenuColapsado);
 
         ConstruirMenu();
+        OnPropertyChanged(nameof(MenuFiltrado));
         ActualizarReloj();
         _reloj.Start();
 
@@ -236,7 +252,7 @@ public partial class MainVistaModelo : ObservableObject
     {
         var elementos = new (string Modulo, string Titulo, PackIconKind Icono, string Descripcion)[]
         {
-            (Modulos.Dashboard, "Dashboard", PackIconKind.ViewDashboardOutline, "Resumen del negocio"),
+            (Modulos.Dashboard, "Inicio", PackIconKind.ViewDashboardOutline, "Resumen del negocio"),
             (Modulos.Ventas, "Punto de venta", PackIconKind.CashRegister, "Registrar ventas"),
             (Modulos.HistorialVentas, "Historial de ventas", PackIconKind.ReceiptTextOutline,
                 "Facturas emitidas y ventas del día"),

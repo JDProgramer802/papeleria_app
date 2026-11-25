@@ -63,6 +63,11 @@ public class ServicioTema : IServicioTema
 
         _paleta.SetTheme(tema);
 
+        // Superficies con contraste suave para distinguir el área de trabajo de las tarjetas.
+        var recursos = System.Windows.Application.Current.Resources;
+        recursos["MaterialDesignPaper"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(oscuro ? "#151B27" : "#F3F5F9"));
+        recursos["MaterialDesignCardBackground"] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(oscuro ? "#202938" : "#FFFFFF"));
+
         EsOscuro = oscuro;
         TemaCambiado?.Invoke(this, EventArgs.Empty);
     }
