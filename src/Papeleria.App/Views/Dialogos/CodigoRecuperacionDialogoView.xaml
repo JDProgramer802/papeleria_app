@@ -1,0 +1,81 @@
+<UserControl x:Class="Papeleria.App.Views.Dialogos.CodigoRecuperacionDialogoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:Papeleria.App.ViewModels.Dialogos"
+             d:DataContext="{d:DesignInstance vm:CodigoRecuperacionDialogoVistaModelo}"
+             mc:Ignorable="d"
+             Width="460">
+
+    <StackPanel Margin="26,24,26,18">
+        <StackPanel Orientation="Horizontal">
+            <materialDesign:PackIcon Kind="KeyChainVariant" Width="30" Height="30"
+                                     VerticalAlignment="Center" Margin="0,0,14,0"
+                                     Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
+            <TextBlock Text="Su código de recuperación"
+                       Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                       VerticalAlignment="Center" />
+        </StackPanel>
+
+        <TextBlock Margin="0,14,0,16" TextWrapping="Wrap" LineHeight="20"
+                   Style="{StaticResource MaterialDesignBody2TextBlock}">
+            <Run Text="Si algún día olvida la contraseña de" />
+            <Run Text="{Binding NombreUsuario, Mode=OneWay}" FontWeight="SemiBold" /><Run Text=", en la pantalla de acceso pulse «¿Olvidó su contraseña?» y escriba este código." />
+        </TextBlock>
+
+        <Border CornerRadius="10" Padding="12,18"
+                Background="{StaticResource BrochaInformacionSuave}">
+            <TextBlock Text="{Binding Codigo}" HorizontalAlignment="Center"
+                       FontFamily="Consolas" FontSize="24" FontWeight="Bold" />
+        </Border>
+
+        <Button Style="{StaticResource BotonTexto}" HorizontalAlignment="Center" Margin="0,8,0,0"
+                Command="{Binding CopiarCommand}">
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon VerticalAlignment="Center">
+                    <materialDesign:PackIcon.Style>
+                        <Style TargetType="materialDesign:PackIcon">
+                            <Setter Property="Kind" Value="ContentCopy" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Copiado}" Value="True">
+                                    <Setter Property="Kind" Value="Check" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </materialDesign:PackIcon.Style>
+                </materialDesign:PackIcon>
+                <TextBlock Margin="6,0,0,0" VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="Copiar" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Copiado}" Value="True">
+                                    <Setter Property="Text" Value="Copiado" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+        </Button>
+
+        <Border Background="{StaticResource BrochaErrorSuave}" CornerRadius="6"
+                Padding="12,9" Margin="0,12,0,18">
+            <TextBlock TextWrapping="Wrap" FontSize="12.5" LineHeight="18"
+                       Foreground="{StaticResource BrochaError}"
+                       Text="Anótelo en papel y guárdelo lejos del computador. No se volverá a mostrar, y quien lo tenga puede cambiar su contraseña. Cada vez que genere uno nuevo, el anterior deja de servir." />
+        </Border>
+
+        <Button Style="{StaticResource BotonPrincipal}" HorizontalAlignment="Right"
+                IsDefault="True"
+                Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}"
+                Content="YA LO ANOTÉ">
+            <Button.CommandParameter>
+                <sys:Boolean>True</sys:Boolean>
+            </Button.CommandParameter>
+        </Button>
+    </StackPanel>
+</UserControl>

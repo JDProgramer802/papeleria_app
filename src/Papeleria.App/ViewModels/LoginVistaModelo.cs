@@ -15,15 +15,18 @@ public partial class LoginVistaModelo : VistaModeloBase
     private readonly IServicioAutenticacion _autenticacion;
     private readonly IContextoSesion _sesion;
     private readonly IServicioConfiguracion _configuracion;
+    private readonly IServicioRecuperacionAcceso _recuperacion;
 
     public LoginVistaModelo(
         IServicioAutenticacion autenticacion,
         IContextoSesion sesion,
-        IServicioConfiguracion configuracion)
+        IServicioConfiguracion configuracion,
+        IServicioRecuperacionAcceso recuperacion)
     {
         _autenticacion = autenticacion;
         _sesion = sesion;
         _configuracion = configuracion;
+        _recuperacion = recuperacion;
 
         Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
     }
@@ -37,15 +40,45 @@ public partial class LoginVistaModelo : VistaModeloBase
     /// </summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ConfirmarContrasenaNuevaCommand))]
+    [NotifyPropertyChangedFor(nameof(MostrandoAcceso))]
     private bool _exigiendoCambioContrasena;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ConfirmarContrasenaNuevaCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RestablecerConCodigoCommand))]
     private string _contrasenaNueva = string.Empty;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ConfirmarContrasenaNuevaCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RestablecerConCodigoCommand))]
     private string _contrasenaRepetida = string.Empty;
+
+    /// <summary>
+    /// «¿Olvidó su contraseña?»: el usuario escribe su código de recuperación y una
+    /// contraseña nueva. Comparte los dos campos de contraseña nueva con el cambio
+    /// obligatorio; nunca están los dos pasos a la vez.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MostrandoAcceso))]
+    [NotifyPropertyChangedFor(nameof(PidiendoCodigo))]
+    private bool _recuperando;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RestablecerConCodigoCommand))]
+    private string _codigoRecuperacion = string.Empty;
+
+    /// <summary>El código nuevo que reemplaza al que se acaba de gastar; se muestra una sola vez.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PidiendoCodigo))]
+    [NotifyPropertyChangedFor(nameof(MostrandoCodigoNuevo))]
+    private string _codigoNuevo = string.Empty;
+
+    /// <summary>El formulario normal de usuario y contraseña.</summary>
+    public bool MostrandoAcceso => !ExigiendoCambioContrasena && !Recuperando;
+
+    public bool PidiendoCodigo => Recuperando && string.IsNullOrEmpty(CodigoNuevo);
+
+    public bool MostrandoCodigoNuevo => Recuperando && !string.IsNullOrEmpty(CodigoNuevo);
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(IniciarSesionCommand))]
@@ -254,6 +287,102 @@ public partial class LoginVistaModelo : VistaModeloBase
         {
             EstaCargando = false;
             IniciarSesionCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    // ── Recuperación con código ─────────────────────────────────────────────
+
+    [RelayCommand]
+    private void IniciarRecuperacion()
+    {
+        MensajeError = null;
+        Contrasena = string.Empty;
+        MostrarContrasena = false;
+        CodigoRecuperacion = string.Empty;
+        CodigoNuevo = string.Empty;
+        ContrasenaNueva = string.Empty;
+        ContrasenaRepetida = string.Empty;
+        Recuperando = true;
+    }
+
+    private bool PuedeRestablecerConCodigo() =>
+        Recuperando &&
+        !string.IsNullOrWhiteSpace(NombreUsuario) &&
+        !string.IsNullOrWhiteSpace(CodigoRecuperacion) &&
+        !string.IsNullOrWhiteSpace(ContrasenaNueva) &&
+        !string.IsNullOrWhiteSpace(ContrasenaRepetida) &&
+        !EstaCargando;
+
+    [RelayCommand(CanExecute = nameof(PuedeRestablecerConCodigo))]
+    private async Task RestablecerConCodigoAsync()
+    {
+        MensajeError = null;
+
+        if (!string.Equals(ContrasenaNueva, ContrasenaRepetida, StringComparison.Ordinal))
+        {
+            MensajeError = "Las dos contraseñas no coinciden.";
+            return;
+        }
+
+        EstaCargando = true;
+        RestablecerConCodigoCommand.NotifyCanExecuteChanged();
+
+        try
+        {
+            CodigoNuevo = await _recuperacion
+                .RestablecerConCodigoAsync(NombreUsuario, CodigoRecuperacion, ContrasenaNueva)
+                .ConfigureAwait(true);
+
+            CodigoRecuperacion = string.Empty;
+            ContrasenaNueva = string.Empty;
+            ContrasenaRepetida = string.Empty;
+        }
+        catch (NegocioException ex)
+        {
+            MensajeError = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Error inesperado al recuperar la contraseña");
+            MensajeError = "No se pudo restablecer la contraseña. Revise el registro de errores.";
+        }
+        finally
+        {
+            EstaCargando = false;
+            RestablecerConCodigoCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    [RelayCommand]
+    private void CopiarCodigoNuevo()
+    {
+        try
+        {
+            System.Windows.Clipboard.SetText(CodigoNuevo);
+        }
+        catch (Exception)
+        {
+            // Otro programa puede tener el portapapeles tomado; el código sigue en pantalla.
+        }
+    }
+
+    /// <summary>Vuelve al acceso normal. Si se acaba de restablecer, deja el aviso de que ya puede entrar.</summary>
+    [RelayCommand]
+    private void TerminarRecuperacion()
+    {
+        var restablecida = !string.IsNullOrEmpty(CodigoNuevo);
+
+        Recuperando = false;
+        CodigoRecuperacion = string.Empty;
+        CodigoNuevo = string.Empty;
+        ContrasenaNueva = string.Empty;
+        ContrasenaRepetida = string.Empty;
+        MensajeError = null;
+
+        if (restablecida)
+        {
+            MostrarAvisoContrasenaPorDefecto = true;
+            AvisoContrasenaPorDefecto = "Contraseña restablecida. Entre con la nueva.";
         }
     }
 

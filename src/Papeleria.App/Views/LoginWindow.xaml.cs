@@ -106,6 +106,33 @@ public partial class LoginWindow : Window
             return;
         }
 
+        // Lo mismo al entrar o salir de la recuperación con código.
+        if (argumentos.PropertyName == nameof(LoginVistaModelo.Recuperando))
+        {
+            CampoRecuperacionNueva.Password = string.Empty;
+            CampoRecuperacionRepetida.Password = string.Empty;
+
+            if (modelo.Recuperando)
+            {
+                Dispatcher.BeginInvoke(new Action(() => CampoCodigoRecuperacion.Focus()));
+            }
+            else
+            {
+                Dispatcher.BeginInvoke(new Action(() => CampoContrasena.Focus()));
+            }
+
+            return;
+        }
+
+        // El código nuevo reemplaza al formulario: los campos de contraseña quedan vacíos.
+        if (argumentos.PropertyName == nameof(LoginVistaModelo.CodigoNuevo)
+            && !string.IsNullOrEmpty(modelo.CodigoNuevo))
+        {
+            CampoRecuperacionNueva.Password = string.Empty;
+            CampoRecuperacionRepetida.Password = string.Empty;
+            return;
+        }
+
         if (argumentos.PropertyName != nameof(LoginVistaModelo.Contrasena) || _sincronizando)
         {
             return;
@@ -152,6 +179,23 @@ public partial class LoginWindow : Window
         if (DataContext is LoginVistaModelo modelo)
         {
             modelo.ContrasenaRepetida = CampoContrasenaRepetida.Password;
+        }
+    }
+
+    /// <summary>Los dos campos de contraseña nueva de la recuperación con código.</summary>
+    private void RecuperacionNuevaCambiada(object remitente, RoutedEventArgs argumentos)
+    {
+        if (DataContext is LoginVistaModelo modelo)
+        {
+            modelo.ContrasenaNueva = CampoRecuperacionNueva.Password;
+        }
+    }
+
+    private void RecuperacionRepetidaCambiada(object remitente, RoutedEventArgs argumentos)
+    {
+        if (DataContext is LoginVistaModelo modelo)
+        {
+            modelo.ContrasenaRepetida = CampoRecuperacionRepetida.Password;
         }
     }
 

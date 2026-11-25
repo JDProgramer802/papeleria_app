@@ -88,6 +88,10 @@
         <dialogos:DialogoMensajeView />
     </DataTemplate>
 
+    <DataTemplate DataType="{x:Type vmDialogos:CodigoRecuperacionDialogoVistaModelo}">
+        <dialogos:CodigoRecuperacionDialogoView />
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type vmDialogos:ImportacionDialogoVistaModelo}">
         <dialogos:ImportacionDialogoView />
     </DataTemplate>

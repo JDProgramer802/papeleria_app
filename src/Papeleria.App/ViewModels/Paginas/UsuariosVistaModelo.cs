@@ -34,17 +34,20 @@ public partial class UsuariosVistaModelo : PaginaVistaModelo
     private readonly IServicioAutenticacion _autenticacion;
     private readonly IServicioDialogos _dialogos;
     private readonly IContextoSesion _sesion;
+    private readonly IServicioRecuperacionAcceso _recuperacion;
 
     public UsuariosVistaModelo(
         IServicioUsuarios usuarios,
         IServicioAutenticacion autenticacion,
         IServicioDialogos dialogos,
-        IContextoSesion sesion)
+        IContextoSesion sesion,
+        IServicioRecuperacionAcceso recuperacion)
     {
         _usuarios = usuarios;
         _autenticacion = autenticacion;
         _dialogos = dialogos;
         _sesion = sesion;
+        _recuperacion = recuperacion;
 
         Titulo = "Usuarios y permisos";
         Subtitulo = "Operadores del sistema y alcance de cada rol";
@@ -97,12 +100,31 @@ public partial class UsuariosVistaModelo : PaginaVistaModelo
 
     public bool HaySeleccion => UsuarioSeleccionado is not null;
 
+    /// <summary>
+    /// Sin código de recuperación, olvidar la contraseña deja al usuario por fuera (y si
+    /// es el único administrador, al negocio entero). Por eso se avisa hasta que lo genere.
+    /// </summary>
+    [ObservableProperty] private bool _faltaCodigoRecuperacion;
+
+    [ObservableProperty] private string _estadoCodigoRecuperacion = string.Empty;
+
+    private void ActualizarEstadoCodigo()
+    {
+        var fecha = _recuperacion.FechaCodigo(_sesion.UsuarioIdRequerido);
+
+        FaltaCodigoRecuperacion = fecha is null;
+        EstadoCodigoRecuperacion = fecha is { } generado
+            ? $"Código de recuperación generado el {Formatos.Fecha(generado)}"
+            : "Aún no tiene código de recuperación";
+    }
+
     partial void OnUsuarioSeleccionadoChanged(Usuario? value) => OnPropertyChanged(nameof(HaySeleccion));
 
     partial void OnRolPermisosChanged(RolUsuario value) => _ = CargarPermisosAsync();
 
     public override async Task CargarAsync()
     {
+        ActualizarEstadoCodigo();
         await CargarUsuariosAsync().ConfigureAwait(true);
         await CargarPermisosAsync().ConfigureAwait(true);
     }
@@ -256,6 +278,39 @@ public partial class UsuariosVistaModelo : PaginaVistaModelo
 
             _dialogos.Notificar("Su contraseña se actualizó correctamente.");
         }, "No se pudo cambiar la contraseña.");
+    }
+
+    /// <summary>Genera el código de recuperación del usuario de la sesión y lo muestra una vez.</summary>
+    [RelayCommand]
+    private async Task GenerarCodigoRecuperacionAsync()
+    {
+        if (!FaltaCodigoRecuperacion)
+        {
+            var reemplazar = await _dialogos.ConfirmarAsync(
+                "Generar un código nuevo",
+                "Ya tiene un código de recuperación. Si genera uno nuevo, el anterior deja de servir.",
+                "Generar otro").ConfigureAwait(true);
+
+            if (!reemplazar)
+            {
+                return;
+            }
+        }
+
+        string? codigo = null;
+
+        await EjecutarAsync(async () =>
+        {
+            codigo = await _recuperacion.GenerarCodigoAsync().ConfigureAwait(true);
+        }, "No se pudo generar el código de recuperación.");
+
+        ActualizarEstadoCodigo();
+
+        if (codigo is not null)
+        {
+            await _dialogos.MostrarAsync(new CodigoRecuperacionDialogoVistaModelo(
+                codigo, _sesion.Usuario?.NombreUsuario ?? string.Empty)).ConfigureAwait(true);
+        }
     }
 
     [RelayCommand]

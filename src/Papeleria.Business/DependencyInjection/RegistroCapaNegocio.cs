@@ -23,6 +23,9 @@ public static class RegistroCapaNegocio
         // por operación, así que registrarlos como únicos evita construcciones repetidas.
         servicios.AddSingleton<IServicioAutenticacion, ServicioAutenticacion>();
         servicios.AddSingleton<IServicioUsuarios, ServicioUsuarios>();
+
+        // Único a propósito: lleva la cuenta de intentos fallidos en memoria.
+        servicios.AddSingleton<IServicioRecuperacionAcceso, ServicioRecuperacionAcceso>();
         servicios.AddSingleton<IServicioCategorias, ServicioCategorias>();
         servicios.AddSingleton<IServicioMarcas, ServicioMarcas>();
         servicios.AddSingleton<IServicioUnidadesMedida, ServicioUnidadesMedida>();

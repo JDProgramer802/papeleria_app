@@ -60,6 +60,15 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                 <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
+                        Command="{Binding GenerarCodigoRecuperacionCommand}"
+                        ToolTip="{Binding EstadoCodigoRecuperacion}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="KeyChainVariant" VerticalAlignment="Center" />
+                        <TextBlock Text="Código de recuperación" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Style="{StaticResource BotonSecundario}" Margin="0,0,8,0"
                         Command="{Binding CambiarMiContrasenaCommand}"
                         ToolTip="Cambiar la contraseña de su propio usuario">
                     <StackPanel Orientation="Horizontal">
@@ -80,12 +89,33 @@
             </StackPanel>
         </Grid>
 
-        <Border Grid.Row="1" Background="{StaticResource BrochaErrorSuave}"
-                CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
-                Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
-            <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrochaError}"
-                       TextWrapping="Wrap" FontSize="12.5" />
-        </Border>
+        <StackPanel Grid.Row="1">
+            <Border Background="{StaticResource BrochaErrorSuave}"
+                    CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
+                    Visibility="{Binding TieneError, Converter={StaticResource BoolAVisible}}">
+                <TextBlock Text="{Binding MensajeError}" Foreground="{StaticResource BrochaError}"
+                           TextWrapping="Wrap" FontSize="12.5" />
+            </Border>
+
+            <!-- Sin código, olvidar la contraseña deja al usuario por fuera. -->
+            <Border Background="{StaticResource BrochaInformacionSuave}"
+                    CornerRadius="6" Padding="12,9" Margin="0,0,0,12"
+                    Visibility="{Binding FaltaCodigoRecuperacion, Converter={StaticResource BoolAVisible}}">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="KeyAlert" VerticalAlignment="Center"
+                                                 Foreground="{StaticResource BrochaInformacion}" />
+                        <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap"
+                                   FontSize="12.5" Foreground="{StaticResource BrochaInformacion}"
+                                   Text="Aún no tiene código de recuperación. Sin él, si olvida su contraseña no podrá volver a entrar." />
+                    </StackPanel>
+
+                    <Button Style="{StaticResource BotonTexto}" HorizontalAlignment="Right"
+                            Command="{Binding GenerarCodigoRecuperacionCommand}"
+                            Content="GENERARLO AHORA" />
+                </Grid>
+            </Border>
+        </StackPanel>
 
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>

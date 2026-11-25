@@ -118,6 +118,7 @@ public static class ContenidoManual
                 Pasos("Montar la papelería desde cero",
                     "Ponga los datos de su negocio en Configuración: el nombre y el NIT salen impresos en cada factura.",
                     "Cambie la contraseña del usuario «admin». La de fábrica la conoce cualquiera.",
+                    "En Usuarios, pulse Código de recuperación, anote el código en papel y guárdelo lejos del computador. Es lo único que le deja volver a entrar si olvida la contraseña.",
                     "Cree sus categorías en Catálogos: cuadernos, escritura, oficina, arte…",
                     "Registre sus productos con su código, su precio y las existencias que tenga hoy.",
                     "Registre sus servicios: fotocopias, impresiones, anillado.",
@@ -126,7 +127,15 @@ public static class ContenidoManual
                     "Haga una venta de prueba y compruebe que el recibo sale bien."),
                 Consejo(
                     "Use el Tutorial guiado: mira su base de datos y le dice cuáles de estos pasos " +
-                    "ya están resueltos y cuáles siguen pendientes.")
+                    "ya están resueltos y cuáles siguen pendientes."),
+                Pasos("Si olvidó su contraseña",
+                    "En la pantalla de acceso pulse «¿Olvidó su contraseña?».",
+                    "Escriba su usuario, el código de recuperación que anotó y la contraseña nueva dos veces.",
+                    "El código usado deja de servir y el programa le muestra uno nuevo: anótelo antes de seguir.",
+                    "Si no tiene código, un administrador puede ponerle una contraseña nueva desde Usuarios."),
+                Aviso(
+                    "Tras cinco códigos equivocados seguidos, el programa no deja intentarlo de nuevo " +
+                    "durante quince minutos.")
             }
         },
         new()

@@ -83,8 +83,10 @@ public static partial class Programa
         await ComprobarCajaRegistradoraAsync(proveedor).ConfigureAwait(false);
         ComprobarQueLasPantallasCargan();
         ComprobarGastosVisuales(proveedor);
+        DibujarRecuperacion(proveedor);
         await ComprobarFacturaAsync(proveedor).ConfigureAwait(false);
         await ComprobarGastosAsync(proveedor).ConfigureAwait(false);
+        await ComprobarRecuperacionAsync(proveedor).ConfigureAwait(false);
 
         Console.WriteLine();
         Console.WriteLine($"Comprobaciones correctas : {_correctas}");
@@ -246,7 +248,9 @@ public static partial class Programa
             ("Gastos", () => new App.Views.Paginas.GastosView()),
             ("Inicio", () => new App.Views.Paginas.DashboardView()),
             ("Ventana principal", () => new App.Views.MainWindow()),
-            ("Acceso", () => new App.Views.LoginWindow())
+            ("Acceso", () => new App.Views.LoginWindow()),
+            ("Usuarios", () => new App.Views.Paginas.UsuariosView()),
+            ("código de recuperación", () => new App.Views.Dialogos.CodigoRecuperacionDialogoView())
         };
 
         foreach (var (nombre, construir) in pantallas)

@@ -123,5 +123,11 @@ public static class ClavesConfiguracion
     public const string ColorPrimario = "ui.colorPrimario";
     public const string UltimoUsuario = "ui.ultimoUsuario";
     public const string RecordarUsuario = "ui.recordarUsuario";
+
+    /// <summary>
+    /// Prefijo del código de recuperación de cada usuario: «seguridad.recuperacion.7.hash»
+    /// guarda el hash BCrypt y «….7.fecha» cuándo se generó. El código nunca se guarda en claro.
+    /// </summary>
+    public const string RecuperacionPrefijo = "seguridad.recuperacion.";
     public const string MenuColapsado = "ui.menuColapsado";
 }

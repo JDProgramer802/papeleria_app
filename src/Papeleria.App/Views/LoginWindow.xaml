@@ -158,7 +158,7 @@
                     </Border>
 
                     <!-- ── Acceso normal ──────────────────────────────────── -->
-                    <StackPanel Visibility="{Binding ExigiendoCambioContrasena, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+                    <StackPanel Visibility="{Binding MostrandoAcceso, Converter={StaticResource BoolAVisible}}">
                         <!-- El logotipo va sobre el blanco de la tarjeta, que es donde
                              está dibujado para leerse. Sin placas ni recuadros. -->
                         <Image Source="pack://application:,,,/Papeleria;component/Resources/Images/logo.png"
@@ -244,9 +244,18 @@
                                        Foreground="{StaticResource BrochaAdvertencia}" />
                         </StackPanel>
 
-                        <CheckBox Content="Recordar mi usuario"
-                                  IsChecked="{Binding RecordarUsuario}"
-                                  Margin="0,12,0,20" />
+                        <Grid Margin="0,12,0,20">
+                            <CheckBox Content="Recordar mi usuario"
+                                      IsChecked="{Binding RecordarUsuario}"
+                                      VerticalAlignment="Center" />
+
+                            <Button Style="{StaticResource BotonTexto}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Padding="6,0" Height="28" FontSize="12.5"
+                                    IsTabStop="False"
+                                    Command="{Binding IniciarRecuperacionCommand}"
+                                    Content="¿Olvidó su contraseña?" />
+                        </Grid>
 
                         <Border Style="{StaticResource AvisoAcceso}"
                                 Background="{StaticResource BrochaErrorSuave}"
@@ -384,6 +393,150 @@
                                 HorizontalAlignment="Center"
                                 Command="{Binding CancelarCambioContrasenaCommand}"
                                 Content="Volver" />
+                    </StackPanel>
+
+                    <!--
+                        «¿Olvidó su contraseña?». Sin internet no hay correo a donde mandar
+                        un enlace: se entra con el código de recuperación que cada usuario
+                        generó en Usuarios y guardó en papel.
+                    -->
+                    <StackPanel Visibility="{Binding PidiendoCodigo, Converter={StaticResource BoolAVisible}}">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <materialDesign:PackIcon Kind="KeyChainVariant"
+                                                     Width="26" Height="26"
+                                                     VerticalAlignment="Center" Margin="0,0,10,0"
+                                                     Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
+                            <TextBlock Text="Recuperar el acceso"
+                                       FontSize="22" FontWeight="Bold" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <TextBlock HorizontalAlignment="Center" TextAlignment="Center"
+                                   Style="{StaticResource TextoTenue}"
+                                   FontSize="12.5" TextWrapping="Wrap" LineHeight="18"
+                                   Margin="0,8,0,16"
+                                   Text="Use el código de recuperación que generó en Usuarios. Si no tiene uno, pida a un administrador que le restablezca la contraseña." />
+
+                        <TextBox Style="{StaticResource CampoDeAcceso}"
+                                 Margin="0,0,0,10"
+                                 materialDesign:HintAssist.Hint="Usuario"
+                                 materialDesign:TextFieldAssist.LeadingIcon="AccountOutline"
+                                 Text="{Binding NombreUsuario, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="50" />
+
+                        <TextBox x:Name="CampoCodigoRecuperacion"
+                                 Style="{StaticResource CampoDeAcceso}"
+                                 Margin="0,0,0,10"
+                                 CharacterCasing="Upper"
+                                 materialDesign:HintAssist.Hint="Código de recuperación"
+                                 materialDesign:TextFieldAssist.LeadingIcon="KeyOutline"
+                                 Text="{Binding CodigoRecuperacion, UpdateSourceTrigger=PropertyChanged}"
+                                 MaxLength="30" />
+
+                        <PasswordBox x:Name="CampoRecuperacionNueva"
+                                     Style="{StaticResource CampoDeAccesoOculto}"
+                                     Margin="0,0,0,10"
+                                     PasswordChanged="RecuperacionNuevaCambiada"
+                                     materialDesign:HintAssist.Hint="Contraseña nueva"
+                                     materialDesign:TextFieldAssist.LeadingIcon="LockOutline" />
+
+                        <PasswordBox x:Name="CampoRecuperacionRepetida"
+                                     Style="{StaticResource CampoDeAccesoOculto}"
+                                     Margin="0,0,0,8"
+                                     PasswordChanged="RecuperacionRepetidaCambiada"
+                                     materialDesign:HintAssist.Hint="Repítala"
+                                     materialDesign:TextFieldAssist.LeadingIcon="LockCheckOutline" />
+
+                        <TextBlock Style="{StaticResource TextoTenue}" FontSize="11.5"
+                                   TextWrapping="Wrap" Margin="2,0,0,12"
+                                   Text="Mínimo 6 caracteres, con letras y números." />
+
+                        <Border Style="{StaticResource AvisoAcceso}"
+                                Background="{StaticResource BrochaErrorSuave}"
+                                Margin="0,0,0,12"
+                                Visibility="{Binding MensajeError, Converter={StaticResource TextoAVisible}}">
+                            <TextBlock Text="{Binding MensajeError}"
+                                       Foreground="{StaticResource BrochaError}"
+                                       TextWrapping="Wrap" MaxWidth="280" FontSize="12.5" />
+                        </Border>
+
+                        <Button Style="{StaticResource BotonDeAcceso}"
+                                Command="{Binding RestablecerConCodigoCommand}"
+                                IsDefault="{Binding PidiendoCodigo}">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal"
+                                            Visibility="{Binding EstaCargando, Converter={StaticResource BoolAVisible}, ConverterParameter=Invertir}">
+                                    <materialDesign:PackIcon Kind="LockReset"
+                                                             Width="21" Height="21"
+                                                             VerticalAlignment="Center" Margin="0,0,10,0" />
+                                    <TextBlock Text="RESTABLECER CONTRASEÑA" VerticalAlignment="Center"
+                                               FontWeight="SemiBold" />
+                                </StackPanel>
+
+                                <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                             IsIndeterminate="True" Width="22" Height="22"
+                                             Foreground="White"
+                                             Visibility="{Binding EstaCargando, Converter={StaticResource BoolAVisible}}" />
+                            </Grid>
+                        </Button>
+
+                        <Button Style="{StaticResource BotonTexto}" Margin="0,6,0,-8"
+                                HorizontalAlignment="Center"
+                                Command="{Binding TerminarRecuperacionCommand}"
+                                Content="Volver" />
+                    </StackPanel>
+
+                    <!--
+                        El código usado ya no sirve: se muestra el que lo reemplaza, una
+                        sola vez. Sin anotarlo, la próxima vez no habría con qué entrar.
+                    -->
+                    <StackPanel Visibility="{Binding MostrandoCodigoNuevo, Converter={StaticResource BoolAVisible}}">
+                        <Border Width="62" Height="62" CornerRadius="18"
+                                HorizontalAlignment="Center"
+                                Background="{StaticResource BrochaInformacionSuave}">
+                            <materialDesign:PackIcon Kind="CheckDecagramOutline"
+                                                     Width="32" Height="32"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource MaterialDesign.Brush.Primary}" />
+                        </Border>
+
+                        <TextBlock Text="Contraseña restablecida"
+                                   HorizontalAlignment="Center"
+                                   FontSize="22" FontWeight="Bold" Margin="0,16,0,0" />
+
+                        <TextBlock HorizontalAlignment="Center" TextAlignment="Center"
+                                   Style="{StaticResource TextoTenue}"
+                                   FontSize="12.5" TextWrapping="Wrap" LineHeight="19"
+                                   Margin="0,8,0,20"
+                                   Text="El código que usó ya no sirve. Este es el nuevo: anótelo y guárdelo en un lugar seguro, porque no se volverá a mostrar." />
+
+                        <Border CornerRadius="10" Padding="12,16"
+                                Background="{StaticResource BrochaInformacionSuave}">
+                            <TextBlock Text="{Binding CodigoNuevo}"
+                                       HorizontalAlignment="Center"
+                                       FontFamily="Consolas" FontSize="22" FontWeight="Bold" />
+                        </Border>
+
+                        <Button Style="{StaticResource BotonTexto}" Margin="0,8,0,18"
+                                HorizontalAlignment="Center"
+                                Command="{Binding CopiarCodigoNuevoCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ContentCopy" VerticalAlignment="Center" />
+                                <TextBlock Text="Copiar" Margin="6,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Style="{StaticResource BotonDeAcceso}"
+                                Command="{Binding TerminarRecuperacionCommand}"
+                                IsDefault="{Binding MostrandoCodigoNuevo}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="LoginVariant"
+                                                         Width="21" Height="21"
+                                                         VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <TextBlock Text="YA LO ANOTÉ, IR A ENTRAR" VerticalAlignment="Center"
+                                           FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>
