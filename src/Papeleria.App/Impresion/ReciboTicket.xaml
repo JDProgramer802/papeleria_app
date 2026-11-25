@@ -3,12 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:dtos="clr-namespace:Papeleria.Business.Dtos;assembly=Papeleria.Business"
-             d:DataContext="{d:DesignInstance dtos:VentaDetalladaDto}"
+             xmlns:impresion="clr-namespace:Papeleria.App.Impresion"
+             d:DataContext="{d:DesignInstance impresion:ReciboTicketDatos}"
              mc:Ignorable="d"
              Background="White"
              TextElement.Foreground="Black"
-             d:DesignWidth="280">
+             TextElement.FontFamily="Consolas"
+             TextElement.FontSize="11"
+             d:DesignWidth="272">
 
     <!--
         Tirilla de 80 mm para impresora térmica.
@@ -18,8 +20,14 @@
         cobrar no puede depender de que alguien abra un visor y busque el botón de
         imprimir con gente esperando en el mostrador.
 
+        Los textos vienen armados de ReciboVenta, el mismo modelo del PDF: aquí solo
+        se decide dónde va cada cosa.
+
         Todo en Consolas: en una térmica, una fuente de ancho fijo es la única forma
-        de que las columnas de cifras queden alineadas.
+        de que las columnas de cifras queden alineadas. La fuente se hereda desde el
+        control y no solo del estilo: los estilos implícitos de TextBlock no entran en
+        las plantillas de datos, y sin esto los renglones salían en Segoe UI. Y todo en negro puro: una
+        térmica no tiene grises, lo que no es negro sale punteado o no sale.
     -->
     <UserControl.Resources>
         <Style TargetType="TextBlock">
@@ -29,71 +37,145 @@
             <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
 
+        <Style x:Key="Centrado" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+
         <Style x:Key="Separador" TargetType="Border">
             <Setter Property="Height" Value="1" />
-            <Setter Property="Background" Value="#000000" />
+            <Setter Property="Background" Value="Black" />
             <Setter Property="Margin" Value="0,5" />
-            <Setter Property="Opacity" Value="0.55" />
         </Style>
+
+        <Style x:Key="SeparadorDoble" TargetType="Border">
+            <Setter Property="Height" Value="4" />
+            <Setter Property="BorderBrush" Value="Black" />
+            <Setter Property="BorderThickness" Value="0,1,0,1" />
+            <Setter Property="Margin" Value="0,6" />
+        </Style>
+
+        <!-- Etiqueta a la izquierda y valor pegado a la derecha. -->
+        <DataTemplate x:Key="FilaValor">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Etiqueta}" />
+                <TextBlock Grid.Column="1" Text="{Binding Valor}" TextWrapping="NoWrap" Margin="6,0,0,0" />
+            </Grid>
+        </DataTemplate>
+
+        <!-- Etiqueta en columna fija y el dato al lado: «Cliente:  Pedro Pérez». -->
+        <DataTemplate x:Key="FilaDato">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="68" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock>
+                    <Run Text="{Binding Etiqueta, Mode=OneWay}" /><Run Text=":" />
+                </TextBlock>
+                <TextBlock Grid.Column="1" Text="{Binding Valor}" />
+            </Grid>
+        </DataTemplate>
     </UserControl.Resources>
 
-    <StackPanel Margin="10,12,10,16">
-        <!-- ══ Encabezado de la empresa ═════════════════════════════════════ -->
-        <TextBlock Text="{Binding Empresa.Nombre}"
-                   FontSize="15" FontWeight="Bold"
-                   TextAlignment="Center" />
+    <StackPanel Margin="10,12,10,18">
+        <!-- ══ Empresa ═══════════════════════════════════════════════════════ -->
+        <Image Source="{Binding Logo, Converter={StaticResource RutaAImagen}}"
+               MaxHeight="64" MaxWidth="200" Stretch="Uniform" Margin="0,0,0,6"
+               HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"
+               Visibility="{Binding Logo, Converter={StaticResource TextoAVisible}}" />
 
-        <TextBlock Text="{Binding Empresa.LineaIdentificacion}"
-                   FontSize="10" TextAlignment="Center"
-                   Visibility="{Binding Empresa.LineaIdentificacion, Converter={StaticResource TextoAVisible}}" />
+        <TextBlock Text="{Binding NombreEmpresa}" Style="{StaticResource Centrado}"
+                   FontSize="15" FontWeight="Bold" />
 
-        <TextBlock Text="{Binding Empresa.LineaUbicacion}"
-                   FontSize="10" TextAlignment="Center"
-                   Visibility="{Binding Empresa.LineaUbicacion, Converter={StaticResource TextoAVisible}}" />
+        <TextBlock Text="{Binding Recibo.Empresa.Eslogan}" Style="{StaticResource Centrado}"
+                   FontSize="10" FontStyle="Italic"
+                   Visibility="{Binding Recibo.Empresa.Eslogan, Converter={StaticResource TextoAVisible}}" />
 
-        <TextBlock Text="{Binding Empresa.LineaContacto}"
-                   FontSize="10" TextAlignment="Center"
-                   Visibility="{Binding Empresa.LineaContacto, Converter={StaticResource TextoAVisible}}" />
-
-        <TextBlock Text="{Binding Empresa.Resolucion}"
-                   FontSize="9" TextAlignment="Center" Margin="0,3,0,0"
-                   Visibility="{Binding Empresa.Resolucion, Converter={StaticResource TextoAVisible}}" />
-
-        <Border Style="{StaticResource Separador}" />
-
-        <!-- ══ Datos de la factura ══════════════════════════════════════════ -->
-        <TextBlock FontSize="13" FontWeight="Bold">
-            <Run Text="FACTURA" />
-            <Run Text="{Binding Venta.NumeroFactura, Mode=OneWay}" />
-        </TextBlock>
-
-        <TextBlock Text="{Binding FechaTexto}" />
-        <TextBlock Text="{Binding CajeroTexto}" />
-        <TextBlock Text="{Binding ClienteTexto}" />
-        <TextBlock Text="{Binding DocumentoTexto}"
-                   Visibility="{Binding DocumentoTexto, Converter={StaticResource TextoAVisible}}" />
-
-        <TextBlock Text="*** FACTURA ANULADA ***"
-                   FontWeight="Bold" TextAlignment="Center" Margin="0,4,0,0"
-                   Visibility="{Binding EstaAnulada, Converter={StaticResource BoolAVisible}}" />
-
-        <Border Style="{StaticResource Separador}" />
-
-        <!-- ══ Renglones ════════════════════════════════════════════════════ -->
-        <ItemsControl ItemsSource="{Binding Lineas}">
+        <ItemsControl ItemsSource="{Binding Recibo.Encabezado}" Margin="0,2,0,0">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Margin="0,0,0,3">
+                    <TextBlock Text="{Binding}" Style="{StaticResource Centrado}" FontSize="10" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Border Style="{StaticResource SeparadorDoble}" />
+
+        <!-- ══ Documento ═════════════════════════════════════════════════════ -->
+        <TextBlock Text="{Binding Recibo.Titulo}" Style="{StaticResource Centrado}"
+                   FontSize="12" FontWeight="Bold" />
+
+        <TextBlock Text="{Binding Recibo.Numero}" Style="{StaticResource Centrado}"
+                   FontSize="16" FontWeight="Bold" />
+
+        <Border BorderBrush="Black" BorderThickness="1" Padding="10,1" Margin="0,3,0,0"
+                HorizontalAlignment="Center"
+                Visibility="{Binding Recibo.EsCopia, Converter={StaticResource BoolAVisible}}">
+            <TextBlock Text="COPIA" FontWeight="Bold" />
+        </Border>
+
+        <StackPanel Margin="0,4,0,0"
+                    Visibility="{Binding Recibo.EsAnulada, Converter={StaticResource BoolAVisible}}">
+            <Border Background="Black" Padding="0,2">
+                <TextBlock Text="*** DOCUMENTO ANULADO ***" Style="{StaticResource Centrado}"
+                           Foreground="White" FontWeight="Bold" />
+            </Border>
+            <TextBlock Style="{StaticResource Centrado}" FontSize="10"
+                       Visibility="{Binding Recibo.MotivoAnulacion, Converter={StaticResource TextoAVisible}}">
+                <Run Text="Motivo:" /> <Run Text="{Binding Recibo.MotivoAnulacion, Mode=OneWay}" />
+            </TextBlock>
+        </StackPanel>
+
+        <Border Style="{StaticResource Separador}" />
+
+        <ItemsControl ItemsSource="{Binding Recibo.DatosVenta}"
+                      ItemTemplate="{StaticResource FilaDato}" />
+
+        <Border Style="{StaticResource Separador}" />
+
+        <!-- ══ Renglones ═════════════════════════════════════════════════════ -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="14" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="DESCRIPCIÓN" FontSize="10" FontWeight="Bold" />
+            <TextBlock Grid.Column="1" Text="VALOR" FontSize="10" FontWeight="Bold" />
+        </Grid>
+
+        <Border Style="{StaticResource Separador}" />
+
+        <ItemsControl ItemsSource="{Binding Recibo.Lineas}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="0,0,0,4">
                         <TextBlock Text="{Binding Descripcion}" FontWeight="Bold" />
 
                         <Grid>
-                            <TextBlock Text="{Binding CantidadPorPrecio}" />
-                            <TextBlock Text="{Binding SubtotalTexto}" HorizontalAlignment="Right" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="14" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding CantidadPorPrecio}" Margin="8,0,0,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding Valor}" TextWrapping="NoWrap" Margin="6,0,0,0" />
+                            <TextBlock Grid.Column="2" Text="{Binding MarcaIva}" TextAlignment="Right" />
                         </Grid>
 
                         <Grid Visibility="{Binding TieneDescuento, Converter={StaticResource BoolAVisible}}">
-                            <TextBlock Text="{Binding DescuentoTexto}" />
-                            <TextBlock Text="{Binding ValorDescuentoTexto}" HorizontalAlignment="Right" />
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="14" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding Descuento}" />
+                            <TextBlock Grid.Column="1" Text="{Binding ValorDescuento}" TextWrapping="NoWrap" />
                         </Grid>
                     </StackPanel>
                 </DataTemplate>
@@ -102,45 +184,96 @@
 
         <Border Style="{StaticResource Separador}" />
 
-        <!-- ══ Totales ══════════════════════════════════════════════════════ -->
-        <ItemsControl ItemsSource="{Binding Totales}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <TextBlock Text="{Binding Etiqueta}" />
-                        <TextBlock Text="{Binding Valor}" HorizontalAlignment="Right" />
-                    </Grid>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <!-- ══ Totales ═══════════════════════════════════════════════════════ -->
+        <ItemsControl ItemsSource="{Binding Recibo.Totales}" ItemTemplate="{StaticResource FilaValor}" />
 
-        <Grid Margin="0,4,0,0">
-            <TextBlock Text="TOTAL" FontSize="16" FontWeight="Bold" />
-            <TextBlock Text="{Binding TotalTexto}" FontSize="16" FontWeight="Bold"
-                       HorizontalAlignment="Right" />
-        </Grid>
+        <Border Background="Black" Padding="6,4" Margin="0,5,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="TOTAL" FontSize="16" FontWeight="Bold" Foreground="White" />
+                <TextBlock Grid.Column="1" Text="{Binding Recibo.TotalTexto}"
+                           FontSize="16" FontWeight="Bold" Foreground="White" TextWrapping="NoWrap" />
+            </Grid>
+        </Border>
 
-        <TextBlock Text="{Binding FormaPagoTexto}" Margin="0,5,0,0" />
+        <TextBlock Text="{Binding TotalEnLetras}" FontSize="9.5" Margin="0,4,0,0" />
 
-        <TextBlock Text="{Binding ReferenciaTexto}"
-                   Visibility="{Binding ReferenciaTexto, Converter={StaticResource TextoAVisible}}" />
+        <!-- ══ Discriminación del IVA ════════════════════════════════════════ -->
+        <StackPanel Visibility="{Binding Recibo.DiscriminaIva, Converter={StaticResource BoolAVisible}}">
+            <Border Style="{StaticResource Separador}" />
 
-        <ItemsControl ItemsSource="{Binding Efectivo}" Margin="0,2,0,0">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <TextBlock Text="{Binding Etiqueta}" />
-                        <TextBlock Text="{Binding Valor}" HorizontalAlignment="Right" />
-                    </Grid>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="1" Text="TARIFA" FontSize="10" FontWeight="Bold" />
+                <TextBlock Grid.Column="2" Text="BASE" FontSize="10" FontWeight="Bold" TextAlignment="Right" />
+                <TextBlock Grid.Column="3" Text="IVA" FontSize="10" FontWeight="Bold" TextAlignment="Right" />
+            </Grid>
 
-        <TextBlock Text="{Binding ArticulosTexto}"
-                   FontSize="10" TextAlignment="Center" Margin="0,8,0,0" />
+            <ItemsControl ItemsSource="{Binding Recibo.Impuestos}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="14" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding Marca}" FontSize="10" />
+                            <TextBlock Grid.Column="1" Text="{Binding Tarifa}" FontSize="10" />
+                            <TextBlock Grid.Column="2" Text="{Binding Base}" FontSize="10" TextAlignment="Right" />
+                            <TextBlock Grid.Column="3" Text="{Binding Iva}" FontSize="10" TextAlignment="Right" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
 
-        <TextBlock Text="{Binding Empresa.PieFactura}"
-                   TextAlignment="Center" Margin="0,6,0,0"
-                   Visibility="{Binding Empresa.PieFactura, Converter={StaticResource TextoAVisible}}" />
+        <Border Style="{StaticResource Separador}" />
+
+        <!-- ══ Pago ══════════════════════════════════════════════════════════ -->
+        <ItemsControl ItemsSource="{Binding Recibo.Pago}" ItemTemplate="{StaticResource FilaValor}" />
+
+        <TextBlock Text="{Binding Recibo.ResumenArticulos}" Style="{StaticResource Centrado}"
+                   FontSize="10" Margin="0,6,0,0" />
+
+        <!-- ══ Resolución y pie ══════════════════════════════════════════════ -->
+        <StackPanel Visibility="{Binding TieneResolucion, Converter={StaticResource BoolAVisible}}">
+            <Border Style="{StaticResource Separador}" />
+
+            <ItemsControl ItemsSource="{Binding Recibo.Resolucion}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" Style="{StaticResource Centrado}" FontSize="9.5" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <TextBlock Text="{Binding Recibo.Pie}" Style="{StaticResource Centrado}"
+                   FontWeight="Bold" Margin="0,8,0,0"
+                   Visibility="{Binding Recibo.Pie, Converter={StaticResource TextoAVisible}}" />
+
+        <Image Source="{Binding CodigoBarras, Converter={StaticResource BytesAImagen}}"
+               Height="42" Stretch="Fill" Margin="16,10,16,0"
+               RenderOptions.BitmapScalingMode="NearestNeighbor"
+               Visibility="{Binding CodigoBarras, Converter={StaticResource NuloAVisible}}" />
+
+        <TextBlock Text="{Binding Recibo.Venta.NumeroFactura}" Style="{StaticResource Centrado}" FontSize="10" />
+
+        <TextBlock Text="{Binding Recibo.LineaCopia}" Style="{StaticResource Centrado}"
+                   FontSize="9.5" Margin="0,4,0,0"
+                   Visibility="{Binding Recibo.EsCopia, Converter={StaticResource BoolAVisible}}" />
+
+        <TextBlock Text="{Binding Recibo.LineaSoftware}" Style="{StaticResource Centrado}"
+                   FontSize="9" Margin="0,4,0,0" />
     </StackPanel>
 </UserControl>

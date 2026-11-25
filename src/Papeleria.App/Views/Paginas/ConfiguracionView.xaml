@@ -151,10 +151,25 @@
                                              materialDesign:HintAssist.IsFloating="True" />
                                 </Grid>
 
-                                <TextBox Style="{StaticResource CampoTexto}" MaxLength="150"
-                                         Text="{Binding Eslogan, UpdateSourceTrigger=PropertyChanged}"
-                                         materialDesign:HintAssist.Hint="Eslogan (opcional)"
-                                         materialDesign:HintAssist.IsFloating="True" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Column="0" Style="{StaticResource CampoTexto}" MaxLength="150"
+                                             Text="{Binding Eslogan, UpdateSourceTrigger=PropertyChanged}"
+                                             materialDesign:HintAssist.Hint="Eslogan (opcional)"
+                                             materialDesign:HintAssist.IsFloating="True" />
+
+                                    <ComboBox Grid.Column="2" Style="{StaticResource CampoSeleccion}"
+                                              IsEditable="True"
+                                              ItemsSource="{Binding RegimenesSugeridos}"
+                                              Text="{Binding Regimen, UpdateSourceTrigger=PropertyChanged}"
+                                              materialDesign:HintAssist.Hint="Responsabilidad frente al IVA (RUT)"
+                                              ToolTip="Sale en el encabezado de la factura, debajo del NIT." />
+                                </Grid>
 
                                 <Separator Style="{StaticResource SeparadorHorizontal}" />
 
@@ -194,12 +209,61 @@
 
                                 <Separator Style="{StaticResource SeparadorHorizontal}" />
 
-                                <TextBlock Text="Texto de la factura" Style="{StaticResource TituloSeccion}" />
+                                <TextBlock Text="Factura y resolución DIAN" Style="{StaticResource TituloSeccion}" />
+
+                                <TextBlock Style="{StaticResource TextoTenue}" TextWrapping="Wrap" Margin="0,0,0,12"
+                                           Text="La autorización de numeración se imprime al pie de cada factura tal como la entregó la DIAN. El prefijo es el de la pestaña Numeración." />
+
+                                <ComboBox Style="{StaticResource CampoSeleccion}"
+                                          IsEditable="True"
+                                          ItemsSource="{Binding TitulosFacturaSugeridos}"
+                                          Text="{Binding TituloFactura, UpdateSourceTrigger=PropertyChanged}"
+                                          materialDesign:HintAssist.Hint="Nombre del documento impreso"
+                                          ToolTip="Es el título grande de la tirilla, encima del número." />
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Column="0" Style="{StaticResource CampoTexto}" MaxLength="40"
+                                             Text="{Binding ResolucionNumero, UpdateSourceTrigger=PropertyChanged}"
+                                             materialDesign:HintAssist.Hint="N.º de resolución DIAN" />
+
+                                    <DatePicker Grid.Column="2" Style="{StaticResource CampoFecha}"
+                                                SelectedDate="{Binding ResolucionFecha}"
+                                                materialDesign:HintAssist.Hint="Fecha de la resolución" />
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="12" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Column="0" Style="{StaticResource CampoNumerico}"
+                                             Text="{Binding ResolucionDesde, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                                             materialDesign:HintAssist.Hint="Rango desde" />
+
+                                    <TextBox Grid.Column="2" Style="{StaticResource CampoNumerico}"
+                                             Text="{Binding ResolucionHasta, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                                             materialDesign:HintAssist.Hint="Rango hasta" />
+
+                                    <DatePicker Grid.Column="4" Style="{StaticResource CampoFecha}"
+                                                SelectedDate="{Binding ResolucionVigencia}"
+                                                materialDesign:HintAssist.Hint="Vigente hasta" />
+                                </Grid>
 
                                 <TextBox Style="{StaticResource CampoTexto}" MaxLength="300"
                                          Text="{Binding ResolucionFactura, UpdateSourceTrigger=PropertyChanged}"
-                                         materialDesign:HintAssist.Hint="Resolución de facturación (opcional)"
-                                         materialDesign:HintAssist.IsFloating="True" />
+                                         materialDesign:HintAssist.Hint="Leyenda legal adicional (opcional)"
+                                         materialDesign:HintAssist.IsFloating="True"
+                                         ToolTip="Texto libre que se imprime después de la resolución." />
 
                                 <TextBox Style="{StaticResource CampoTexto}" MaxLength="200"
                                          Text="{Binding PieFactura, UpdateSourceTrigger=PropertyChanged}"

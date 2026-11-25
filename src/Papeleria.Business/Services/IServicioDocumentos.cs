@@ -32,9 +32,10 @@ public class EtiquetaProducto
 /// <summary>Generación de los documentos imprimibles del sistema en PDF.</summary>
 public interface IServicioDocumentos
 {
+    /// <param name="esCopia">Reimpresión: el documento sale marcado como COPIA.</param>
     Task<string> GenerarFacturaAsync(
         VentaDetalladaDto venta, FormatoFactura formato = FormatoFactura.Recibo80mm,
-        string? rutaDestino = null, CancellationToken ct = default);
+        string? rutaDestino = null, bool esCopia = false, CancellationToken ct = default);
 
     /// <summary>Cotización en formato carta, para imprimir o mandar por correo.</summary>
     Task<string> GenerarCotizacionAsync(

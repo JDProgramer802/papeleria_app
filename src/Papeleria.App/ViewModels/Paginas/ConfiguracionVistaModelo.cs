@@ -75,6 +75,24 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
     [ObservableProperty] private string _ciudad = string.Empty;
     [ObservableProperty] private string _eslogan = string.Empty;
     [ObservableProperty] private string _logoPath = string.Empty;
+    [ObservableProperty] private string _regimen = string.Empty;
+
+    /// <summary>Lo que se suele poner en el RUT; el campo admite escribir otra cosa.</summary>
+    public IReadOnlyList<string> RegimenesSugeridos { get; } = new[]
+    {
+        "No responsable de IVA",
+        "Responsable de IVA",
+        "Régimen Simple de Tributación",
+        "Gran contribuyente"
+    };
+
+    /// <summary>Nombres habituales del documento que se entrega en el mostrador.</summary>
+    public IReadOnlyList<string> TitulosFacturaSugeridos { get; } = new[]
+    {
+        "Factura de venta",
+        "Documento equivalente POS",
+        "Recibo de venta"
+    };
 
     // ── Documentos e impuestos ──────────────────────────────────────────────
 
@@ -85,6 +103,12 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
     [ObservableProperty] private string _prefijoFactura = "FV-";
     [ObservableProperty] private int _consecutivoFactura;
     [ObservableProperty] private string _resolucionFactura = string.Empty;
+    [ObservableProperty] private string _tituloFactura = "Factura de venta";
+    [ObservableProperty] private string _resolucionNumero = string.Empty;
+    [ObservableProperty] private DateTime? _resolucionFecha;
+    [ObservableProperty] private int? _resolucionDesde;
+    [ObservableProperty] private int? _resolucionHasta;
+    [ObservableProperty] private DateTime? _resolucionVigencia;
     [ObservableProperty] private string _pieFactura = string.Empty;
     [ObservableProperty] private string _prefijoCompra = "CMP-";
     [ObservableProperty] private int _consecutivoCompra;
@@ -178,12 +202,19 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
         Ciudad = empresa.Ciudad;
         Eslogan = empresa.Eslogan;
         LogoPath = empresa.LogoPath;
+        Regimen = empresa.Regimen;
 
         IvaPorDefecto = empresa.IvaPorDefecto;
         MonedaSimbolo = empresa.MonedaSimbolo;
         MonedaCodigo = empresa.MonedaCodigo;
         DecimalesMoneda = empresa.DecimalesMoneda;
         ResolucionFactura = empresa.Resolucion;
+        TituloFactura = empresa.TituloFactura;
+        ResolucionNumero = empresa.ResolucionNumero;
+        ResolucionFecha = empresa.ResolucionFecha;
+        ResolucionDesde = empresa.ResolucionDesde;
+        ResolucionHasta = empresa.ResolucionHasta;
+        ResolucionVigencia = empresa.ResolucionVigencia;
         PieFactura = empresa.PieFactura;
 
         PrefijoFactura = _configuracion.ObtenerTexto(ClavesConfiguracion.FacturaPrefijo, "FV-");
@@ -338,7 +369,14 @@ public partial class ConfiguracionVistaModelo : PaginaVistaModelo
             Ciudad = Ciudad,
             Eslogan = Eslogan,
             LogoPath = LogoPath,
+            Regimen = Regimen,
             Resolucion = ResolucionFactura,
+            TituloFactura = TituloFactura,
+            ResolucionNumero = ResolucionNumero,
+            ResolucionFecha = ResolucionFecha,
+            ResolucionDesde = ResolucionDesde,
+            ResolucionHasta = ResolucionHasta,
+            ResolucionVigencia = ResolucionVigencia,
             PieFactura = PieFactura,
             MonedaSimbolo = MonedaSimbolo,
             MonedaCodigo = MonedaCodigo,

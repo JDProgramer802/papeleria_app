@@ -33,16 +33,17 @@ public class ServicioDocumentos : IServicioDocumentos
         VentaDetalladaDto venta,
         FormatoFactura formato = FormatoFactura.Recibo80mm,
         string? rutaDestino = null,
+        bool esCopia = false,
         CancellationToken ct = default)
     {
         var ruta = rutaDestino ?? RutasAplicacion.RutaTemporal(".pdf");
-        var empresa = _configuracion.ObtenerEmpresa();
+        var recibo = new ReciboVenta(venta, _configuracion.ObtenerEmpresa(), esCopia);
 
         await Task.Run(() =>
         {
             var documento = formato == FormatoFactura.Recibo80mm
-                ? ConstruirRecibo(venta, empresa)
-                : ConstruirFacturaCarta(venta, empresa);
+                ? ConstruirRecibo(recibo)
+                : ConstruirFacturaCarta(recibo);
 
             documento.GeneratePdf(ruta);
         }, ct).ConfigureAwait(false);
@@ -50,10 +51,16 @@ public class ServicioDocumentos : IServicioDocumentos
         return ruta;
     }
 
-    /// <summary>Tirilla continua de 80 mm: el alto crece con el número de líneas.</summary>
-    private IDocument ConstruirRecibo(VentaDetalladaDto venta, DatosEmpresa empresa) =>
+    /// <summary>
+    /// Tirilla continua de 80 mm: el alto crece con el número de líneas. Es el mismo
+    /// diseño que sale por la impresora térmica, renglón por renglón.
+    /// </summary>
+    private IDocument ConstruirRecibo(ReciboVenta recibo) =>
         Document.Create(documento =>
         {
+            var venta = recibo.Venta;
+            var empresa = recibo.Empresa;
+
             documento.Page(pagina =>
             {
                 pagina.ContinuousSize(80, Unit.Millimetre);
@@ -63,134 +70,212 @@ public class ServicioDocumentos : IServicioDocumentos
 
                 pagina.Content().Column(columna =>
                 {
-                    columna.Item().AlignCenter().Text(empresa.Nombre).Bold().FontSize(10);
-
-                    if (!string.IsNullOrWhiteSpace(empresa.LineaIdentificacion))
+                    // ── Empresa ─────────────────────────────────────────────
+                    if (empresa.TieneLogo)
                     {
-                        columna.Item().AlignCenter().Text(empresa.LineaIdentificacion).FontSize(7);
+                        columna.Item().AlignCenter().Height(16, Unit.Millimetre)
+                            .Image(empresa.LogoPath).FitHeight();
+                        columna.Item().Height(2, Unit.Millimetre);
                     }
 
-                    if (!string.IsNullOrWhiteSpace(empresa.LineaUbicacion))
+                    columna.Item().AlignCenter().Text(empresa.Nombre.ToUpper(Formatos.Cultura))
+                        .Bold().FontSize(10.5f);
+
+                    if (!string.IsNullOrWhiteSpace(empresa.Eslogan))
                     {
-                        columna.Item().AlignCenter().Text(empresa.LineaUbicacion).FontSize(7);
+                        columna.Item().AlignCenter().Text(empresa.Eslogan).Italic().FontSize(7);
                     }
 
-                    if (!string.IsNullOrWhiteSpace(empresa.LineaContacto))
+                    foreach (var linea in recibo.Encabezado)
                     {
-                        columna.Item().AlignCenter().Text(empresa.LineaContacto).FontSize(7);
+                        columna.Item().AlignCenter().Text(linea).FontSize(7);
                     }
 
-                    if (!string.IsNullOrWhiteSpace(empresa.Resolucion))
+                    SeparadorRecibo(columna, doble: true);
+
+                    // ── Documento ───────────────────────────────────────────
+                    columna.Item().AlignCenter().Text(recibo.Titulo).Bold().FontSize(9);
+                    columna.Item().AlignCenter().Text(recibo.Numero).Bold().FontSize(11);
+
+                    if (recibo.EsCopia)
                     {
-                        columna.Item().AlignCenter().PaddingTop(2).Text(empresa.Resolucion).FontSize(6);
+                        columna.Item().PaddingTop(2).AlignCenter().Border(0.75f).PaddingHorizontal(6)
+                            .Text("COPIA").Bold().FontSize(8);
                     }
 
-                    columna.Item().PaddingVertical(4).LineHorizontal(0.5f);
-
-                    columna.Item().Text($"FACTURA {venta.NumeroFactura}").Bold().FontSize(9);
-                    columna.Item().Text($"Fecha:   {Formatos.FechaHora(venta.Fecha)}");
-                    columna.Item().Text($"Cajero:  {venta.UsuarioNombre}");
-                    columna.Item().Text($"Cliente: {venta.ClienteNombre}");
-
-                    if (!string.IsNullOrWhiteSpace(venta.ClienteDocumento))
+                    if (recibo.EsAnulada)
                     {
-                        columna.Item().Text($"Doc.:    {venta.ClienteDocumento}");
+                        columna.Item().PaddingTop(3).Background(Colors.Black).PaddingVertical(2).AlignCenter()
+                            .Text("*** DOCUMENTO ANULADO ***").Bold().FontColor(Colors.White);
+
+                        if (!string.IsNullOrWhiteSpace(recibo.MotivoAnulacion))
+                        {
+                            columna.Item().AlignCenter().Text($"Motivo: {recibo.MotivoAnulacion}").FontSize(7);
+                        }
                     }
 
-                    if (venta.Estado == EstadoVenta.Anulada)
+                    SeparadorRecibo(columna);
+
+                    foreach (var fila in recibo.DatosVenta)
                     {
-                        columna.Item().PaddingTop(3).AlignCenter()
-                            .Text("*** FACTURA ANULADA ***").Bold().FontColor(Colors.Red.Darken2);
+                        FilaDatoRecibo(columna, fila);
                     }
 
-                    columna.Item().PaddingVertical(4).LineHorizontal(0.5f);
+                    SeparadorRecibo(columna);
 
-                    foreach (var linea in venta.Lineas)
+                    // ── Renglones ───────────────────────────────────────────
+                    columna.Item().Row(fila =>
+                    {
+                        fila.RelativeItem().Text("DESCRIPCIÓN / CANT. x V.UNIT").Bold().FontSize(7);
+                        fila.AutoItem().Text("VALOR").Bold().FontSize(7);
+                        fila.ConstantItem(8);
+                    });
+
+                    SeparadorRecibo(columna);
+
+                    foreach (var linea in recibo.Lineas)
                     {
                         columna.Item().Text(linea.Descripcion).Bold();
 
                         columna.Item().Row(fila =>
                         {
-                            fila.RelativeItem(3).Text(
-                                $"{Formatos.Cantidad(linea.Cantidad)} x {Formatos.Moneda(linea.ValorUnitario)}");
-                            fila.RelativeItem(2).AlignRight().Text(Formatos.Moneda(linea.Subtotal));
+                            fila.RelativeItem().Text($"  {linea.CantidadPorPrecio}");
+                            fila.AutoItem().Text(linea.Valor);
+                            fila.ConstantItem(8).AlignRight().Text(linea.MarcaIva);
                         });
 
-                        if (linea.ValorDescuento > 0)
+                        if (linea.TieneDescuento)
                         {
                             columna.Item().Row(fila =>
                             {
-                                fila.RelativeItem(3).Text($"  Descuento {Formatos.Porcentaje(linea.PorcentajeDescuento)}");
-                                fila.RelativeItem(2).AlignRight().Text($"-{Formatos.Moneda(linea.ValorDescuento)}");
+                                fila.RelativeItem().Text(linea.Descuento!);
+                                fila.AutoItem().Text(linea.ValorDescuento!);
+                                fila.ConstantItem(8);
+                            });
+                        }
+
+                        columna.Item().Height(1.5f);
+                    }
+
+                    SeparadorRecibo(columna);
+
+                    // ── Totales ─────────────────────────────────────────────
+                    foreach (var fila in recibo.Totales)
+                    {
+                        FilaValorRecibo(columna, fila);
+                    }
+
+                    columna.Item().PaddingTop(3).Background(Colors.Black)
+                        .PaddingVertical(3).PaddingHorizontal(4).Row(fila =>
+                        {
+                            fila.RelativeItem().Text("TOTAL A PAGAR").Bold().FontSize(10.5f).FontColor(Colors.White);
+                            fila.AutoItem().Text(recibo.TotalTexto).Bold().FontSize(10.5f).FontColor(Colors.White);
+                        });
+
+                    columna.Item().PaddingTop(3).Text(recibo.TotalEnLetras).FontSize(6.5f);
+
+                    // ── Discriminación del IVA ──────────────────────────────
+                    if (recibo.DiscriminaIva)
+                    {
+                        SeparadorRecibo(columna);
+
+                        columna.Item().Row(fila =>
+                        {
+                            fila.ConstantItem(10);
+                            fila.RelativeItem(3).Text("TARIFA").Bold().FontSize(7);
+                            fila.RelativeItem(3).AlignRight().Text("BASE").Bold().FontSize(7);
+                            fila.RelativeItem(3).AlignRight().Text("IVA").Bold().FontSize(7);
+                        });
+
+                        foreach (var impuesto in recibo.Impuestos)
+                        {
+                            columna.Item().Row(fila =>
+                            {
+                                fila.ConstantItem(10).Text(impuesto.Marca).FontSize(7);
+                                fila.RelativeItem(3).Text(impuesto.Tarifa).FontSize(7);
+                                fila.RelativeItem(3).AlignRight().Text(impuesto.Base).FontSize(7);
+                                fila.RelativeItem(3).AlignRight().Text(impuesto.Iva).FontSize(7);
                             });
                         }
                     }
 
-                    columna.Item().PaddingVertical(4).LineHorizontal(0.5f);
+                    SeparadorRecibo(columna);
 
-                    AgregarTotalRecibo(columna, "Subtotal", venta.Subtotal);
-
-                    if (venta.TotalDescuento > 0)
+                    // ── Pago ────────────────────────────────────────────────
+                    foreach (var fila in recibo.Pago)
                     {
-                        AgregarTotalRecibo(columna, "Descuentos", -venta.TotalDescuento);
+                        FilaValorRecibo(columna, fila);
                     }
 
-                    if (venta.TotalIva > 0)
+                    columna.Item().PaddingTop(4).AlignCenter().Text(recibo.ResumenArticulos).FontSize(7);
+
+                    // ── Resolución y pie ────────────────────────────────────
+                    if (recibo.Resolucion.Count > 0)
                     {
-                        AgregarTotalRecibo(columna, "IVA", venta.TotalIva);
+                        SeparadorRecibo(columna);
+
+                        foreach (var linea in recibo.Resolucion)
+                        {
+                            columna.Item().AlignCenter().Text(linea).FontSize(6.5f);
+                        }
                     }
 
-                    columna.Item().PaddingTop(2).Row(fila =>
+                    if (!string.IsNullOrWhiteSpace(recibo.Pie))
                     {
-                        fila.RelativeItem().Text("TOTAL").Bold().FontSize(11);
-                        fila.RelativeItem().AlignRight().Text(Formatos.Moneda(venta.Total)).Bold().FontSize(11);
-                    });
-
-                    columna.Item().PaddingTop(3).Text($"Forma de pago: {venta.MetodoPago.Descripcion()}");
-
-                    // La referencia también va impresa: es la que el cliente reclama
-                    // cuando dice que ya pagó y hay que buscar el movimiento.
-                    if (venta.TieneReferenciaPago)
-                    {
-                        columna.Item().Text($"Ref.: {venta.ReferenciaPago}");
-                    }
-
-                    if (venta.MetodoPago is MetodoPago.Efectivo or MetodoPago.Mixto)
-                    {
-                        AgregarTotalRecibo(columna, "Recibido", venta.MontoRecibido);
-                        AgregarTotalRecibo(columna, "Cambio", venta.Cambio);
-                    }
-
-                    columna.Item().PaddingTop(6).AlignCenter()
-                        .Text($"Artículos: {venta.CantidadArticulos}").FontSize(7);
-
-                    if (!string.IsNullOrWhiteSpace(empresa.PieFactura))
-                    {
-                        columna.Item().PaddingTop(4).AlignCenter().Text(empresa.PieFactura).FontSize(8).Bold();
+                        columna.Item().PaddingTop(5).AlignCenter().Text(recibo.Pie).FontSize(8).Bold();
                     }
 
                     // El código del documento permite recuperar la venta escaneando la tirilla.
                     var imagen = _codigoBarras.GenerarPng(venta.NumeroFactura,
                         SimbologiaCodigoBarras.Code128, 420, 90);
 
-                    columna.Item().PaddingTop(6).AlignCenter().Width(60, Unit.Millimetre).Image(imagen);
+                    columna.Item().PaddingTop(6).AlignCenter().Width(56, Unit.Millimetre).Image(imagen);
+                    columna.Item().AlignCenter().Text(venta.NumeroFactura).FontSize(7);
 
-                    columna.Item().PaddingTop(2).AlignCenter().Text(venta.NumeroFactura).FontSize(7);
+                    if (recibo.EsCopia)
+                    {
+                        columna.Item().PaddingTop(3).AlignCenter().Text(recibo.LineaCopia).FontSize(6.5f);
+                    }
+
+                    columna.Item().PaddingTop(3).AlignCenter().Text(recibo.LineaSoftware).FontSize(6);
                 });
             });
         });
 
-    private static void AgregarTotalRecibo(ColumnDescriptor columna, string etiqueta, decimal valor) =>
-        columna.Item().Row(fila =>
+    /// <summary>Raya de lado a lado; la doble separa el encabezado de la empresa.</summary>
+    private static void SeparadorRecibo(ColumnDescriptor columna, bool doble = false) =>
+        columna.Item().PaddingVertical(3).Column(raya =>
         {
-            fila.RelativeItem().Text(etiqueta);
-            fila.RelativeItem().AlignRight().Text(Formatos.Moneda(valor));
+            raya.Item().LineHorizontal(0.6f);
+
+            if (doble)
+            {
+                raya.Item().Height(1.2f);
+                raya.Item().LineHorizontal(0.6f);
+            }
+        });
+
+    private static void FilaDatoRecibo(ColumnDescriptor columna, FilaRecibo fila) =>
+        columna.Item().Row(renglon =>
+        {
+            renglon.ConstantItem(17, Unit.Millimetre).Text($"{fila.Etiqueta}:");
+            renglon.RelativeItem().Text(fila.Valor);
+        });
+
+    private static void FilaValorRecibo(ColumnDescriptor columna, FilaRecibo fila) =>
+        columna.Item().Row(renglon =>
+        {
+            renglon.RelativeItem().Text(fila.Etiqueta);
+            renglon.AutoItem().Text(fila.Valor);
         });
 
     /// <summary>Formato carta, con encabezado de empresa y tabla de detalle.</summary>
-    private IDocument ConstruirFacturaCarta(VentaDetalladaDto venta, DatosEmpresa empresa) =>
+    private IDocument ConstruirFacturaCarta(ReciboVenta recibo) =>
         Document.Create(documento =>
         {
+            var venta = recibo.Venta;
+            var empresa = recibo.Empresa;
+
             documento.Page(pagina =>
             {
                 pagina.Size(PageSizes.Letter);
@@ -211,10 +296,7 @@ public class ServicioDocumentos : IServicioDocumentos
                                     .FontColor(Colors.Grey.Darken1);
                             }
 
-                            foreach (var linea in new[]
-                                     {
-                                         empresa.LineaIdentificacion, empresa.LineaUbicacion, empresa.LineaContacto
-                                     }.Where(l => !string.IsNullOrWhiteSpace(l)))
+                            foreach (var linea in recibo.Encabezado)
                             {
                                 datos.Item().Text(linea).FontSize(8);
                             }
@@ -222,7 +304,7 @@ public class ServicioDocumentos : IServicioDocumentos
 
                         fila.ConstantItem(190).Border(1).BorderColor(ColorPrincipal).Padding(8).Column(caja =>
                         {
-                            caja.Item().AlignCenter().Text("FACTURA DE VENTA")
+                            caja.Item().AlignCenter().Text(recibo.Titulo)
                                 .FontSize(11).Bold().FontColor(ColorPrincipal);
                             caja.Item().AlignCenter().PaddingTop(3).Text(venta.NumeroFactura)
                                 .FontSize(14).Bold();
@@ -234,12 +316,17 @@ public class ServicioDocumentos : IServicioDocumentos
                                 caja.Item().AlignCenter().PaddingTop(3).Text("ANULADA")
                                     .Bold().FontColor(Colors.Red.Darken2);
                             }
+
+                            if (recibo.EsCopia)
+                            {
+                                caja.Item().AlignCenter().PaddingTop(3).Text("COPIA").Bold();
+                            }
                         });
                     });
 
-                    if (!string.IsNullOrWhiteSpace(empresa.Resolucion))
+                    if (recibo.Resolucion.Count > 0)
                     {
-                        encabezado.Item().PaddingTop(4).Text(empresa.Resolucion)
+                        encabezado.Item().PaddingTop(4).Text(string.Join("  ·  ", recibo.Resolucion))
                             .FontSize(7).FontColor(Colors.Grey.Darken1);
                     }
 
@@ -380,13 +467,45 @@ public class ServicioDocumentos : IServicioDocumentos
                             }
                         });
                     });
+
+                    contenido.Item().PaddingTop(8).Text(recibo.TotalEnLetras).FontSize(8).Bold();
+
+                    if (recibo.DiscriminaIva)
+                    {
+                        contenido.Item().PaddingTop(8).Width(300).Table(tabla =>
+                        {
+                            tabla.ColumnsDefinition(definicion =>
+                            {
+                                definicion.RelativeColumn(2);
+                                definicion.RelativeColumn(2);
+                                definicion.RelativeColumn(2);
+                            });
+
+                            foreach (var titulo in new[] { "Tarifa", "Base gravable", "IVA" })
+                            {
+                                tabla.Cell().Background(Colors.Grey.Lighten3).Padding(3)
+                                    .Text(titulo).FontSize(7.5f).Bold();
+                            }
+
+                            foreach (var impuesto in recibo.Impuestos)
+                            {
+                                CeldaFactura(tabla, Colors.White).Text(impuesto.Tarifa).FontSize(8);
+                                CeldaFactura(tabla, Colors.White).AlignRight().Text(impuesto.Base).FontSize(8);
+                                CeldaFactura(tabla, Colors.White).AlignRight().Text(impuesto.Iva).FontSize(8);
+                            }
+                        });
+                    }
                 });
 
                 pagina.Footer().PaddingTop(6).BorderTop(0.5f).BorderColor(Colors.Grey.Lighten1)
                     .PaddingTop(4).Row(fila =>
                     {
-                        fila.RelativeItem().Text(empresa.PieFactura)
-                            .FontSize(8).FontColor(Colors.Grey.Darken1);
+                        fila.RelativeItem().Column(pie =>
+                        {
+                            pie.Item().Text(empresa.PieFactura).FontSize(8).FontColor(Colors.Grey.Darken1);
+                            pie.Item().Text(recibo.EsCopia ? $"{recibo.LineaCopia}  ·  {recibo.LineaSoftware}" : recibo.LineaSoftware)
+                                .FontSize(6.5f).FontColor(Colors.Grey.Darken1);
+                        });
 
                         fila.RelativeItem().AlignRight().Text(texto =>
                         {

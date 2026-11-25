@@ -63,6 +63,9 @@ public static class ClavesConfiguracion
     public const string EmpresaLogo = "empresa.logo";
     public const string EmpresaEslogan = "empresa.eslogan";
 
+    /// <summary>Responsabilidad frente al IVA: «No responsable de IVA», «Responsable de IVA»…</summary>
+    public const string EmpresaRegimen = "empresa.regimen";
+
     public const string ImpuestoPorDefecto = "impuesto.porDefecto";
     public const string MonedaSimbolo = "moneda.simbolo";
     public const string MonedaCodigo = "moneda.codigo";
@@ -72,6 +75,16 @@ public static class ClavesConfiguracion
     public const string FacturaConsecutivo = "factura.consecutivo";
     public const string FacturaResolucion = "factura.resolucion";
     public const string FacturaPieDePagina = "factura.pie";
+
+    /// <summary>Nombre del documento impreso: «Factura de venta», «Documento equivalente POS»…</summary>
+    public const string FacturaTitulo = "factura.titulo";
+
+    // Autorización de numeración de la DIAN, por partes, para imprimirla completa.
+    public const string FacturaResolucionNumero = "factura.resolucion.numero";
+    public const string FacturaResolucionFecha = "factura.resolucion.fecha";
+    public const string FacturaResolucionDesde = "factura.resolucion.desde";
+    public const string FacturaResolucionHasta = "factura.resolucion.hasta";
+    public const string FacturaResolucionVigencia = "factura.resolucion.vigencia";
     public const string CotizacionPrefijo = "cotizacion.prefijo";
     public const string CotizacionConsecutivo = "cotizacion.consecutivo";
     public const string CotizacionDiasValidez = "cotizacion.diasValidez";

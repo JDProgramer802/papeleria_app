@@ -51,6 +51,11 @@ public class ServicioConfiguracion : IServicioConfiguracion
             ? valor
             : valorPorDefecto;
 
+    private int? ObtenerEnteroOpcional(string clave) =>
+        int.TryParse(ObtenerTexto(clave), NumberStyles.Integer, CultureInfo.InvariantCulture, out var valor)
+            ? valor
+            : null;
+
     public bool ObtenerBooleano(string clave, bool valorPorDefecto = false) =>
         bool.TryParse(ObtenerTexto(clave), out var valor) ? valor : valorPorDefecto;
 
@@ -108,7 +113,15 @@ public class ServicioConfiguracion : IServicioConfiguracion
         Ciudad = ObtenerTexto(ClavesConfiguracion.EmpresaCiudad),
         Eslogan = ObtenerTexto(ClavesConfiguracion.EmpresaEslogan),
         LogoPath = ObtenerTexto(ClavesConfiguracion.EmpresaLogo),
+        Regimen = ObtenerTexto(ClavesConfiguracion.EmpresaRegimen),
         Resolucion = ObtenerTexto(ClavesConfiguracion.FacturaResolucion),
+        TituloFactura = ObtenerTexto(ClavesConfiguracion.FacturaTitulo, "Factura de venta"),
+        ResolucionNumero = ObtenerTexto(ClavesConfiguracion.FacturaResolucionNumero),
+        ResolucionFecha = ObtenerFecha(ClavesConfiguracion.FacturaResolucionFecha),
+        ResolucionDesde = ObtenerEnteroOpcional(ClavesConfiguracion.FacturaResolucionDesde),
+        ResolucionHasta = ObtenerEnteroOpcional(ClavesConfiguracion.FacturaResolucionHasta),
+        ResolucionVigencia = ObtenerFecha(ClavesConfiguracion.FacturaResolucionVigencia),
+        PrefijoFactura = ObtenerTexto(ClavesConfiguracion.FacturaPrefijo, "FV-"),
         PieFactura = ObtenerTexto(ClavesConfiguracion.FacturaPieDePagina, "¡Gracias por su compra!"),
         MonedaSimbolo = ObtenerTexto(ClavesConfiguracion.MonedaSimbolo, "$"),
         MonedaCodigo = ObtenerTexto(ClavesConfiguracion.MonedaCodigo, "COP"),
@@ -128,7 +141,18 @@ public class ServicioConfiguracion : IServicioConfiguracion
             [ClavesConfiguracion.EmpresaCiudad] = Texto.Normalizar(empresa.Ciudad),
             [ClavesConfiguracion.EmpresaEslogan] = Texto.Normalizar(empresa.Eslogan),
             [ClavesConfiguracion.EmpresaLogo] = Texto.Normalizar(empresa.LogoPath),
+            [ClavesConfiguracion.EmpresaRegimen] = Texto.Normalizar(empresa.Regimen),
             [ClavesConfiguracion.FacturaResolucion] = Texto.Normalizar(empresa.Resolucion),
+            [ClavesConfiguracion.FacturaTitulo] = Texto.Normalizar(empresa.TituloFactura),
+            [ClavesConfiguracion.FacturaResolucionNumero] = Texto.Normalizar(empresa.ResolucionNumero),
+            [ClavesConfiguracion.FacturaResolucionFecha] =
+                empresa.ResolucionFecha?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            [ClavesConfiguracion.FacturaResolucionDesde] =
+                empresa.ResolucionDesde?.ToString(CultureInfo.InvariantCulture),
+            [ClavesConfiguracion.FacturaResolucionHasta] =
+                empresa.ResolucionHasta?.ToString(CultureInfo.InvariantCulture),
+            [ClavesConfiguracion.FacturaResolucionVigencia] =
+                empresa.ResolucionVigencia?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             [ClavesConfiguracion.FacturaPieDePagina] = Texto.Normalizar(empresa.PieFactura),
             [ClavesConfiguracion.MonedaSimbolo] = Texto.Normalizar(empresa.MonedaSimbolo),
             [ClavesConfiguracion.MonedaCodigo] = Texto.Normalizar(empresa.MonedaCodigo),

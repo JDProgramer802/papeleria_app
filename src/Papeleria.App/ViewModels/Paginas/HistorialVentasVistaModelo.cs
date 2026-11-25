@@ -316,7 +316,7 @@ public partial class HistorialVentasVistaModelo : PaginaVistaModelo
         }
 
         var ruta = await _documentos
-            .GenerarFacturaAsync(detalle, FormatoFactura.Recibo80mm)
+            .GenerarFacturaAsync(detalle, FormatoFactura.Recibo80mm, esCopia: true)
             .ConfigureAwait(true);
 
         _archivos.AbrirConAplicacionPredeterminada(ruta);
@@ -370,7 +370,8 @@ public partial class HistorialVentasVistaModelo : PaginaVistaModelo
             return;
         }
 
-        var ruta = await _documentos.GenerarFacturaAsync(Detalle, formato).ConfigureAwait(true);
+        // Desde el historial siempre es reimpresión: el original salió al cobrar.
+        var ruta = await _documentos.GenerarFacturaAsync(Detalle, formato, esCopia: true).ConfigureAwait(true);
 
         _archivos.AbrirConAplicacionPredeterminada(ruta);
     }, "No se pudo generar el comprobante de la factura.");

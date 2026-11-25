@@ -29,7 +29,8 @@ public interface IServicioImpresion
     bool ImprimeAutomatico { get; }
 
     /// <summary>Manda la tirilla a la impresora configurada.</summary>
-    void ImprimirRecibo(VentaDetalladaDto venta);
+    /// <param name="esCopia">Reimpresión: la tirilla sale marcada como COPIA.</param>
+    void ImprimirRecibo(VentaDetalladaDto venta, bool esCopia = false);
 
     /// <summary>Tirilla de prueba, para comprobar que la impresora responde.</summary>
     void ImprimirPrueba();
@@ -45,11 +46,16 @@ public class ServicioImpresion : IServicioImpresion
     private const double AnchoTirilla = 72 / 25.4 * 96;
 
     private readonly IServicioConfiguracion _configuracion;
+    private readonly IServicioCodigoBarras _codigoBarras;
     private readonly ILogger<ServicioImpresion> _log;
 
-    public ServicioImpresion(IServicioConfiguracion configuracion, ILogger<ServicioImpresion> log)
+    public ServicioImpresion(
+        IServicioConfiguracion configuracion,
+        IServicioCodigoBarras codigoBarras,
+        ILogger<ServicioImpresion> log)
     {
         _configuracion = configuracion;
+        _codigoBarras = codigoBarras;
         _log = log;
     }
 
@@ -83,18 +89,31 @@ public class ServicioImpresion : IServicioImpresion
         }
     }
 
-    public void ImprimirRecibo(VentaDetalladaDto venta)
-    {
-        var ticket = new ReciboTicket
-        {
-            DataContext = new ReciboTicketDatos
-            {
-                Venta = venta,
-                Empresa = _configuracion.ObtenerEmpresa()
-            }
-        };
+    public void ImprimirRecibo(VentaDetalladaDto venta, bool esCopia = false) =>
+        Imprimir(ConstruirTirilla(venta, esCopia), $"Recibo {venta.NumeroFactura}");
 
-        Imprimir(ticket, $"Recibo {venta.NumeroFactura}");
+    /// <summary>La tirilla lista para dibujar; aparte para poder verla sin imprimirla.</summary>
+    public ReciboTicket ConstruirTirilla(VentaDetalladaDto venta, bool esCopia = false) => new()
+    {
+        DataContext = new ReciboTicketDatos
+        {
+            Recibo = new ReciboVenta(venta, _configuracion.ObtenerEmpresa(), esCopia),
+            CodigoBarras = GenerarCodigo(venta.NumeroFactura)
+        }
+    };
+
+    /// <summary>Sin código de barras la tirilla sigue valiendo: no se deja de imprimir por eso.</summary>
+    private byte[]? GenerarCodigo(string numeroFactura)
+    {
+        try
+        {
+            return _codigoBarras.GenerarPng(numeroFactura, SimbologiaCodigoBarras.Code128, 420, 90);
+        }
+        catch (Exception ex)
+        {
+            _log.LogWarning(ex, "No se pudo generar el código de barras de {Numero}", numeroFactura);
+            return null;
+        }
     }
 
     public void ImprimirPrueba()

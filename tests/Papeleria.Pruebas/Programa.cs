@@ -5,13 +5,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Papeleria.App.Impresion;
+using Papeleria.Business.Common;
+using Papeleria.Business.Dtos;
 using Papeleria.Business.DependencyInjection;
 using Papeleria.Business.Security;
 using Papeleria.Business.Services;
 using Papeleria.Data;
 using Papeleria.Data.Seed;
 using Papeleria.Domain.Constants;
+using Papeleria.Domain.Enums;
 
 namespace Papeleria.Pruebas;
 
@@ -76,6 +81,7 @@ public static class Programa
 
         await ComprobarCajaRegistradoraAsync(proveedor).ConfigureAwait(false);
         ComprobarQueLasPantallasCargan();
+        await ComprobarFacturaAsync(proveedor).ConfigureAwait(false);
 
         Console.WriteLine();
         Console.WriteLine($"Comprobaciones correctas : {_correctas}");
@@ -121,7 +127,7 @@ public static class Programa
 
         var configuracion = proveedor.GetRequiredService<IServicioConfiguracion>();
 
-        var impresion = new ServicioImpresion(configuracion, NullLogger<ServicioImpresion>.Instance);
+        var impresion = new ServicioImpresion(configuracion, proveedor.GetRequiredService<IServicioCodigoBarras>(), NullLogger<ServicioImpresion>.Instance);
 
         var cajon = new ServicioCajonMonedero(
             configuracion, impresion, NullLogger<ServicioCajonMonedero>.Instance);
@@ -248,6 +254,227 @@ public static class Programa
             {
                 Verificar($"la pantalla de {nombre} carga", false, $"{ex.GetType().Name}: {ex.Message}");
             }
+        }
+    }
+
+    // ── La factura ──────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Lo que va impreso en la factura. El valor en letras y el cuadro del IVA son lo
+    /// que mira un contador; si uno de los dos no cuadra con el total, el soporte no
+    /// sirve. Y la tirilla tiene que poder dibujarse: si su XAML se rompe, la venta
+    /// queda hecha pero el cliente se va sin comprobante.
+    ///
+    /// Con la variable PAPELSOFT_MUESTRAS apuntando a una carpeta, deja ahí la tirilla
+    /// en PNG y los PDF, para mirarlos.
+    /// </summary>
+    private static async Task ComprobarFacturaAsync(IServiceProvider proveedor)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Factura");
+        Console.WriteLine("───────");
+
+        foreach (var (valor, esperado) in new[]
+                 {
+                     (1m, "UN PESO M/CTE"),
+                     (21_000m, "VEINTIÚN MIL PESOS M/CTE"),
+                     (15_400m, "QUINCE MIL CUATROCIENTOS PESOS M/CTE"),
+                     (100m, "CIEN PESOS M/CTE"),
+                     (101m, "CIENTO UN PESOS M/CTE"),
+                     (1_000_000m, "UN MILLÓN DE PESOS M/CTE"),
+                     (2_531_731m, "DOS MILLONES QUINIENTOS TREINTA Y UN MIL SETECIENTOS TREINTA Y UN PESOS M/CTE"),
+                     (1_000_000_000m, "MIL MILLONES DE PESOS M/CTE"),
+                     (1_250.5m, "MIL DOSCIENTOS CINCUENTA PESOS CON 50/100 M/CTE")
+                 })
+        {
+            var obtenido = NumeroEnLetras.Pesos(valor);
+            Verificar($"{valor} se escribe «{esperado}»", obtenido == esperado, obtenido);
+        }
+
+        var configuracion = proveedor.GetRequiredService<IServicioConfiguracion>();
+
+        await configuracion.GuardarVariosAsync(new Dictionary<string, string?>
+        {
+            [ClavesConfiguracion.EmpresaNombre] = "Papelería El Lápiz",
+            [ClavesConfiguracion.EmpresaNit] = "900.123.456-7",
+            [ClavesConfiguracion.EmpresaRegimen] = "Responsable de IVA",
+            [ClavesConfiguracion.EmpresaDireccion] = "Cra. 7 # 12-34",
+            [ClavesConfiguracion.EmpresaCiudad] = "Bogotá",
+            [ClavesConfiguracion.EmpresaTelefono] = "601 555 1234",
+            [ClavesConfiguracion.FacturaPrefijo] = "FV-",
+            [ClavesConfiguracion.FacturaResolucionNumero] = "18764000001234",
+            [ClavesConfiguracion.FacturaResolucionFecha] = "2026-01-15",
+            [ClavesConfiguracion.FacturaResolucionDesde] = "1",
+            [ClavesConfiguracion.FacturaResolucionHasta] = "5000",
+            [ClavesConfiguracion.FacturaResolucionVigencia] = "2028-01-15"
+        }).ConfigureAwait(false);
+
+        var empresa = configuracion.ObtenerEmpresa();
+        var venta = VentaDeMuestra();
+        var recibo = new ReciboVenta(venta, empresa);
+
+        Verificar("la resolución sale completa, con prefijo y vigencia",
+            recibo.Resolucion.Count == 3
+            && recibo.Resolucion[0] == "Resolución DIAN N.º 18764000001234 del 2026-01-15"
+            && recibo.Resolucion[1] == "Prefijo FV del 1 al 5000"
+            && recibo.Resolucion[2] == "Vigencia hasta 2028-01-15",
+            string.Join(" | ", recibo.Resolucion));
+
+        Verificar("el régimen va en el encabezado", recibo.Encabezado.Contains("Responsable de IVA"));
+        Verificar("el título por defecto es «FACTURA DE VENTA»", recibo.Titulo == "FACTURA DE VENTA", recibo.Titulo);
+
+        Verificar("hay una fila de IVA por tarifa, de mayor a menor",
+            recibo.Impuestos.Select(i => i.Tarifa).SequenceEqual(new[] { "IVA 19 %", "IVA 5 %", "Excluido" }),
+            string.Join(", ", recibo.Impuestos.Select(i => i.Tarifa)));
+
+        Verificar("cada renglón lleva la letra de su tarifa",
+            recibo.Lineas.Select(l => l.MarcaIva).SequenceEqual(new[] { "A", "C", "B" }),
+            string.Join(", ", recibo.Lineas.Select(l => l.MarcaIva)));
+
+        Verificar("la base del 19 % ya tiene restado el descuento",
+            recibo.Impuestos[0].Base == Formatos.Moneda(9_000m), recibo.Impuestos[0].Base);
+
+        Verificar("el total en letras es el del total",
+            recibo.TotalEnLetras == $"SON: {NumeroEnLetras.Pesos(venta.Total)}", recibo.TotalEnLetras);
+
+        var sinIva = new ReciboVenta(new VentaDetalladaDto
+        {
+            NumeroFactura = "FV-000002",
+            Fecha = DateTime.Now,
+            ClienteNombre = "Consumidor final",
+            Subtotal = 5_000m,
+            Total = 5_000m,
+            Lineas =
+            {
+                new LineaDocumentoDto
+                {
+                    Descripcion = "Cuaderno", Cantidad = 1, ValorUnitario = 5_000m, Subtotal = 5_000m, Total = 5_000m
+                }
+            }
+        }, empresa);
+
+        Verificar("sin IVA no se imprime un cuadro de ceros",
+            !sinIva.DiscriminaIva && sinIva.Impuestos.Count == 0 && sinIva.Lineas[0].MarcaIva == "");
+
+        Verificar("la copia se marca como copia", new ReciboVenta(venta, empresa, esCopia: true).EsCopia);
+
+        // ── Que se dibuje ───────────────────────────────────────────────────
+        var impresion = new ServicioImpresion(configuracion,
+            proveedor.GetRequiredService<IServicioCodigoBarras>(), NullLogger<ServicioImpresion>.Instance);
+
+        var muestras = Environment.GetEnvironmentVariable("PAPELSOFT_MUESTRAS");
+
+        foreach (var esCopia in new[] { false, true })
+        {
+            var titulo = esCopia ? "la tirilla de la copia se dibuja" : "la tirilla se dibuja";
+
+            try
+            {
+                var tirilla = impresion.ConstruirTirilla(venta, esCopia);
+                var ancho = 72 / 25.4 * 96;
+
+                tirilla.Width = ancho;
+                tirilla.Measure(new Size(ancho, double.PositiveInfinity));
+                tirilla.Arrange(new Rect(tirilla.DesiredSize));
+                tirilla.UpdateLayout();
+
+                Verificar(titulo, tirilla.ActualHeight > 300, $"alto {tirilla.ActualHeight}");
+
+                if (!string.IsNullOrWhiteSpace(muestras))
+                {
+                    const int escala = 3;
+
+                    var mapa = new RenderTargetBitmap(
+                        (int)(ancho * escala), (int)(tirilla.ActualHeight * escala),
+                        96 * escala, 96 * escala, PixelFormats.Pbgra32);
+                    mapa.Render(tirilla);
+
+                    var png = new PngBitmapEncoder();
+                    png.Frames.Add(BitmapFrame.Create(mapa));
+
+                    Directory.CreateDirectory(muestras);
+                    using var archivo = File.Create(
+                        Path.Combine(muestras, esCopia ? "tirilla-copia.png" : "tirilla.png"));
+                    png.Save(archivo);
+                }
+            }
+            catch (Exception ex)
+            {
+                Verificar(titulo, false, $"{ex.GetType().Name}: {ex.Message}");
+            }
+        }
+
+        var documentos = proveedor.GetRequiredService<IServicioDocumentos>();
+
+        foreach (var formato in new[] { FormatoFactura.Recibo80mm, FormatoFactura.Carta })
+        {
+            var destino = string.IsNullOrWhiteSpace(muestras)
+                ? null
+                : Path.Combine(muestras, $"factura-{formato}.pdf");
+
+            try
+            {
+                var ruta = await documentos.GenerarFacturaAsync(venta, formato, destino).ConfigureAwait(false);
+                Verificar($"el PDF {formato} se genera", new FileInfo(ruta).Length > 1_000);
+            }
+            catch (Exception ex)
+            {
+                Verificar($"el PDF {formato} se genera", false, $"{ex.GetType().Name}: {ex.Message}");
+            }
+        }
+    }
+
+    /// <summary>Tres tarifas, un descuento y pago en efectivo: todo lo que la tirilla sabe mostrar.</summary>
+    private static VentaDetalladaDto VentaDeMuestra()
+    {
+        var lineas = new List<LineaDocumentoDto>
+        {
+            Linea("Resma papel carta 75 g Reprograf", 1, 10_000m, 19m, 10m),
+            Linea("Lápiz negro N.º 2 HB", 3, 800m, 0m, 0m),
+            Linea("Cuaderno cosido 100 hojas cuadriculado", 2, 4_200m, 5m, 0m)
+        };
+
+        var subtotal = lineas.Sum(l => l.Subtotal);
+        var descuento = lineas.Sum(l => l.ValorDescuento);
+        var iva = lineas.Sum(l => l.ValorIva);
+        var total = subtotal - descuento + iva;
+
+        return new VentaDetalladaDto
+        {
+            NumeroFactura = "FV-000045",
+            Fecha = new DateTime(2026, 10, 1, 15, 42, 0),
+            ClienteNombre = "Consumidor final",
+            ClienteDocumento = "222222222222",
+            UsuarioNombre = "Administrador",
+            Subtotal = subtotal,
+            TotalDescuento = descuento,
+            TotalIva = iva,
+            Total = total,
+            MetodoPago = MetodoPago.Efectivo,
+            MontoRecibido = 50_000m,
+            Cambio = 50_000m - total,
+            Lineas = lineas
+        };
+
+        static LineaDocumentoDto Linea(string descripcion, decimal cantidad, decimal precio, decimal iva, decimal descuento)
+        {
+            var subtotal = Dinero.Redondear(cantidad * precio);
+            var valorDescuento = Dinero.Porcentaje(subtotal, descuento);
+            var valorIva = Dinero.Porcentaje(subtotal - valorDescuento, iva);
+
+            return new LineaDocumentoDto
+            {
+                Descripcion = descripcion,
+                UnidadAbreviatura = "UND",
+                Cantidad = cantidad,
+                ValorUnitario = precio,
+                PorcentajeDescuento = descuento,
+                PorcentajeIva = iva,
+                ValorDescuento = valorDescuento,
+                ValorIva = valorIva,
+                Subtotal = subtotal,
+                Total = subtotal - valorDescuento + valorIva
+            };
         }
     }
 
